@@ -1,10 +1,5 @@
-import Dashboard from '@/components/dashboard'
-import DashboardLayout from '@/components/layout'
+import Hero from './hero/hero'
 
 export default function Home() {
-  return (
-    <DashboardLayout>
-      <Dashboard />
-    </DashboardLayout>
-  )
+  return <div className='bg-[#f5f5f5]'><Hero /></div>
 }
