@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import router from "next/router";
 import { useEffect, useRef } from "react";
 
 export default function Navbar() {
@@ -39,7 +40,7 @@ export default function Navbar() {
       <div
         ref={navRef}
         className={[
-          "flex w-11/12 justify-between p-6 fixed top-8 left-1/2 -translate-x-1/2 rounded-4xl",
+          "flex w-11/12 z-10 items-center justify-between pl-5 pr-3 py-3 fixed top-8 left-1/2 -translate-x-1/2 rounded-4xl",
           // Smooth color fade
           "transition-colors duration-300 ease-in-out",
           // Top-of-page background (your requested f5f5f5)
@@ -57,8 +58,10 @@ export default function Navbar() {
           <Link href="/quiz">Quiz</Link>
         </div>
 
-        <div className="text-2xl font-bold">
-          <button>Get started!</button>
+        <div className="font-bold">
+          <Link href="/sign-in">
+            <button className="py-2 px-4 bg-black cursor-pointer rounded-full text-white">Get started</button>
+          </Link>
         </div>
       </div>
     </>
