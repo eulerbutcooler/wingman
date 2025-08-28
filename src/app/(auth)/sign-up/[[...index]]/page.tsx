@@ -3,32 +3,29 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Toaster, toast } from 'sonner'
 
 export default function SignUpPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError('')
-    setSuccess('')
 
     // Basic validation
     if (password !== confirmPassword) {
-      setError('Passwords do not match')
+      toast.error('Passwords do not match')
       setIsLoading(false)
       return
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters long')
+      toast.error('Password must be at least 6 characters long')
       setIsLoading(false)
       return
     }
@@ -50,21 +47,21 @@ export default function SignUpPage() {
 
       if (response.ok) {
         if (data.requiresVerification) {
-          setSuccess('Account created successfully! Redirecting to email verification...')
+          toast.success('Account created successfully! Redirecting to email verification...')
           setTimeout(() => {
             router.push(`/verify-otp?email=${encodeURIComponent(email)}`)
           }, 2000)
         } else {
-          setSuccess('Account created successfully! Redirecting to sign in...')
+          toast.success('Account created successfully! Redirecting to sign in...')
           setTimeout(() => {
             router.push('/sign-in')
           }, 2000)
         }
       } else {
-        setError(data.error || 'An error occurred during registration')
+        toast.error(data.error || 'An error occurred during registration')
       }
     } catch (error) {
-      setError('An error occurred. Please try again.')
+      toast.error('An error occurred. Please try again.')
       console.error('Registration error:', error)
     } finally {
       setIsLoading(false)
@@ -72,106 +69,101 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link href="/sign-in" className="font-medium text-indigo-600 hover:text-indigo-500">
-              sign in to your existing account
-            </Link>
-          </p>
+    <div className="flex items-center justify-center min-h-screen font-inter" style={{ backgroundColor: '#f3f4f6' }}>
+      {/* Main container for the signup form */}
+      <div className="bg-white text-black w-full max-w-md mx-4 p-8 md:p-10 rounded-[2rem] shadow-sm border border-gray-200">
+        
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold tracking-tight text-black">Create Account</h1>
+          <p className="text-gray-500 mt-2">Join our community today!</p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
+
+        {/* Signup Form */}
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-6">
+            {/* Full Name Input */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full Name
-              </label>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
               <input
+                type="text"
                 id="name"
                 name="name"
-                type="text"
-                autoComplete="name"
+                placeholder="John Doe"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your full name"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition duration-300"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
+
+            {/* Email Input */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email Address
-              </label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
               <input
+                type="email"
                 id="email"
                 name="email"
-                type="email"
-                autoComplete="email"
+                placeholder="you@example.com"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your email address"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition duration-300"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
+
+            {/* Password Input */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">Password</label>
               <input
+                type="password"
                 id="password"
                 name="password"
-                type="password"
-                autoComplete="new-password"
+                placeholder="••••••••"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your password"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition duration-300"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+
+            {/* Confirm Password Input */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
-              </label>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
               <input
+                type="password"
                 id="confirmPassword"
                 name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
+                placeholder="••••••••"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Confirm your password"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition duration-300"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
           </div>
 
-          {error && (
-            <div className="text-red-600 text-sm text-center">{error}</div>
-          )}
-
-          {success && (
-            <div className="text-green-600 text-sm text-center">{success}</div>
-          )}
-
-          <div>
+          {/* Submit Button */}
+          <div className="mt-8">
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              className="w-full bg-black text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-black transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
             >
-              {isLoading ? 'Creating account...' : 'Create account'}
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
           </div>
         </form>
+
+        {/* Footer Link */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-gray-500">
+            Already have an account? 
+            <Link href="/sign-in" className="font-medium text-black hover:underline ml-1">Sign In</Link>
+          </p>
+        </div>
       </div>
+      <Toaster />
     </div>
   )
 }

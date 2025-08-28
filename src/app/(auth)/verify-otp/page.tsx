@@ -3,12 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { Toaster, toast } from 'sonner'
 
 export default function VerifyOTPPage() {
   const [otp, setOtp] = useState('')
   const [email, setEmail] = useState('')
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isResending, setIsResending] = useState(false)
   const router = useRouter()
@@ -25,11 +24,9 @@ export default function VerifyOTPPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError('')
-    setSuccess('')
 
     if (!email || !otp) {
-      setError('Email and OTP are required')
+      toast.error('Email and OTP are required')
       setIsLoading(false)
       return
     }
@@ -49,15 +46,15 @@ export default function VerifyOTPPage() {
       const data = await response.json()
 
       if (response.ok) {
-        setSuccess('Email verified successfully! Redirecting to sign in...')
+        toast.success('Email verified successfully! Redirecting to sign in...')
         setTimeout(() => {
           router.push('/sign-in')
         }, 2000)
       } else {
-        setError(data.error || 'Verification failed')
+        toast.error(data.error || 'Verification failed')
       }
     } catch (error) {
-      setError('An error occurred. Please try again.')
+      toast.error('An error occurred. Please try again.')
       console.error('OTP verification error:', error)
     } finally {
       setIsLoading(false)
@@ -66,13 +63,11 @@ export default function VerifyOTPPage() {
 
   const handleResendOTP = async () => {
     if (!email) {
-      setError('Email is required to resend OTP')
+      toast.error('Email is required to resend OTP')
       return
     }
 
     setIsResending(true)
-    setError('')
-    setSuccess('')
 
     try {
       const response = await fetch('/api/auth/resend-otp', {
@@ -86,12 +81,12 @@ export default function VerifyOTPPage() {
       const data = await response.json()
 
       if (response.ok) {
-        setSuccess('New OTP sent to your email!')
+        toast.success('New OTP sent to your email!')
       } else {
-        setError(data.error || 'Failed to resend OTP')
+        toast.error(data.error || 'Failed to resend OTP')
       }
     } catch (error) {
-      setError('An error occurred. Please try again.')
+      toast.error('An error occurred. Please try again.')
       console.error('Resend OTP error:', error)
     } finally {
       setIsResending(false)
@@ -99,46 +94,45 @@ export default function VerifyOTPPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Verify Your Email
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            We've sent a 6-digit verification code to your email address
-          </p>
+    <div className="flex items-center justify-center min-h-screen font-inter" style={{ backgroundColor: '#f3f4f6' }}>
+      {/* Main container for the verify OTP form */}
+      <div className="bg-white text-black w-full max-w-md mx-4 p-8 md:p-10 rounded-[2rem] shadow-sm border border-gray-200">
+        
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold tracking-tight text-black">Verify Your Email</h1>
+          <p className="text-gray-500 mt-2">We've sent a 6-digit verification code to your email address</p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
+
+        {/* Verify OTP Form */}
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-6">
+            {/* Email Input */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email Address
-              </label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
               <input
+                type="email"
                 id="email"
                 name="email"
-                type="email"
-                autoComplete="email"
+                placeholder="you@example.com"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your email address"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition duration-300"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
+
+            {/* OTP Input */}
             <div>
-              <label htmlFor="otp" className="block text-sm font-medium text-gray-700">
-                Verification Code
-              </label>
+              <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-2">Verification Code</label>
               <input
+                type="text"
                 id="otp"
                 name="otp"
-                type="text"
                 maxLength={6}
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm text-center tracking-widest text-2xl"
                 placeholder="000000"
+                required
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition duration-300 text-center tracking-widest text-2xl"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
               />
@@ -148,19 +142,12 @@ export default function VerifyOTPPage() {
             </div>
           </div>
 
-          {error && (
-            <div className="text-red-600 text-sm text-center">{error}</div>
-          )}
-
-          {success && (
-            <div className="text-green-600 text-sm text-center">{success}</div>
-          )}
-
-          <div className="space-y-4">
+          {/* Submit Buttons */}
+          <div className="space-y-4 mt-8">
             <button
               type="submit"
               disabled={isLoading || otp.length !== 6}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              className="w-full bg-black text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-black transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
             >
               {isLoading ? 'Verifying...' : 'Verify Email'}
             </button>
@@ -169,19 +156,21 @@ export default function VerifyOTPPage() {
               type="button"
               onClick={handleResendOTP}
               disabled={isResending || !email}
-              className="group relative w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              className="w-full bg-white text-black font-medium py-3 px-4 rounded-lg border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition duration-300 disabled:opacity-50"
             >
               {isResending ? 'Sending...' : 'Resend Code'}
             </button>
           </div>
-
-          <div className="text-center">
-            <Link href="/sign-up" className="font-medium text-indigo-600 hover:text-indigo-500">
-              Back to Sign Up
-            </Link>
-          </div>
         </form>
+
+        {/* Footer Link */}
+        <div className="mt-8 text-center">
+          <Link href="/sign-up" className="font-medium text-black hover:underline">
+            Back to Sign Up
+          </Link>
+        </div>
       </div>
+      <Toaster />
     </div>
   )
 }
