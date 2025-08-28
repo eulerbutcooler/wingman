@@ -1,34 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import path from 'path';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { db } from '@/lib/db/drizzle';
 import { files } from '@/lib/db/schema/courses';
-import { eq, and } from 'drizzle-orm';
 
-// Configuration for file uploads
-const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
+// AWS S3 Configuration
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION || 'us-east-1',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+});
+
+const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME!;
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/mov', 'video/avi'];
 const ALLOWED_PDF_TYPES = ['application/pdf'];
-
-// Ensure upload directory exists
-async function ensureUploadDir() {
-  if (!existsSync(UPLOAD_DIR)) {
-    await mkdir(UPLOAD_DIR, { recursive: true });
-  }
-}
 
 // Validate file type and size
 function validateFile(file: File) {
   const errors: string[] = [];
   
-  // Check file size
   if (file.size > MAX_FILE_SIZE) {
     errors.push(`File size must be less than ${MAX_FILE_SIZE / (1024 * 1024)}MB`);
   }
   
-  // Check file type
   const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type);
   const isPDF = ALLOWED_PDF_TYPES.includes(file.type);
   
@@ -43,17 +40,17 @@ function validateFile(file: File) {
   };
 }
 
-// Generate unique filename
-function generateUniqueFilename(originalName: string): string {
+// Generate unique S3 key
+function generateS3Key(originalName: string, userId: string): string {
   const timestamp = Date.now();
   const randomString = Math.random().toString(36).substring(2, 8);
-  const extension = path.extname(originalName);
-  const nameWithoutExt = path.basename(originalName, extension);
+  const extension = originalName.split('.').pop();
+  const nameWithoutExt = originalName.replace(/\.[^/.]+$/, "");
   
-  return `${nameWithoutExt}_${timestamp}_${randomString}${extension}`;
+  return `courses/${userId}/${timestamp}_${randomString}_${nameWithoutExt}.${extension}`;
 }
 
-// POST /api/upload - Upload file (video or PDF)
+// POST /api/upload-s3 - Upload file to AWS S3
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -78,25 +75,35 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Ensure upload directory exists
-    await ensureUploadDir();
+    // Generate S3 key
+    const s3Key = generateS3Key(file.name, userId);
 
-    // Generate unique filename
-    const uniqueFilename = generateUniqueFilename(file.name);
-    const filePath = path.join(UPLOAD_DIR, uniqueFilename);
-
-    // Convert file to buffer and save
+    // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
 
-    // Create file URL (this would be your domain in production)
-    const fileUrl = `/uploads/${uniqueFilename}`;
+    // Upload to S3
+    const uploadCommand = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: s3Key,
+      Body: buffer,
+      ContentType: file.type,
+      Metadata: {
+        originalName: file.name,
+        userId: userId,
+        uploadedAt: new Date().toISOString(),
+      },
+    });
+
+    await s3Client.send(uploadCommand);
+
+    // Create public URL
+    const fileUrl = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${s3Key}`;
 
     // Save file metadata to database
     const [savedFile] = await db.insert(files).values({
       originalName: file.name,
-      filename: uniqueFilename,
+      filename: s3Key,
       mimeType: file.type,
       size: file.size,
       url: fileUrl,
@@ -105,25 +112,9 @@ export async function POST(request: NextRequest) {
       createdAt: new Date(),
     }).returning();
 
-    // Extract additional metadata based on file type
-    let metadata: Record<string, unknown> = {};
-    
-    if (validation.fileType === 'video') {
-      // In production, you would use ffmpeg or similar to extract video metadata
-      metadata = {
-        duration: '00:00', // Placeholder - would be extracted from video
-        thumbnail: null, // Placeholder - would generate thumbnail
-      };
-    } else if (validation.fileType === 'pdf') {
-      // In production, you would use pdf-parse or similar to extract PDF metadata
-      metadata = {
-        pageCount: 1, // Placeholder - would be extracted from PDF
-      };
-    }
-
     return NextResponse.json({
       success: true,
-      message: 'File uploaded successfully',
+      message: 'File uploaded successfully to S3',
       file: {
         id: savedFile.id,
         originalName: savedFile.originalName,
@@ -131,56 +122,58 @@ export async function POST(request: NextRequest) {
         url: savedFile.url,
         size: savedFile.size,
         type: validation.fileType,
-        ...metadata,
       },
     });
 
   } catch (error) {
-    console.error('Error uploading file:', error);
+    console.error('Error uploading file to S3:', error);
     return NextResponse.json(
-      { error: 'Failed to upload file' },
+      { error: 'Failed to upload file to S3' },
       { status: 500 }
     );
   }
 }
 
-// GET /api/upload - Get upload progress or file info
+// GET /api/upload-s3 - Generate presigned URL for direct upload
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const fileId = searchParams.get('fileId');
+    const fileName = searchParams.get('fileName');
+    const fileType = searchParams.get('fileType');
     const userId = searchParams.get('userId');
 
-    if (!fileId || !userId) {
+    if (!fileName || !fileType || !userId) {
       return NextResponse.json(
-        { error: 'File ID and User ID are required' },
+        { error: 'fileName, fileType, and userId are required' },
         { status: 400 }
       );
     }
 
-    // Get file info from database
-    const fileInfo = await db
-      .select()
-      .from(files)
-      .where(and(eq(files.id, fileId), eq(files.userId, userId)))
-      .limit(1);
+    // Generate S3 key
+    const s3Key = generateS3Key(fileName, userId);
 
-    if (fileInfo.length === 0) {
-      return NextResponse.json(
-        { error: 'File not found' },
-        { status: 404 }
-      );
-    }
+    // Create presigned URL for direct upload
+    const command = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: s3Key,
+      ContentType: fileType,
+    });
+
+    const signedUrl = await getSignedUrl(s3Client, command, { 
+      expiresIn: 3600 // 1 hour
+    });
 
     return NextResponse.json({
       success: true,
-      file: fileInfo[0],
+      uploadUrl: signedUrl,
+      fileUrl: `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${s3Key}`,
+      s3Key,
     });
 
   } catch (error) {
-    console.error('Error fetching file info:', error);
+    console.error('Error generating presigned URL:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch file info' },
+      { error: 'Failed to generate upload URL' },
       { status: 500 }
     );
   }
