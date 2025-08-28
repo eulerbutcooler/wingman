@@ -47,14 +47,14 @@ export default function Navbar() {
         ].join(" ")}
       >
         <div>
-          <h1 className="text-2xl font-bold">Wingman<span className="text-blue-600">AI</span></h1>
+          <h1 className="text-2xl font-bold">Wingman<span className="navyblue">AI</span></h1>
         </div>
 
         <div className="flex text-black space-x-6">
           <Link href="/">Home</Link>
           <Link href="/chat">Chat</Link>
           <Link href="/library">Library</Link>
-          <Link href="/learning">Learning</Link>
+          <Link href="/quiz">Quiz</Link>
         </div>
 
         <div className="text-2xl font-bold">

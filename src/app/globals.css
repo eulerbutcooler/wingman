@@ -9,6 +9,10 @@
   
 }
 
+.navyblue{
+  color: #041270;
+}
+
 
 @theme inline {
   --color-background: var(--background);
