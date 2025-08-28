@@ -4,8 +4,8 @@
 
 
 .scrolled {
-  background-color: rgba(255, 255, 255, 0.9); /* or any color you want */
-  backdrop-filter: blur(8px);                  /* optional glass effect */
+  background-color: white; /* or any color you want */
+                    /* optional glass effect */
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);     /* optional subtle elevation */
   
 }
