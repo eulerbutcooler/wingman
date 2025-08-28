@@ -1,34 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import path from 'path';
+import { v2 as cloudinary } from 'cloudinary';
 import { db } from '@/lib/db/drizzle';
 import { files } from '@/lib/db/schema/courses';
-import { eq, and } from 'drizzle-orm';
 
-// Configuration for file uploads
-const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
+// Cloudinary Configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+});
+
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/mov', 'video/avi'];
 const ALLOWED_PDF_TYPES = ['application/pdf'];
-
-// Ensure upload directory exists
-async function ensureUploadDir() {
-  if (!existsSync(UPLOAD_DIR)) {
-    await mkdir(UPLOAD_DIR, { recursive: true });
-  }
-}
 
 // Validate file type and size
 function validateFile(file: File) {
   const errors: string[] = [];
   
-  // Check file size
   if (file.size > MAX_FILE_SIZE) {
     errors.push(`File size must be less than ${MAX_FILE_SIZE / (1024 * 1024)}MB`);
   }
   
-  // Check file type
   const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type);
   const isPDF = ALLOWED_PDF_TYPES.includes(file.type);
   
@@ -43,17 +36,7 @@ function validateFile(file: File) {
   };
 }
 
-// Generate unique filename
-function generateUniqueFilename(originalName: string): string {
-  const timestamp = Date.now();
-  const randomString = Math.random().toString(36).substring(2, 8);
-  const extension = path.extname(originalName);
-  const nameWithoutExt = path.basename(originalName, extension);
-  
-  return `${nameWithoutExt}_${timestamp}_${randomString}${extension}`;
-}
-
-// POST /api/upload - Upload file (video or PDF)
+// POST /api/upload-cloudinary - Upload file to Cloudinary
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -78,52 +61,63 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Ensure upload directory exists
-    await ensureUploadDir();
-
-    // Generate unique filename
-    const uniqueFilename = generateUniqueFilename(file.name);
-    const filePath = path.join(UPLOAD_DIR, uniqueFilename);
-
-    // Convert file to buffer and save
+    // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
 
-    // Create file URL (this would be your domain in production)
-    const fileUrl = `/uploads/${uniqueFilename}`;
+    // Generate unique public ID
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 8);
+    const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+    const publicId = `courses/${userId}/${timestamp}_${randomString}_${nameWithoutExt}`;
+
+    // Upload to Cloudinary
+    const uploadResult = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        {
+          public_id: publicId,
+          resource_type: validation.fileType === 'video' ? 'video' : 'raw',
+          folder: `courses/${userId}`,
+          context: {
+            originalName: file.name,
+            userId: userId,
+            uploadedAt: new Date().toISOString(),
+          },
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      ).end(buffer);
+    });
+
+    const result = uploadResult as any;
 
     // Save file metadata to database
     const [savedFile] = await db.insert(files).values({
       originalName: file.name,
-      filename: uniqueFilename,
+      filename: result.public_id,
       mimeType: file.type,
       size: file.size,
-      url: fileUrl,
+      url: result.secure_url,
       lessonId: lessonId || null,
       userId,
       createdAt: new Date(),
     }).returning();
 
-    // Extract additional metadata based on file type
-    let metadata: Record<string, unknown> = {};
-    
-    if (validation.fileType === 'video') {
-      // In production, you would use ffmpeg or similar to extract video metadata
-      metadata = {
-        duration: '00:00', // Placeholder - would be extracted from video
-        thumbnail: null, // Placeholder - would generate thumbnail
-      };
-    } else if (validation.fileType === 'pdf') {
-      // In production, you would use pdf-parse or similar to extract PDF metadata
-      metadata = {
-        pageCount: 1, // Placeholder - would be extracted from PDF
-      };
+    // Extract additional metadata for videos
+    let metadata: any = {};
+    if (validation.fileType === 'video' && result.duration) {
+      const duration = result.duration;
+      const minutes = Math.floor(duration / 60);
+      const seconds = Math.floor(duration % 60);
+      metadata.duration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      metadata.thumbnail = result.secure_url.replace(/\.[^/.]+$/, '.jpg');
     }
 
     return NextResponse.json({
       success: true,
-      message: 'File uploaded successfully',
+      message: 'File uploaded successfully to Cloudinary',
       file: {
         id: savedFile.id,
         originalName: savedFile.originalName,
@@ -136,51 +130,49 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error uploading file:', error);
+    console.error('Error uploading file to Cloudinary:', error);
     return NextResponse.json(
-      { error: 'Failed to upload file' },
+      { error: 'Failed to upload file to Cloudinary' },
       { status: 500 }
     );
   }
 }
 
-// GET /api/upload - Get upload progress or file info
+// GET /api/upload-cloudinary - Generate signed upload URL
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const fileId = searchParams.get('fileId');
     const userId = searchParams.get('userId');
 
-    if (!fileId || !userId) {
+    if (!userId) {
       return NextResponse.json(
-        { error: 'File ID and User ID are required' },
+        { error: 'userId is required' },
         { status: 400 }
       );
     }
 
-    // Get file info from database
-    const fileInfo = await db
-      .select()
-      .from(files)
-      .where(and(eq(files.id, fileId), eq(files.userId, userId)))
-      .limit(1);
-
-    if (fileInfo.length === 0) {
-      return NextResponse.json(
-        { error: 'File not found' },
-        { status: 404 }
-      );
-    }
+    const timestamp = Math.round(Date.now() / 1000);
+    const signature = cloudinary.utils.api_sign_request(
+      {
+        timestamp,
+        folder: `courses/${userId}`,
+      },
+      process.env.CLOUDINARY_API_SECRET!
+    );
 
     return NextResponse.json({
       success: true,
-      file: fileInfo[0],
+      uploadUrl: `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/upload`,
+      signature,
+      timestamp,
+      apiKey: process.env.CLOUDINARY_API_KEY,
+      folder: `courses/${userId}`,
     });
 
   } catch (error) {
-    console.error('Error fetching file info:', error);
+    console.error('Error generating Cloudinary signature:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch file info' },
+      { error: 'Failed to generate upload signature' },
       { status: 500 }
     );
   }

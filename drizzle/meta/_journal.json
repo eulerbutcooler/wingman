@@ -15,6 +15,13 @@
       "when": 1756374050085,
       "tag": "0001_brief_maverick",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1756411632864,
+      "tag": "0002_gorgeous_peter_parker",
+      "breakpoints": true
     }
   ]
 }
