@@ -36,11 +36,9 @@ export default function SignInPage() {
         if (response.ok) {
           const data = await response.json()
           if (!data.verified) {
-            toast.error('Please verify your email before signing in.')
-            // Optionally redirect to verification page
-            setTimeout(() => {
-              router.push(`/verify-otp?email=${encodeURIComponent(email)}`)
-            }, 2000)
+            toast.error('User is not registered.')
+            
+            
             return
           }
         }

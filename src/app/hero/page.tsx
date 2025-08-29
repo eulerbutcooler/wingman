@@ -22,14 +22,14 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <motion.div layout className="w-full  rounded-2xl   bg-white px-4 py-4 shadow-sm" initial={false}>
+    <motion.div layout className="w-full   rounded-2xl hover:shadow-xl transition-all duration-300 cursor-pointer   bg-white px-4 py-4 shadow-sm" initial={false}>
       <button
-        className="flex w-full items-center justify-between text-left"
+        className="flex w-full items-center cursor-pointer justify-between text-left"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={`panel-${q}`}
       >
-        <span className="font-medium text-black">{q}</span>
+        <span className="font-medium cursor-pointer text-black">{q}</span>
         <motion.span animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.2 }} className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-[#f5f5f5] text-black">
           +
         </motion.span>
@@ -65,7 +65,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 export default function Hero() {
   return (
     <div className="bg-[#f5f5f5] min-h-screen w-[100vw] flex flex-col pt-34 gap-8 items-center ">
-      <div className="bg-white w-11/12 flex cta justify-evenly p-10 gap-12 shadow-sm rounded-4xl font-mono">
+      <div className="bg-white w-11/12 flex cta justify-evenly p-10 gap-12 shadow-sm  rounded-4xl font-mono">
         <div className="flex flex-col justify-center gap-10">
           <h1 className="text-4xl font-bold text-black">Welcome to Wingman</h1>
 
@@ -94,17 +94,17 @@ export default function Hero() {
         <Image src="/su-7.png" alt="Hero Image" className="navyblue" width={500} height={600} />
       </div>
       <div className="flex w-11/12 cards gap-4 justify-evenly">
-              <div className="flex p-8 bg-white shadow-sm rounded-4xl flex-col justify-evenly gap-4">
+              <div className="flex p-8 bg-white shadow-sm hover:shadow-xl transition-all duration-300 rounded-4xl flex-col justify-evenly gap-4">
                 <h1 className="text-2xl font-bold text-black">Chat bot</h1>
                 <p className="text-xl navyblue">Talk to your PDFs</p>
                 <p className="text-base text-black">Chat with documents, websites, and notes in natural language, and get cited answers, summaries, and follow ups instantly.</p>
               </div>
-              <div className="flex p-8 bg-white shadow-sm rounded-4xl flex-col justify-evenly gap-4">
+              <div className="flex p-8 bg-white hover:shadow-xl transition-all duration-300 shadow-sm rounded-4xl flex-col justify-evenly gap-4">
                 <h1 className="text-2xl font-bold text-black">Library</h1>
                 <p className="text-xl navyblue">Build courses from your knowledge</p>
                 <p className="text-base text-black">Turn saved content into structured study plans and bite‑sized courses, complete with milestones, reminders, and progress tracking.</p>
               </div>
-              <div className="flex p-8 bg-white shadow-sm rounded-4xl flex-col justify-evenly gap-4">
+              <div className="flex p-8 bg-white hover:shadow-xl transition-all duration-300 shadow-sm rounded-4xl flex-col justify-evenly gap-4">
                 <h1 className="text-2xl font-bold text-black">Quiz</h1>
                 <p className="text-xl navyblue">Quiz me from your data</p>
                 <p className="text-base text-black">Auto‑generate personalized quizzes from uploaded files, chats, and bookmarks, with adaptive difficulty and instant feedback.</p>
@@ -113,7 +113,7 @@ export default function Hero() {
 
       </div>
 
-      <div className="flex flex-col w-11/12 faqs gap-4 items-center justify-evenly flex-wrap">
+      <div className="flex  flex-col w-11/12 faqs gap-4 items-center justify-evenly flex-wrap">
       {faqs.map((f) => (
         <FAQItem key={f.id} q={f.q} a={f.a} />
       ))}

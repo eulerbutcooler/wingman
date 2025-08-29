@@ -3,7 +3,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 
 import Navbar from "@/components/ui/navbar";
-
+import AuroraBackground from "@/components/ui/aurora";
 import ClientLayout from "@/components/ClientLayout";
 import { AuthProvider } from "@/components/AuthProvider";
 

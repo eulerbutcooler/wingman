@@ -3,8 +3,10 @@
 import Link from "next/link";
 import router from "next/router";
 import { useEffect, useRef } from "react";
+import { useSession } from "next-auth/react"
 
 export default function Navbar() {
+  const { data: session, status } = useSession()
   const navRef = useRef<HTMLDivElement | null>(null);
   const sentRef = useRef<HTMLDivElement | null>(null);
 
@@ -59,9 +61,19 @@ export default function Navbar() {
         </div>
 
         <div className="font-bold">
-          <Link href="/sign-in">
-            <button className="py-2 px-4 bg-black cursor-pointer rounded-full text-white">Get started</button>
-          </Link>
+        {!session ? (
+  <Link href="/sign-in">
+    <button className="py-2 px-4 bg-black cursor-pointer rounded-full text-white">
+      Get started
+    </button>
+  </Link>
+) : (
+  <Link href="/dashboard">
+    <button className="py-2 px-4 bg-black cursor-pointer rounded-full text-white">
+      {session.user?.name?.charAt(0).toUpperCase()}
+    </button>
+  </Link>
+)}
         </div>
       </div>
     </>
