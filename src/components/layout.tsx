@@ -7,7 +7,7 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
+      
       
       {/* Main content */}
       <div className="lg:pl-72">
