@@ -44,9 +44,9 @@ export default function Navbar() {
         className={[
           "flex w-11/12 z-10 items-center justify-between pl-5 pr-3 py-3 fixed top-8 left-1/2 -translate-x-1/2 rounded-4xl",
           // Smooth color fade
-          "transition-colors duration-300 ease-in-out",
+          "transition-colors duration-150 ease-in-out",
           // Top-of-page background (your requested f5f5f5)
-          "bg-[#f5f5f5]",
+          ,
         ].join(" ")}
       >
         <div>
