@@ -3,6 +3,9 @@
 import React, { useState, useRef } from 'react';
 import { courseService } from '@/lib/services/course-service';
 import { useCourseCreator } from '@/hooks/use-course-creator';
+import {FaArrowRight} from "react-icons/fa";
+import {FaArrowLeft} from "react-icons/fa";
+
 
 interface CourseCreatorProps {
   userId: string;
@@ -164,27 +167,26 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Create New Course</h1>
-          <p className="text-gray-600">Build a comprehensive learning experience</p>
-        </div>
+    <div className='flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw] pt-34'>
+      <div className='w-11/12 pb-12'>
+        <div className="flex  items-center justify-between mb-8">
+        
         <button
           onClick={onCancel}
-          className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+          className="px-4 py-2 text-neutral-600 cursor-pointer flex hover:text-black items-center gap-4 transition-colors"
         >
-          Cancel
+          <FaArrowLeft/>Go back
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-8 w-full ">
         {/* Course Details */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
+        <div className='flex gap-8'>
+          <div className="bg-white p-6 h-fit rounded-4xl w-1/2 shadow-sm">
           <h2 className="text-xl font-semibold mb-4">Course Information</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-600 mb-2">
                 Course Title *
               </label>
               <input
@@ -192,12 +194,12 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
                 required
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-4xl "
                 placeholder="Enter course title"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-600 mb-2">
                 Description *
               </label>
               <textarea
@@ -205,33 +207,49 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-4xl "
                 placeholder="Describe what students will learn"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-600 mb-2">
                 Course Image URL (optional)
               </label>
               <input
                 type="url"
                 value={formData.imageUrl}
                 onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-4xl "
                 placeholder="https://example.com/image.jpg"
               />
             </div>
           </div>
+          <div className="flex justify-end mt-8 gap-4">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-6 py-3 border border-gray-300 text-gray-600 rounded-4xl hover:border-gray-600 cursor-pointer transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting || !formData.title || !formData.description}
+              className="px-6 py-3 bg-black text-white rounded-4xl cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              {isSubmitting ? 'Creating Course...' : 'Create Course'}
+            </button>
+          </div>
         </div>
 
         {/* Topics */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
+        <div className="bg-white p-6 rounded-4xl w-1/2 border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Course Topics</h2>
             <button
               type="button"
               onClick={addTopic}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-black text-white rounded-4xl cursor-pointer transition-colors"
             >
               Add Topic
             </button>
@@ -239,26 +257,26 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
 
           <div className="space-y-6">
             {topics.map((topic, topicIndex) => (
-              <div key={topic.id} className="border border-gray-200 rounded-lg p-4">
+              <div key={topic.id} className="shadow-sm rounded-4xl p-4">
                 <div className="flex items-center gap-4 mb-4">
                   <input
                     type="text"
                     value={topic.title}
                     onChange={(e) => updateTopic(topic.id, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="flex-1 px-4 py-2 shadow-sm rounded-4xl focus:ring-2 "
                     placeholder="Topic title"
                   />
                   <button
                     type="button"
                     onClick={() => addLesson(topic.id)}
-                    className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                    className="px-4 py-2 bg-black text-white rounded-4xl cursor-pointer transition-colors text-sm"
                   >
                     Add Lesson
                   </button>
                   <button
                     type="button"
                     onClick={() => removeTopic(topic.id)}
-                    className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                    className="px-4 py-2 cursor-pointer border border-gray-300 text-gray-600 rounded-4xl hover:border-gray-600 transition-colors text-sm"
                   >
                     Remove
                   </button>
@@ -267,21 +285,23 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
                 {/* Lessons */}
                 <div className="space-y-3 ml-4">
                   {topic.lessons.map((lesson, lessonIndex) => (
-                    <div key={lesson.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div key={lesson.id} className="flex items-center gap-3 p-3  rounded-lg">
+                      <FaArrowRight/>
                       <input
                         type="text"
                         value={lesson.title}
                         onChange={(e) => updateLesson(topic.id, lesson.id, { title: e.target.value })}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-4xl text-sm"
                         placeholder="Lesson title"
                       />
                       <select
                         value={lesson.type}
                         onChange={(e) => updateLesson(topic.id, lesson.id, { type: e.target.value as 'video' | 'pdf' })}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="px-4 py-2 border border-gray-300 rounded-4xl  text-sm"
                       >
-                        <option value="video">Video</option>
                         <option value="pdf">PDF</option>
+                        <option value="video">Video</option>
+                        
                       </select>
                       <input
                         ref={(el) => {
@@ -302,14 +322,14 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
                         onClick={() => {
                           fileInputRefs.current[`${topic.id}-${lesson.id}`]?.click();
                         }}
-                        className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                        className="px-4 py-2 bg-black text-white rounded-4xl cursor-pointer transition-colors text-sm"
                       >
-                        {lesson.file ? 'Change File' : 'Select File'}
+                        {lesson.file ? 'Change' : 'Select'}
                       </button>
                       <button
                         type="button"
                         onClick={() => removeLesson(topic.id, lesson.id)}
-                        className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                        className="px-4 py-2 bg-white border border-gray-300 cursor-pointer text-gray-600 rounded-4xl hover:border-gray-600 transition-colors text-sm"
                       >
                         Remove
                       </button>
@@ -320,25 +340,13 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
             ))}
           </div>
         </div>
+        </div>
 
         {/* Submit */}
-        <div className="flex justify-end gap-4">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting || !formData.title || !formData.description}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {isSubmitting ? 'Creating Course...' : 'Create Course'}
-          </button>
-        </div>
+        
       </form>
+    
+      </div>
     </div>
   );
 }
