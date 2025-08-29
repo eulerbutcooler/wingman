@@ -1,69 +1,244 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import DashboardLayout from '@/components/layout'
-import ChatInterface from '@/components/chat-interface'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { FileText, MessageSquare } from 'lucide-react'
+import { useState, useEffect, useRef } from "react";
+import {
+  Message,
+  continueConversation,
+  loadChatHistory,
+} from "../actions/chat/actions";
+import { readStreamableValue } from "@ai-sdk/rsc";
+import { Send, MessageSquare, Bot, User } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
+import ChatSidebar from "@/components/chat/ChatSidebar";
 
-const mockDocuments = [
-  { id: '1', name: 'Introduction to Machine Learning.pdf' },
-  { id: '2', name: 'Data Structures and Algorithms.docx' },
-  { id: '3', name: 'Neural Networks Research.pdf' }
-]
+export const maxDuration = 30;
 
 export default function ChatPage() {
-  const [selectedDocument, setSelectedDocument] = useState<{ id: string; name: string } | null>(null)
+  const [conversation, setConversation] = useState<Message[]>([]);
+  const [input, setInput] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [chatId, setChatId] = useState<string | undefined>();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [conversation]);
+
+  useEffect(() => {
+    const chatIdFromUrl = searchParams.get("id");
+    if (chatIdFromUrl) {
+      setChatId(chatIdFromUrl);
+      loadChat(chatIdFromUrl);
+    }
+  }, [searchParams]);
+
+  const loadChat = async (id: string) => {
+    try {
+      setIsLoading(true);
+      const history = await loadChatHistory(id);
+      setConversation(history);
+    } catch (error) {
+      console.error("Failed to load chat history:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: Message = { role: "user", content: input.trim() };
+    const newConversation = [...conversation, userMessage];
+    setConversation(newConversation);
+    setInput("");
+    setIsLoading(true);
+
+    try {
+      const {
+        messages,
+        newMessage,
+        chatId: returnedChatId,
+      } = await continueConversation(newConversation, chatId);
+
+      if (returnedChatId && !chatId) {
+        setChatId(returnedChatId);
+        router.replace(`/chat?id=${returnedChatId}`);
+      }
+
+      let textContent = "";
+      for await (const delta of readStreamableValue(newMessage)) {
+        textContent = `${textContent}${delta}`;
+        setConversation([
+          ...messages,
+          { role: "assistant", content: textContent },
+        ]);
+      }
+    } catch (error) {
+      console.error("Error in conversation:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e as any);
+    }
+  };
+
+  const startNewChat = () => {
+    setConversation([]);
+    setChatId(undefined);
+    setInput("");
+    router.replace("/chat");
+  };
+
+  const selectChat = (id: string) => {
+    router.push(`/chat?id=${id}`);
+  };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">AI Chat Assistant</h1>
-          <p className="text-gray-600 mt-2">Ask questions about your uploaded documents and get AI-powered answers</p>
-        </div>
+    <div className="w-[100vw] h-screen bg-[#f5f5f5] overflow-hidden p-6 pt-28">
+      <div className="w-11/12 mx-auto h-full">
+        <div className="flex h-full bg-white rounded-4xl shadow-xl overflow-hidden">
+          <ChatSidebar
+            currentChatId={chatId}
+            onSelectChat={selectChat}
+            onNewChat={startNewChat}
+          />
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Document Selection */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Select Document</CardTitle>
-                <CardDescription>Choose a document to chat about</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {mockDocuments.map((doc) => (
-                  <Button
-                    key={doc.id}
-                    variant={selectedDocument?.id === doc.id ? "default" : "outline"}
-                    className="w-full justify-start text-left h-auto p-3"
-                    onClick={() => setSelectedDocument(doc)}
-                  >
-                    <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span className="truncate">{doc.name}</span>
-                  </Button>
-                ))}
-                
-                {mockDocuments.length === 0 && (
-                  <div className="text-center py-8">
-                    <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">No documents uploaded yet</p>
+          <div className="flex-1 flex flex-col h-full">
+            {/* <div className="z-20 shadow-[0_15px_30px_15px] shadow-white/80"></div> */}
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
+              {conversation.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center max-w-2xl mx-auto">
+                  <div className="w-16 h-16 bg-navy rounded-full flex items-center justify-center mb-6">
+                    <Bot size={24} className="text-white" />
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                  <p className="text-gray-600 mb-8 leading-relaxed">
+                    I'm your virtual teaching assistant for the Naval Institute
+                    of Aeronautical Technology (NIAT). Ask me about aeronautical
+                    engineering, naval technology, or any course-related
+                    questions. I'm here to help you learn and understand complex
+                    concepts!
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg">
+                    <div className="p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+                      <h3 className="font-medium text-gray-900 mb-2">
+                        Engineering Concepts
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Ask about aerodynamics, propulsion, structures, and more
+                      </p>
+                    </div>
+                    <div className="p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+                      <h3 className="font-medium text-gray-900 mb-2">
+                        Problem Solving
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Get guidance on formulas, methods, and logical steps
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                conversation.map((message, index) => (
+                  <div
+                    key={index}
+                    className={`flex gap-4 ${
+                      message.role === "user" ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    {message.role === "assistant" && (
+                      <div className="w-8 h-8 bg-navy rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                        <Bot size={16} className="text-white" />
+                      </div>
+                    )}
+                    <div
+                      className={`max-w-3xl rounded-2xl px-4 py-3 ${
+                        message.role === "user"
+                          ? "bg-navy text-white ml-12"
+                          : "bg-white border border-gray-200 text-gray-900 shadow-sm"
+                      }`}
+                    >
+                      <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                        {message.content}
+                      </div>
+                    </div>
+                    {message.role === "user" && (
+                      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                        <User size={16} className="text-gray-600" />
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+              {isLoading && (
+                <div className="flex gap-4 justify-start">
+                  <div className="w-8 h-8 bg-navy rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <Bot size={16} className="text-white" />
+                  </div>
+                  <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm">
+                    <div className="flex items-center gap-1">
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0s" }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.1s" }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.2s" }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
 
-          {/* Chat Interface */}
-          <div className="lg:col-span-3">
-            <ChatInterface 
-              documentId={selectedDocument?.id}
-              documentName={selectedDocument?.name}
-            />
+            <div className="px-6 pb-6 pt-0 flex-shrink-0">
+              <form onSubmit={handleSubmit} className="flex gap-4">
+                <div className="flex-1 relative">
+                  <textarea
+                    ref={inputRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Ask Wingman about your studies..."
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent resize-none min-h-[48px] max-h-32 shadow-[0_-35px_30px_2px] shadow-white/80"
+                    rows={1}
+                    disabled={isLoading}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={!input.trim() || isLoading}
+                  className="px-6 py-3 bg-navy text-white rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
+                >
+                  <Send size={16} />
+                  Send
+                </button>
+              </form>
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                Press Enter to send, Shift + Enter for new line
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </DashboardLayout>
-  )
+    </div>
+  );
 }
