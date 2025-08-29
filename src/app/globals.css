@@ -1,43 +1,32 @@
 @import "tailwindcss";
 
-
-
-
 .scrolled {
   background-color: white; /* or any color you want */
-                    /* optional glass effect */
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);     /* optional subtle elevation */
-  
+  /* optional glass effect */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); /* optional subtle elevation */
 }
-
 
 @theme inline {
   --animate-aurora: aurora 60s linear infinite;
   @keyframes aurora {
     from {
-      background-position:
-        50% 50%,
-        50% 50%;
+      background-position: 50% 50%, 50% 50%;
     }
     to {
-      background-position:
-        350% 50%,
-        350% 50%;
+      background-position: 350% 50%, 350% 50%;
     }
   }
 }
 
-
-.navyblue{
+.navyblue {
   color: #041270;
 }
+
 :root {
   /* --background: #f5f5f5; */
   --foreground: #171717;
   --navy: #04127b;
-
 }
-
 
 @theme inline {
   --color-background: var(--background);
