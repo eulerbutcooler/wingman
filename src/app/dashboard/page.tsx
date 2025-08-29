@@ -3,14 +3,21 @@
 import { useSession } from 'next-auth/react'
 import { FaArrowRight } from "react-icons/fa";
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { PiTimer } from "react-icons/pi";
 import { IoBookOutline } from "react-icons/io5";
 import { AiOutlineThunderbolt } from "react-icons/ai";
 import Image from 'next/image'
+import { signOutUser, deleteAccount } from '@/lib/auth/client'
 export default function DashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [isSigningOut, setIsSigningOut] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deletePassword, setDeletePassword] = useState('')
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [deleteError, setDeleteError] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return // Still loading
@@ -19,6 +26,55 @@ export default function DashboardPage() {
       router.push('/sign-in')
     }
   }, [session, status, router])
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true)
+    try {
+      await signOutUser('/')
+    } catch (error) {
+      console.error('Sign out failed:', error)
+      setIsSigningOut(false)
+    }
+  }
+
+  const handleDeleteAccount = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (deleteConfirmText !== 'DELETE') {
+      setDeleteError('Please type "DELETE" to confirm')
+      return
+    }
+
+    if (!deletePassword) {
+      setDeleteError('Password is required')
+      return
+    }
+
+    setIsDeleting(true)
+    setDeleteError('')
+
+    try {
+      const result = await deleteAccount({ password: deletePassword })
+      
+      if (result.success) {
+        // User will be automatically signed out and redirected
+      } else {
+        setDeleteError(result.error || 'Failed to delete account')
+      }
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete account')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const resetDeleteModal = () => {
+    setDeletePassword('')
+    setDeleteConfirmText('')
+    setDeleteError('')
+    setIsDeleting(false)
+    setShowDeleteModal(false)
+  }
 
   if (status === 'loading') {
     return (
@@ -139,14 +195,94 @@ export default function DashboardPage() {
               
 
               <div className='flex justify-between p-4 flex- flex-col'>
-                <button className='rounded-4xl bg-black text-white px-6 py-4 cursor-pointer text-xl'>Log out</button>
-                <button className='rounded-4xl bg-red-500/20 border border-red-500/20 hover:bg-red-500 transition-all duration-150 cursor-pointer text-white px-6 py-4 text-xl'>Delete account</button>
+                <button 
+                  onClick={handleSignOut}
+                  disabled={isSigningOut}
+                  className='rounded-4xl bg-black text-white px-6 py-4 cursor-pointer text-xl hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                >
+                  {isSigningOut ? 'Signing out...' : 'Log out'}
+                </button>
+                <button 
+                  onClick={() => setShowDeleteModal(true)}
+                  className='rounded-4xl bg-red-500/20 border border-red-500/20 hover:bg-red-500 transition-all duration-150 cursor-pointer text-white px-6 py-4 text-xl mt-4'
+                >
+                  Delete account
+                </button>
               </div>
               
             </div>
           </div>
         </div>
       </div>
+
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h2 className="text-xl font-bold text-red-600 mb-4">Delete Account</h2>
+            
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-800 text-sm">
+                <strong>Warning:</strong> This action cannot be undone. This will permanently delete your account and all associated data including courses, lessons, and uploaded files.
+              </p>
+            </div>
+
+            <form onSubmit={handleDeleteAccount} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Confirm by typing "DELETE":
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Type DELETE to confirm"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Enter your password to confirm:
+                </label>
+                <input
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+
+              {deleteError && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-600 text-sm">{deleteError}</p>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={resetDeleteModal}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  disabled={isDeleting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isDeleting || deleteConfirmText !== 'DELETE' || !deletePassword}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isDeleting ? 'Deleting...' : 'Delete Account'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -74,7 +74,18 @@ const handler = NextAuth({
     }
   },
   pages: {
-    signIn: "/sign-in"
+    signIn: "/sign-in",
+    signOut: "/sign-out"
+  },
+  events: {
+    async signOut({ token }) {
+      // Log signout event
+      console.log("User signed out:", token?.email);
+    },
+    async session({ session, token }) {
+      // Ensure session is properly maintained
+      console.log("Session active for:", session?.user?.email);
+    }
   },
   secret: process.env.NEXTAUTH_SECRET,
 });
