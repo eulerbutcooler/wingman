@@ -10,11 +10,29 @@
   
 }
 
+
+@theme inline {
+  --animate-aurora: aurora 60s linear infinite;
+  @keyframes aurora {
+    from {
+      background-position:
+        50% 50%,
+        50% 50%;
+    }
+    to {
+      background-position:
+        350% 50%,
+        350% 50%;
+    }
+  }
+}
+
+
 .navyblue{
   color: #041270;
 }
 :root {
-  --background: #f5f5f5;
+  /* --background: #f5f5f5; */
   --foreground: #171717;
   --navy: #04127b;
 
