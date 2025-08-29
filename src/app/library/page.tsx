@@ -131,10 +131,10 @@ export default function LibraryPage() {
   const CourseCard: FC<{ course: Course; onClick: () => void }> = ({ course, onClick }) => (
     <div
       onClick={onClick}
-      className="bg-white rounded-4xl shadow-sm overflow-hidden cursor-pointer group  transition-all duration-300 hover:shadow-xl"
+      className="bg-white rounded-4xl  shadow-sm overflow-hidden cursor-pointer group  transition-all duration-300 hover:shadow-xl"
     >
-      <img src={course.imageUrl} alt={course.title.charAt(0).toUpperCase() + course.title.slice(1)}  className="w-full h-48 object-cover" />
-      <div className="p-6">
+      <img src={course.imageUrl} alt={course.title.charAt(0).toUpperCase() + course.title.slice(1)}  className="w-full h-32 object-cover" />
+      <div className=" p-6">
         <h3 className="text-xl font-semibold text-black mb-2">{course.title.charAt(0).toUpperCase() + course.title.slice(1)}</h3>
         <p className="text-navy text-base">{course.description.charAt(0).toUpperCase() + course.description.slice(1)}</p>
       </div>
@@ -193,7 +193,7 @@ export default function LibraryPage() {
               </div>
             </div>
             <h2 className="text-2xl font-bold text-black mb-4 border-b-[1px] border-gray-600/50 pb-2">Topics</h2>
-            <div className="space-y-4">
+            <div className="space-y-4 mb-18">
               {selectedCourse.topics && selectedCourse.topics.length > 0 ? (
                 selectedCourse.topics.map((topic) => (
                   <div 
@@ -229,7 +229,7 @@ export default function LibraryPage() {
             </button>
             <h1 className="text-4xl font-bold mb-4 text-black">{selectedTopic.title}</h1>
             <p className="text-neutral-600 border-b-gray-600/50 border-b-[1px] mb-4 pb-4">All lessons for this topic.</p>
-            <div className="space-y-3">
+            <div className="space-y-3 mb-18">
               {selectedTopic.lessons && selectedTopic.lessons.length > 0 ? (
                 selectedTopic.lessons.map((lesson) => (
                   <div key={lesson.id} className="bg-white p-4 px-6 cursor-pointer rounded-4xl shadow-sm hover:shadow-xl transition-all duration-300 flex justify-between items-center">
@@ -271,7 +271,7 @@ export default function LibraryPage() {
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
                 </div>
               ) : (
-                <div className='rounded-4xl w-full bg-white p-8 shadow-sm'>
+                <div className='rounded-4xl w-full bg-white p-8 mb-18 shadow-sm'>
                   <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-8">
                     {courses.map((course) => (
                       <CourseCard key={course.id} course={course} onClick={() => handleCourseSelect(course)} />
