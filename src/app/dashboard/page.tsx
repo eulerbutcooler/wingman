@@ -91,8 +91,8 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen w-[100vw] bg-[#f5f5f5]">
       <div className=" mx-auto max-w-11/12 pt-34 pb-12">
-        <div className=" shadow-sm bg-white rounded-4xl">
-          <div className="px-8 py-8">
+        <div className=" ">
+          <div className="">
             <h1 className="text-2xl font-bold text-black mb-4">
               Welcome to your Dashboard, <span className="text-navy">{session.user?.name}!</span>
             </h1>
@@ -101,7 +101,7 @@ export default function DashboardPage() {
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="shadow-sm p-6 hover:shadow-xl transition-all duration-300 rounded-4xl ">
+              <div className="shadow-sm p-6 hover:shadow-xl bg-white transition-all duration-300 rounded-4xl ">
                 <h3 className="text-lg font-semibold text-black mb-2">Chat</h3>
                 <p className="text-navy mb-4">Start a conversation with AI</p>
                 <button 
@@ -114,19 +114,19 @@ export default function DashboardPage() {
                 </button>
               </div>
 
-              <div className="shadow-sm p-6 hover:shadow-xl transition-all duration-300 rounded-4xl ">
-                <h3 className="text-lg font-semibold text-black mb-2">Library</h3>
+              <div className="shadow-sm p-6 hover:shadow-xl bg-white transition-all duration-300 rounded-4xl ">
+                <h3 className="text-lg font-semibold  text-black mb-2">Library</h3>
                 <p className="text-navy mb-4">Access your document library</p>
                 <button 
                   onClick={() => router.push('/library')}
-                  className="bg-black text-white px-4 flex items-center gap-2 py-2 cursor-pointer rounded-4xl hover:scale-101 transition-colors"
+                  className="bg-black text-white  px-4 flex items-center gap-2 py-2 cursor-pointer rounded-4xl hover:scale-101 transition-colors"
                 >
                   View library
                   <FaArrowRight className="inline-block ml-2" />
                 </button>
               </div>
 
-              <div className="shadow-sm p-6 hover:shadow-xl transition-all duration-300 rounded-4xl ">
+              <div className="shadow-sm p-6 hover:shadow-xl bg-white transition-all duration-300 rounded-4xl ">
                 <h3 className="text-lg font-semibold text-black mb-2">Quizzes</h3>
                 <p className="text-navy mb-4">Explore challenging quizzes</p>
                 <button 
@@ -150,7 +150,7 @@ export default function DashboardPage() {
                   <p className='text-navy text-xl'><span className="font-medium text-black">User ID:</span> {(session.user as any)?.id}</p>
                 </div>
               </div>
-              <div className='p-6 rounded-4xl shadow-sm hover:shadow-xl gap-2 flex flex-col transition-all duration-300'>
+              <div className='p-6 rounded-4xl shadow-sm hover:shadow-xl bg-white gap-2 flex flex-col transition-all duration-300'>
                 <h3 className='text-lg font-semibold text-black'>Recent activity</h3>
                 <p className='text-navy pt-2'>This is a sample activity in under 1 line</p>
                 <p className='text-navy'>This is sample activity 2 </p>
@@ -160,7 +160,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className='flex justify-between gap-8 mt-8'>
-              <div className='p-6 rounded-4xl   transition-all flex flex-col  duration-300 shadow-sm'>
+              <div className='p-6 rounded-4xl bg-white   transition-all flex flex-col  duration-300 shadow-sm'>
 
                 <h3 className='text-lg font-semibold text-black'>Your learning snapshot</h3>
                 <div className='gap-6  flex pt-4'>

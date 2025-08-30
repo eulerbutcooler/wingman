@@ -216,7 +216,7 @@ const QuizCard = ({ quiz, progress, onStart, onReset, onReview }: {
 const QuizList = ({ progress, onStartQuiz, onResetQuiz, onReviewQuiz }: QuizListProps) => (
     <div>
         <h1 className="text-2xl font-semibold text-left mb-8">Available quizzes</h1>
-    <div className="bg-white  rounded-4xl shadow-sm mb-18  p-8 w-full  mx-auto">
+    <div className=" rounded-4xl  mb-18 w-full  mx-auto">
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {quizzes.map(quiz => (
@@ -460,8 +460,8 @@ function QuizContent() {
     };
 
     return (
-        <div className='flex flex-col items-center min-h-screen w-[100vw]'>
-            <div className='w-11/12 pt-34 px-4'>
+        <div className='flex flex-col items-center min-h-screen bg-[#f5f5f5] w-[100vw]'>
+            <div className='w-11/12 pt-34'>
                 {renderContent()}
             </div>
             <style>{`
@@ -484,8 +484,8 @@ function QuizContent() {
 
 export default function QuizPage() {
     return (
-        <AuroraBackground>
+        
             <QuizContent />
-        </AuroraBackground>
+        
     );
 }

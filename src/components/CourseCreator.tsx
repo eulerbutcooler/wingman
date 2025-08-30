@@ -243,7 +243,7 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
         </div>
 
         {/* Topics */}
-        <div className="bg-white p-6 rounded-4xl w-1/2 border border-gray-200">
+        <div className=" p-6 rounded-4xl shadow-sm bg-white w-1/2 ">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Course Topics</h2>
             <button
@@ -257,8 +257,8 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
 
           <div className="space-y-6">
             {topics.map((topic, topicIndex) => (
-              <div key={topic.id} className="shadow-sm rounded-4xl p-4">
-                <div className="flex items-center gap-4 mb-4">
+              <div key={topic.id} className="shadow-sm bg-white rounded-4xl p-4">
+                <div className="flex items-center  gap-4 mb-4">
                   <input
                     type="text"
                     value={topic.title}

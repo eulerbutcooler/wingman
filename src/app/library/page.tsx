@@ -180,7 +180,7 @@ export default function LibraryPage() {
         return selectedCourse && (
           <div className='flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw]'>
             <div className='w-11/12 pt-34 px-4'>
-            <button onClick={backToLibrary} className="flex items-center font-semibold text-gray-600 hover:text-black mb-6 transition-colors duration-300">
+            <button onClick={backToLibrary} className="flex items-center cursor-pointer font-semibold text-gray-600 hover:text-black mb-6 transition-colors duration-300">
               <Icons.ArrowLeft className="w-4 h-4 mr-2" />
               Back to Library
             </button>
@@ -223,7 +223,7 @@ export default function LibraryPage() {
         return selectedTopic && selectedCourse && (
           <div className='flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw]'>
             <div className='w-11/12 pt-34 px-4'>
-            <button onClick={backToCourse} className="flex items-center font-semibold text-gray-600 hover:text-black mb-6 transition-colors duration-300">
+            <button onClick={backToCourse} className="flex items-center cursor-pointer font-semibold text-gray-600 hover:text-black mb-6 transition-colors duration-300">
               <Icons.ArrowLeft className="w-4 h-4 mr-2" />
               Back to {selectedCourse.title}
             </button>
@@ -271,7 +271,7 @@ export default function LibraryPage() {
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
                 </div>
               ) : (
-                <div className='rounded-4xl w-full bg-white p-8 mb-18 shadow-sm'>
+                <div className='rounded-4xl w-full  p-8 mb-18 '>
                   <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-8">
                     {courses.map((course) => (
                       <CourseCard key={course.id} course={course} onClick={() => handleCourseSelect(course)} />
