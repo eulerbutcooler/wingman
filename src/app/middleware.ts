@@ -1,0 +1,62 @@
+import { withAuth } from "next-auth/middleware"
+import { NextResponse } from "next/server"
+
+export default withAuth(
+  function middleware(req) {
+    const token = req.nextauth.token
+    const isAuth = !!token
+    const isAuthPage = req.nextUrl.pathname.startsWith('/sign-in') || 
+                      req.nextUrl.pathname.startsWith('/sign-up') ||
+                      req.nextUrl.pathname.startsWith('/verify-otp')
+
+    // If user is on auth page and is authenticated, redirect to dashboard
+    if (isAuthPage && isAuth) {
+      return NextResponse.redirect(new URL('/dashboard', req.url))
+    }
+
+    // If user is not authenticated and trying to access protected routes
+    if (!isAuth && !isAuthPage && req.nextUrl.pathname !== '/') {
+      let from = req.nextUrl.pathname;
+      if (req.nextUrl.search) {
+        from += req.nextUrl.search;
+      }
+
+      return NextResponse.redirect(
+        new URL(`/sign-in?from=${encodeURIComponent(from)}`, req.url)
+      );
+    }
+
+    return NextResponse.next()
+  },
+  {
+    callbacks: {
+      authorized: ({ token, req }) => {
+        // Allow access to home page and auth pages without authentication
+        if (req.nextUrl.pathname === '/' || 
+            req.nextUrl.pathname.startsWith('/sign-in') || 
+            req.nextUrl.pathname.startsWith('/sign-up') ||
+            req.nextUrl.pathname.startsWith('/verify-otp') ||
+            req.nextUrl.pathname.startsWith('/api/auth')) {
+          return true
+        }
+        
+        // For all other routes, require authentication
+        return !!token
+      },
+    },
+  }
+)
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api/auth (NextAuth API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|public/).*)",
+  ],
+}
