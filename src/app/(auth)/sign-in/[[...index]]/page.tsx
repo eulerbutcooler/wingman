@@ -2,15 +2,20 @@
 
 import { useState } from 'react'
 import { signIn, getSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Toaster, toast } from 'sonner'
+import { AuroraBackground } from '@/components/ui/aurora-background'
 
 export default function SignInPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  
+  // Get the redirect URL from query params
+  const from = searchParams.get('from') || '/dashboard'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,7 +54,7 @@ export default function SignInPage() {
         const session = await getSession()
         if (session) {
           toast.success('Welcome back!')
-          router.push('/dashboard')
+          router.push(from) // Redirect to the original page or dashboard
           router.refresh()
         }
       }

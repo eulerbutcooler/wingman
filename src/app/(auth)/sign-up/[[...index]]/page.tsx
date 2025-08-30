@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Toaster, toast } from 'sonner'
+import { AuroraBackground } from '@/components/ui/aurora-background'
 
 export default function SignUpPage() {
   const [name, setName] = useState('')
@@ -12,6 +13,10 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  
+  // Get the redirect URL from query params
+  const from = searchParams.get('from') || '/dashboard'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

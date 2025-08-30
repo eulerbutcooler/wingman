@@ -1,4 +1,4 @@
-import Navigation from '@/components/navigation'
+import AuthGuard from '@/components/AuthGuard'
 
 export default function DashboardLayout({
   children,
@@ -6,15 +6,17 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-gray-50">
-      
-      
-      {/* Main content */}
-      <div className="lg:pl-72">
-        <main className="p-4 sm:p-6 lg:p-8">
-          {children}
-        </main>
+    <AuthGuard>
+      <div className="min-h-screen bg-gray-50">
+        
+        
+        {/* Main content */}
+        <div className="lg:pl-72">
+          <main className="p-4 sm:p-6 lg:p-8">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </AuthGuard>
   )
 }
