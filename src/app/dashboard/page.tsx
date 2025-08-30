@@ -90,7 +90,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen w-[100vw] bg-[#f5f5f5]">
-      <div className=" mx-auto max-w-11/12 pt-34 pb-12">
+      <div className=" mx-auto max-w-11/12 px-6 pt-34 pb-12">
         <div className=" ">
           <div className="">
             <h1 className="text-2xl font-bold text-black mb-4">

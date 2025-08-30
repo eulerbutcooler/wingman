@@ -168,7 +168,7 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
 
   return (
     <div className='flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw] pt-34'>
-      <div className='w-11/12 pb-12'>
+      <div className='w-11/12 px-6 pb-12'>
         <div className="flex  items-center justify-between mb-8">
         
         <button

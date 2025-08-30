@@ -179,7 +179,7 @@ export default function LibraryPage() {
       case 'course':
         return selectedCourse && (
           <div className='flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw]'>
-            <div className='w-11/12 pt-34 px-4'>
+            <div className='w-11/12 pt-34 px-6'>
             <button onClick={backToLibrary} className="flex items-center cursor-pointer font-semibold text-gray-600 hover:text-black mb-6 transition-colors duration-300">
               <Icons.ArrowLeft className="w-4 h-4 mr-2" />
               Back to Library
@@ -193,7 +193,7 @@ export default function LibraryPage() {
               </div>
             </div>
             <h2 className="text-2xl font-bold text-black mb-4 border-b-[1px] border-gray-600/50 pb-2">Topics</h2>
-            <div className="space-y-4 mb-18">
+            <div className="space-y-4 mb-14">
               {selectedCourse.topics && selectedCourse.topics.length > 0 ? (
                 selectedCourse.topics.map((topic) => (
                   <div 
@@ -222,14 +222,14 @@ export default function LibraryPage() {
       case 'topic':
         return selectedTopic && selectedCourse && (
           <div className='flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw]'>
-            <div className='w-11/12 pt-34 px-4'>
+            <div className='w-11/12 pt-34 px-6'>
             <button onClick={backToCourse} className="flex items-center cursor-pointer font-semibold text-gray-600 hover:text-black mb-6 transition-colors duration-300">
               <Icons.ArrowLeft className="w-4 h-4 mr-2" />
               Back to {selectedCourse.title}
             </button>
             <h1 className="text-4xl font-bold mb-4 text-black">{selectedTopic.title}</h1>
             <p className="text-neutral-600 border-b-gray-600/50 border-b-[1px] mb-4 pb-4">All lessons for this topic.</p>
-            <div className="space-y-3 mb-18">
+            <div className="space-y-3 mb-14">
               {selectedTopic.lessons && selectedTopic.lessons.length > 0 ? (
                 selectedTopic.lessons.map((lesson) => (
                   <div key={lesson.id} className="bg-white p-4 px-6 cursor-pointer rounded-4xl shadow-sm hover:shadow-xl transition-all duration-300 flex justify-between items-center">
@@ -260,7 +260,7 @@ export default function LibraryPage() {
       default:
         return (
           <div className='flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw]'>
-            <div className='w-11/12 pt-34 px-4'>
+            <div className='w-11/12 px-6 pt-34 '>
               <div className='flex justify-between items-center '>
                 <div><h1 className='text-left text-2xl font-semibold'>Library</h1>
               <p className="text-gray-600- text-left mb-8">Explore your courses or create a new one to get started.</p></div>
@@ -271,7 +271,7 @@ export default function LibraryPage() {
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
                 </div>
               ) : (
-                <div className='rounded-4xl w-full  p-8 mb-18 '>
+                <div className='rounded-4xl w-full  py-8 mb-14'>
                   <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-8">
                     {courses.map((course) => (
                       <CourseCard key={course.id} course={course} onClick={() => handleCourseSelect(course)} />

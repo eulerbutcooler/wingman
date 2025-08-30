@@ -108,8 +108,8 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="w-[100vw] h-screen bg-[#f5f5f5] overflow-hidden pb-14 pt-34">
-      <div className="w-11/12 mx-auto justify-between flex h-full">
+    <div className="w-[100vw] h-screen bg-[#f5f5f5] overflow-hidden pb-12 pt-34">
+      <div className="w-11/12 px-6 mx-auto justify-between flex h-full">
         <div className="flex h-full flex-1 gap-8  ">
           <ChatSidebar
             currentChatId={chatId}

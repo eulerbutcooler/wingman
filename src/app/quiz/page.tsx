@@ -216,7 +216,7 @@ const QuizCard = ({ quiz, progress, onStart, onReset, onReview }: {
 const QuizList = ({ progress, onStartQuiz, onResetQuiz, onReviewQuiz }: QuizListProps) => (
     <div>
         <h1 className="text-2xl font-semibold text-left mb-8">Available quizzes</h1>
-    <div className=" rounded-4xl  mb-18 w-full  mx-auto">
+    <div className=" rounded-4xl  mb-14 w-full  mx-auto">
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {quizzes.map(quiz => (
@@ -259,7 +259,7 @@ const QuizInProgress = ({ quiz, onQuizComplete }: QuizInProgressProps) => {
     return (
         <div>
             <h3 className="text-2xl font-semibold text-left mb-8">Quiz in progress...</h3>
-            <div className="bg-white  rounded-4xl shadow-sm mb-18   p-8  mx-auto w-full">
+            <div className="bg-white  rounded-4xl shadow-sm mb-14   p-8  mx-auto w-full">
             <div className="mb-4">
                 <p className="text-sm text-gray-600">Question {currentQuestionIndex + 1} of {quiz.questions.length}</p>
                 <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
@@ -306,7 +306,7 @@ const QuizResults = ({ quiz, progress, onRestart, onReview, onBackToList }: Quiz
     };
 
     return (
-        <div className="bg-white rounded-4xl shadow-sm mt-16 mb-18 p-8 text-center  mx-auto w-full">
+        <div className="bg-white rounded-4xl shadow-sm mt-16 mb-14 p-8 text-center  mx-auto w-full">
             <Award className={cn("w-12 h-12 mx-auto mb-4", getScoreColor())} />
             <h1 className="text-2xl font-bold mb-2">Quiz complete!</h1>
             <p className="text-neutral-600 mb-6">You've successfully completed the {quiz.topic} - {quiz.difficulty} quiz.</p>
@@ -368,7 +368,7 @@ const ReviewAnswers = ({ quiz, progress, onBackToResults }: ReviewAnswersProps) 
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to results
         </button>
-        <div className="bg-white  rounded-4xl shadow-sm  p-8 mb-18 mx-auto w-full">
+        <div className="bg-white  rounded-4xl shadow-sm  p-8 mb-14 mx-auto w-full">
             
             <h1 className="text-2xl font-semibold mb-6">Review Answers</h1>
             <div className="space-y-8">
@@ -461,7 +461,7 @@ function QuizContent() {
 
     return (
         <div className='flex flex-col items-center min-h-screen bg-[#f5f5f5] w-[100vw]'>
-            <div className='w-11/12 pt-34'>
+            <div className='w-11/12 px-6 pt-34'>
                 {renderContent()}
             </div>
             <style>{`
