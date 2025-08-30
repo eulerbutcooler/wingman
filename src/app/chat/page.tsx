@@ -8,6 +8,7 @@ import {
 } from "../actions/chat/actions";
 import { readStreamableValue } from "@ai-sdk/rsc";
 import { Send, MessageSquare, Bot, User } from "lucide-react";
+import { FaArrowUp } from "react-icons/fa6";
 import { useSearchParams, useRouter } from "next/navigation";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 
@@ -107,16 +108,16 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="w-[100vw] h-screen bg-[#f5f5f5] overflow-hidden p-6 pt-28">
-      <div className="w-11/12 mx-auto h-full">
-        <div className="flex h-full bg-white rounded-4xl shadow-xl overflow-hidden">
+    <div className="w-[100vw] h-screen bg-[#f5f5f5] overflow-hidden pb-14 pt-34">
+      <div className="w-11/12 mx-auto justify-between flex h-full">
+        <div className="flex h-full flex-1 gap-8  ">
           <ChatSidebar
             currentChatId={chatId}
             onSelectChat={selectChat}
             onNewChat={startNewChat}
           />
 
-          <div className="flex-1 flex flex-col h-full">
+          <div className="flex-1 flex flex-col bg-white rounded-4xl shadow-sm h-full">
             {/* <div className="z-20 shadow-[0_15px_30px_15px] shadow-white/80"></div> */}
 
             <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
@@ -133,7 +134,7 @@ export default function ChatPage() {
                     concepts!
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg">
-                    <div className="p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+                    <div className="p-4 bg-white rounded-4xl border border-gray-200 shadow-sm">
                       <h3 className="font-medium text-gray-900 mb-2">
                         Engineering Concepts
                       </h3>
@@ -141,7 +142,7 @@ export default function ChatPage() {
                         Ask about aerodynamics, propulsion, structures, and more
                       </p>
                     </div>
-                    <div className="p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+                    <div className="p-4 bg-white rounded-4xl border border-gray-200 shadow-sm">
                       <h3 className="font-medium text-gray-900 mb-2">
                         Problem Solving
                       </h3>
@@ -165,7 +166,7 @@ export default function ChatPage() {
                       </div>
                     )}
                     <div
-                      className={`max-w-3xl rounded-2xl px-4 py-3 ${
+                      className={`max-w-3xl rounded-4xl px-4 py-3 ${
                         message.role === "user"
                           ? "bg-navy text-white ml-12"
                           : "bg-white border border-gray-200 text-gray-900 shadow-sm"
@@ -209,8 +210,8 @@ export default function ChatPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="px-6 pb-6 pt-0 flex-shrink-0">
-              <form onSubmit={handleSubmit} className="flex gap-4">
+            <div className="px-6  pb-6 rounded-4xl shadow-[0_-25px_15px_-4px] shadow-white flex-shrink-0">
+              <form onSubmit={handleSubmit} className="flex items-center gap-4">
                 <div className="flex-1 relative">
                   <textarea
                     ref={inputRef}
@@ -218,7 +219,7 @@ export default function ChatPage() {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Ask Wingman about your studies..."
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent resize-none min-h-[48px] max-h-32 shadow-[0_-35px_30px_2px] shadow-white/80"
+                    className="w-full px-4 py-3 border border-gray-600/40  rounded-4xl shadow-lg  focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-transparent resize-none min-h-[48px] max-h-32 "
                     rows={1}
                     disabled={isLoading}
                   />
@@ -226,15 +227,13 @@ export default function ChatPage() {
                 <button
                   type="submit"
                   disabled={!input.trim() || isLoading}
-                  className="px-6 py-3 bg-navy text-white rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
+                  className="p-5 bg-navy/80 text-white rounded-4xl hover:bg-navy cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
                 >
-                  <Send size={16} />
-                  Send
+                  <FaArrowUp size={16} />
+                  
                 </button>
               </form>
-              <p className="text-xs text-gray-500 mt-2 text-center">
-                Press Enter to send, Shift + Enter for new line
-              </p>
+              
             </div>
           </div>
         </div>
