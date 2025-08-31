@@ -18,9 +18,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate type
-    if (!['video', 'pdf'].includes(type)) {
+    if (!['video', 'pdf', 'pptx'].includes(type)) {
       return NextResponse.json(
-        { error: 'Type must be either "video" or "pdf"' },
+        { error: 'Type must be "video", "pdf", or "pptx"' },
         { status: 400 }
       );
     }
@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { lessonId, title, order, duration } = body;
+    const { lessonId, title, order, duration, fileUrl } = body;
 
     if (!lessonId) {
       return NextResponse.json(
@@ -140,6 +140,7 @@ export async function PUT(request: NextRequest) {
     if (title) updateData.title = title;
     if (order !== undefined) updateData.order = order;
     if (duration) updateData.duration = duration;
+    if (fileUrl) updateData.fileUrl = fileUrl;
 
     const [updatedLesson] = await db
       .update(lessons)

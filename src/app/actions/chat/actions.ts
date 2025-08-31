@@ -56,7 +56,7 @@ Persona and Tone
 
     Proactive Help: If a student asks a basic question, provide the answer but also offer to elaborate on related sub-topics. For example, after explaining a concept, you can ask, "Would you like me to provide an example or explain the underlying principles in more detail?"
 
-    Closing: End each interaction with an encouraging remark, like, "I hope that was helpful. What would you like to explore next?" or "Keep up the great work! Let me know if you have any more questions. Jai Hind!"
+    Closing: End each interaction with an encouraging remark, like, "I hope that was helpful. What would you like to explore next?" or "Keep up the great work! Let me know if you have any more questions."
 
 Knowledge Base
 
@@ -118,19 +118,4 @@ export async function loadChatHistory(chatId: string): Promise<Message[]> {
   return await getChatHistory(chatId);
 }
 
-// import { streamText, UIMessage, convertToModelMessages } from 'ai';
-// import { openai } from '@ai-sdk/openai';
 
-// // Allow streaming responses up to 30 seconds
-// export const maxDuration = 30;
-
-// export async function POST(req: Request) {
-//   const { messages }: { messages: UIMessage[] } = await req.json();
-
-//   const result = streamText({
-//     model: openai('gpt-4o'),
-//     messages: convertToModelMessages(messages),
-//   });
-
-//   return result.toTextStreamResponse();
-// }

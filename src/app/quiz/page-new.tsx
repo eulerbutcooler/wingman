@@ -71,22 +71,21 @@ interface Course {
 // Mock user ID - replace with actual authentication
 const MOCK_USER_ID = "550e8400-e29b-41d4-a716-446655440000";
 
-const QuizCard = ({ quiz, onStart, onReset, onReview, isResetting = false }: {
+const QuizCard = ({ quiz, onStart, onReset, onReview }: {
   quiz: Quiz;
   onStart: () => void;
   onReset: () => void;
   onReview: () => void;
-  isResetting?: boolean;
 }) => {
   const isCompleted = quiz.latestResult !== null && quiz.latestResult !== undefined;
   const scorePercentage = isCompleted ? (quiz.latestResult!.score / quiz.totalQuestions) * 100 : 0;
 
   return (
-    <div className="flex flex-col md:flex-row items-center gap-8   transition-all duration-300 rounded-4xl">
-      <div className="w-full md:w-1/3 bg-white  transition-all duration-300 text-navy hover:shadow-xl p-6 gap-2 rounded-4xl shadow-sm flex flex-col justify-center h-full">
-        <h2 className="text-2xl text-black font-semibold">{quiz.difficulty.charAt(0).toUpperCase() + quiz.difficulty.slice(1)}</h2>
-        <p className="text-lg ">{quiz.title.split(' - ')[0]}</p>
-        <p className="text-sm text-neutral-800 mt-1">{quiz.totalQuestions} questions</p>
+    <div className="flex flex-col md:flex-row items-center gap-6 bg-white p-4 shadow-sm hover:shadow-xl transition-all duration-300 rounded-4xl">
+      <div className="w-full md:w-1/3 bg-black text-white p-6 rounded-4xl flex flex-col justify-center text-center h-full">
+        <h2 className="text-2xl font-bold">{quiz.difficulty.charAt(0).toUpperCase() + quiz.difficulty.slice(1)}</h2>
+        <p className="text-lg text-neutral-300">{quiz.title.split(' - ')[0]}</p>
+        <p className="text-sm text-neutral-300 mt-1">{quiz.totalQuestions} questions</p>
       </div>
 
       <div className="w-full md:w-2/3 flex flex-col justify-center">
@@ -106,13 +105,8 @@ const QuizCard = ({ quiz, onStart, onReset, onReview, isResetting = false }: {
               <button onClick={onReview} className="flex-grow bg-white font-semibold py-2 px-5 rounded-4xl hover:border-gray-600 transition-colors flex border-gray-300 cursor-pointer border items-center justify-center gap-2">
                 <Eye className="w-4 h-4" /> View Answers
               </button>
-              <button 
-                onClick={onReset} 
-                disabled={isResetting}
-                className={`p-2 transition-colors ${isResetting ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:text-black cursor-pointer'}`} 
-                title="Reset Progress"
-              >
-                <RefreshCw className={`w-5 h-5 ${isResetting ? 'animate-spin' : ''}`} />
+              <button onClick={onReset} className="p-2 text-gray-500 hover:text-black transition-colors" title="Reset Progress">
+                <RefreshCw className="w-5 h-5" />
               </button>
             </>
           )}
@@ -124,34 +118,33 @@ const QuizCard = ({ quiz, onStart, onReset, onReview, isResetting = false }: {
 
 const CourseList = ({ courses, onSelectCourse }: { courses: Course[], onSelectCourse: (course: Course) => void }) => (
   <div>
-    <h1 className="text-2xl font-semibold text-left mb-8">Select a course for quiz</h1>
+    <h1 className="text-2xl font-semibold text-left mb-8">Select a Course</h1>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
       {courses.map(course => (
         <div
           key={course.id}
           onClick={() => onSelectCourse(course)}
-          className="bg-white p-6 flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 rounded-4xl cursor-pointer"
+          className="bg-white p-6 shadow-sm hover:shadow-xl transition-all duration-300 rounded-4xl cursor-pointer"
         >
           <div className="flex items-center gap-4 mb-4">
-            
-            <h2 className="text-2xl font-semibold">{course.title.charAt(0).toUpperCase() + course.title.slice(1)}</h2>
+            <BookOpen className="w-8 h-8 text-blue-600" />
+            <h2 className="text-xl font-bold">{course.title}</h2>
           </div>
-          <p className="text-navy text-lg mb-4">{course.description.charAt(0).toUpperCase() + course.description.slice(1)}</p>
-          <div className="text-base text-neutral-800 font-semibold">View Quizzes →</div>
+          <p className="text-gray-600 mb-4">{course.description}</p>
+          <div className="text-sm text-blue-600 font-semibold">View Quizzes →</div>
         </div>
       ))}
     </div>
   </div>
 );
 
-const CourseQuizzes = ({ course, quizzes, onStartQuiz, onResetQuiz, onReviewQuiz, onBackToCourses, resettingQuizId }: {
+const CourseQuizzes = ({ course, quizzes, onStartQuiz, onResetQuiz, onReviewQuiz, onBackToCourses }: {
   course: Course;
   quizzes: Quiz[];
   onStartQuiz: (quiz: Quiz) => void;
   onResetQuiz: (quiz: Quiz) => void;
   onReviewQuiz: (quiz: Quiz) => void;
   onBackToCourses: () => void;
-  resettingQuizId?: string | null;
 }) => (
   <div>
     <button onClick={onBackToCourses} className="flex items-center font-semibold text-neutral-600 cursor-pointer hover:text-black mb-6 transition-colors duration-300">
@@ -159,15 +152,15 @@ const CourseQuizzes = ({ course, quizzes, onStartQuiz, onResetQuiz, onReviewQuiz
       Back to courses
     </button>
     
-    <h1 className="text-2xl font-semibold text-left mb-4">{course.title.charAt(0).toUpperCase() + course.title.slice(1)} - Quizzes</h1>
-    <p className="text-gray-600 mb-8">{course.description.charAt(0).toUpperCase() + course.description.slice(1)}</p>
-
+    <h1 className="text-2xl font-semibold text-left mb-4">{course.title} - Quizzes</h1>
+    <p className="text-gray-600 mb-8">{course.description}</p>
+    
     {quizzes.length === 0 ? (
-      <div className="h-[50vh] flex justify-center items-center p-8  text-center">
+      <div className="bg-white p-8 rounded-4xl shadow-sm text-center">
         <p className="text-gray-600">Quizzes are being generated for this course. Please check back in a few moments.</p>
       </div>
     ) : (
-      <div className="grid grid-cols-1 gap-8">
+      <div className="grid grid-cols-1 gap-6">
         {quizzes.map(quiz => (
           <QuizCard
             key={quiz.id}
@@ -175,7 +168,6 @@ const CourseQuizzes = ({ course, quizzes, onStartQuiz, onResetQuiz, onReviewQuiz
             onStart={() => onStartQuiz(quiz)}
             onReset={() => onResetQuiz(quiz)}
             onReview={() => onReviewQuiz(quiz)}
-            isResetting={resettingQuizId === quiz.id}
           />
         ))}
       </div>
@@ -342,11 +334,11 @@ const ReviewAnswers = ({ quiz, answers, onBackToResults }: {
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to results
       </button>
-      <div className=" p-8 mb-14 mx-auto w-full">
+      <div className="bg-white rounded-4xl shadow-sm p-8 mb-14 mx-auto w-full">
         <h1 className="text-2xl font-semibold mb-6">Review Answers</h1>
         <div className="space-y-8">
           {questions.map((question, index) => (
-            <div key={question.id} className="shadow-sm bg-white rounded-4xl hover:shadow-xl transition-all duration-300 p-4">
+            <div key={question.id} className="shadow-sm rounded-4xl hover:shadow-xl transition-all duration-300 p-4">
               <h2 className="font-bold text-lg p-2 mb-3">{index + 1}. {question.question}</h2>
               <div className="space-y-4 px-2 pb-2">
                 {question.options?.map((option) => (
@@ -359,7 +351,7 @@ const ReviewAnswers = ({ quiz, answers, onBackToResults }: {
                 ))}
               </div>
               {question.explanation && (
-                <div className="mt-4 p-3 px-4 bg-blue-50 rounded-4xl">
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-800"><strong>Explanation:</strong> {question.explanation}</p>
                 </div>
               )}
@@ -371,19 +363,6 @@ const ReviewAnswers = ({ quiz, answers, onBackToResults }: {
   );
 };
 
-// Helper function to ensure unique quizzes (one per difficulty per course)
-const deduplicateQuizzes = (quizzes: Quiz[]): Quiz[] => {
-  const seen = new Set<string>();
-  return quizzes.filter(quiz => {
-    const key = `${quiz.courseId}-${quiz.difficulty}`;
-    if (seen.has(key)) {
-      return false;
-    }
-    seen.add(key);
-    return true;
-  });
-};
-
 function QuizContent() {
   const [view, setView] = useState<'courses' | 'course_quizzes' | 'quiz_in_progress' | 'quiz_results' | 'review_answers'>('courses');
   const [courses, setCourses] = useState<Course[]>([]);
@@ -393,7 +372,6 @@ function QuizContent() {
   const [quizResults, setQuizResults] = useState<{ score: number, answers: Record<string, string>, timeSpent: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [resettingQuizId, setResettingQuizId] = useState<string | null>(null);
 
   // Load courses on component mount
   useEffect(() => {
@@ -464,23 +442,16 @@ function QuizContent() {
     if (!selectedCourse) return;
 
     try {
-      setResettingQuizId(quiz.id);
-      // Generate new quiz with same difficulty
-      const newQuiz = await quizService.resetQuiz(selectedCourse.id, MOCK_USER_ID, quiz.difficulty);
-      
-      // Update only the specific quiz in the list (replace old with new)
-      setCourseQuizzes(prevQuizzes => 
-        prevQuizzes.map(q => 
-          q.difficulty === quiz.difficulty && q.courseId === quiz.courseId 
-            ? { ...newQuiz, latestResult: undefined } as Quiz // Reset result for new quiz
-            : q
-        )
-      );
+      setLoading(true);
+      await quizService.resetQuiz(selectedCourse.id, MOCK_USER_ID, quiz.difficulty);
+      // Refresh quizzes
+      const updatedQuizzes = await quizService.getQuizzesForCourse(selectedCourse.id, MOCK_USER_ID);
+      setCourseQuizzes(updatedQuizzes);
     } catch (error) {
       console.error('Error resetting quiz:', error);
       setError('Failed to reset quiz');
     } finally {
-      setResettingQuizId(null);
+      setLoading(false);
     }
   };
 
@@ -502,9 +473,9 @@ function QuizContent() {
     return (
       <div className='flex flex-col items-center min-h-screen bg-[#f5f5f5] w-[100vw]'>
         <div className='w-11/12 px-6 pt-34 text-center'>
-          <div className="flex justify-center text-xl h-[70vh] items-center">
-                            <div className="loader"></div>
-                          </div>
+          <div className="bg-white p-8 rounded-4xl shadow-sm">
+            <p className="text-gray-600">Loading...</p>
+          </div>
         </div>
       </div>
     );
@@ -545,7 +516,6 @@ function QuizContent() {
             onResetQuiz={handleResetQuiz}
             onReviewQuiz={handleReviewQuiz}
             onBackToCourses={() => setView('courses')}
-            resettingQuizId={resettingQuizId}
           />
         ) : null;
 
@@ -586,7 +556,7 @@ function QuizContent() {
 
   return (
     <div className='flex flex-col items-center min-h-screen bg-[#f5f5f5] w-[100vw]'>
-      <div className='w-11/12 mb-14 px-6 pt-34'>
+      <div className='w-11/12 px-6 pt-34'>
         {renderContent()}
       </div>
     </div>

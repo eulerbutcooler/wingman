@@ -25,7 +25,7 @@ export interface Topic {
 export interface Lesson {
   id: string;
   title: string;
-  type: 'video' | 'pdf';
+  type: 'video' | 'pdf' | 'pptx';
   fileUrl?: string;
   duration?: string;
   topicId: string;
@@ -40,7 +40,7 @@ export interface UploadedFile {
   filename: string;
   url: string;
   size: number;
-  type: 'video' | 'pdf';
+  type: 'video' | 'pdf' | 'pptx';
   duration?: string;
   pageCount?: number;
   thumbnail?: string;
@@ -55,7 +55,7 @@ export interface CreateCourseData {
     title: string;
     lessons?: {
       title: string;
-      type: 'video' | 'pdf';
+      type: 'video' | 'pdf' | 'pptx';
       fileUrl?: string;
       duration?: string;
     }[];
@@ -94,6 +94,19 @@ class CourseService {
 
     const result = await response.json();
     return result.courses;
+  }
+
+  async deleteCourse(courseId: string, userId: string): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/courses?courseId=${courseId}&userId=${userId}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to delete course');
+    }
+
+    console.log(`Course ${courseId} deleted successfully`);
   }
 
   // Topic management
@@ -159,7 +172,7 @@ class CourseService {
   // Lesson management
   async createLesson(lessonData: {
     title: string;
-    type: 'video' | 'pdf';
+    type: 'video' | 'pdf' | 'pptx';
     topicId: string;
     fileId?: string;
     duration?: string;
@@ -197,13 +210,14 @@ class CourseService {
     title?: string;
     order?: number;
     duration?: string;
+    fileUrl?: string;
   }): Promise<Lesson> {
-    const response = await fetch(`${this.baseUrl}/lessons`, {
+    const response = await fetch(`${this.baseUrl}/lessons/${lessonId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ lessonId, ...updates }),
+      body: JSON.stringify(updates),
     });
 
     if (!response.ok) {
@@ -231,6 +245,7 @@ class CourseService {
     file: File,
     userId: string,
     lessonId?: string,
+    topicId?: string,
     onProgress?: (progress: number) => void
   ): Promise<UploadedFile> {
     const formData = new FormData();
@@ -239,8 +254,11 @@ class CourseService {
     if (lessonId) {
       formData.append('lessonId', lessonId);
     }
+    if (topicId) {
+      formData.append('topicId', topicId);
+    }
 
-    // Use XMLHttpRequest for progress tracking
+    // Use XMLHttpRequest for progress tracking with Supabase upload
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
 
@@ -267,7 +285,52 @@ class CourseService {
         reject(new Error('Failed to upload file'));
       });
 
-      xhr.open('POST', `${this.baseUrl}/upload`);
+      xhr.open('POST', `${this.baseUrl}/upload-supabase`);
+      xhr.send(formData);
+    });
+  }
+
+  // Upload image to Supabase Storage
+  async uploadImage(
+    file: File,
+    userId: string,
+    onProgress?: (progress: number) => void
+  ): Promise<{ url: string; publicId: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('userId', userId);
+    formData.append('type', 'image');
+
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+
+      if (onProgress) {
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable) {
+            const progress = (event.loaded / event.total) * 100;
+            onProgress(progress);
+          }
+        });
+      }
+
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const result = JSON.parse(xhr.responseText);
+          resolve({
+            url: result.file.url,
+            publicId: result.file.filename
+          });
+        } else {
+          const error = JSON.parse(xhr.responseText);
+          reject(new Error(error.error || 'Failed to upload image'));
+        }
+      });
+
+      xhr.addEventListener('error', () => {
+        reject(new Error('Failed to upload image'));
+      });
+
+      xhr.open('POST', `${this.baseUrl}/upload-supabase`);
       xhr.send(formData);
     });
   }
@@ -313,10 +376,14 @@ class CourseService {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
-  validateFile(file: File): { isValid: boolean; error?: string; fileType?: 'video' | 'pdf' } {
+  validateFile(file: File): { isValid: boolean; error?: string; fileType?: 'video' | 'pdf' | 'pptx' } {
     const maxSize = 100 * 1024 * 1024; // 100MB
     const videoTypes = ['video/mp4', 'video/webm', 'video/mov', 'video/avi'];
     const pdfTypes = ['application/pdf'];
+    const pptxTypes = [
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'application/vnd.ms-powerpoint'
+    ];
     
     if (file.size > maxSize) {
       return { isValid: false, error: 'File size must be less than 100MB' };
@@ -330,7 +397,26 @@ class CourseService {
       return { isValid: true, fileType: 'pdf' };
     }
     
-    return { isValid: false, error: 'Only MP4, WebM, MOV, AVI videos and PDF files are supported' };
+    if (pptxTypes.includes(file.type)) {
+      return { isValid: true, fileType: 'pptx' };
+    }
+    
+        return { isValid: false, error: 'Only MP4, WebM, MOV, AVI videos, PDF files, and PowerPoint presentations are supported' };
+  }
+
+  validateImage(file: File): { isValid: boolean; error?: string } {
+    const maxSize = 10 * 1024 * 1024; // 10MB for images
+    const imageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    
+    if (file.size > maxSize) {
+      return { isValid: false, error: 'Image size must be less than 10MB' };
+    }
+    
+    if (!imageTypes.includes(file.type)) {
+      return { isValid: false, error: 'Only JPEG, PNG, and WebP images are supported' };
+    }
+    
+    return { isValid: true };
   }
 }
 

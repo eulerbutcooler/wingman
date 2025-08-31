@@ -16,6 +16,11 @@ export default withAuth(
     const isPublicPage = pathname === '/' || 
                         pathname.startsWith('/hero') ||
                         pathname.startsWith('/api/auth') ||
+                        pathname.startsWith('/api/upload-supabase') ||
+                        pathname.startsWith('/api/setup-storage') ||
+                        pathname.startsWith('/api/courses') ||
+                        pathname.startsWith('/api/topics') ||
+                        pathname.startsWith('/api/lessons') ||
                         pathname.startsWith('/_next') ||
                         pathname.startsWith('/favicon')
 
@@ -43,7 +48,12 @@ export default withAuth(
       authorized: ({ token, req }) => {
         const pathname = req.nextUrl.pathname
         
-        if (pathname.startsWith('/api/auth')) {
+        if (pathname.startsWith('/api/auth') ||
+            pathname.startsWith('/api/upload-supabase') ||
+            pathname.startsWith('/api/setup-storage') ||
+            pathname.startsWith('/api/courses') ||
+            pathname.startsWith('/api/topics') ||
+            pathname.startsWith('/api/lessons')) {
           return true
         }
         

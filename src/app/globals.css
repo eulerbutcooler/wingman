@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 
+
 .scrolled {
   background-color: white; /* or any color you want */
   /* optional glass effect */
@@ -36,9 +37,19 @@
 :root {
   --background: #f5f5f5;
   --foreground: #171717;
-  --navy: #04127b;
+  --navy: #1c1c84;
 }
-
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: fit-content;
+  
+  clip-path: inset(0 3ch 0 0);
+  animation: l4 1s steps(4) infinite;
+}
+.loader:before {
+  content:"Loading..."
+}
+@keyframes l4 {to{clip-path: inset(0 -1ch 0 0)}}
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

@@ -51,6 +51,22 @@ const Icons = {
       <line x1="16" y1="17" x2="8" y2="17"></line>
       <polyline points="10 9 9 9 8 9"></polyline>
     </svg>
+  ),
+  
+  Presentation: ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+      <line x1="8" y1="21" x2="16" y2="21"></line>
+      <line x1="12" y1="17" x2="12" y2="21"></line>
+    </svg>
+  ),
+
+  ExternalLink: ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+      <polyline points="15 3 21 3 21 9"></polyline>
+      <line x1="10" y1="14" x2="21" y2="3"></line>
+    </svg>
   )
 };
 
@@ -100,6 +116,33 @@ export default function LibraryPage() {
   const handleCourseSelect = (course: Course) => {
     setSelectedCourse(course);
     setView('course');
+  };
+
+  const handleCourseDelete = async (courseId: string) => {
+    if (!window.confirm('Are you sure you want to delete this course? This will also delete all associated quizzes and cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await courseService.deleteCourse(courseId, userId);
+      
+      // Remove the course from the local state
+      setCourses(courses.filter(course => course.id !== courseId));
+      
+      // If the deleted course was currently selected, go back to library
+      if (selectedCourse?.id === courseId) {
+        setSelectedCourse(null);
+        setView('library');
+      }
+      
+      console.log('Course deleted successfully');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete course');
+      console.error('Failed to delete course:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleTopicSelect = (topic: Topic) => {
@@ -180,16 +223,26 @@ export default function LibraryPage() {
         return selectedCourse && (
           <div className='flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw]'>
             <div className='w-11/12 pt-34 px-6'>
-            <button onClick={backToLibrary} className="flex items-center cursor-pointer font-semibold text-gray-600 hover:text-black mb-6 transition-colors duration-300">
+            <div className='flex justify-between'>
+              <button onClick={backToLibrary} className="flex items-center cursor-pointer font-semibold text-gray-600 hover:text-black mb-6 transition-colors duration-300">
               <Icons.ArrowLeft className="w-4 h-4 mr-2" />
               Back to Library
             </button>
+            <button className={`flex items-center cursor-pointer font-semibold text-right transition-colors duration-300 mb-6 ${
+                      loading ? 'text-gray-400 cursor-not-allowed' : 'text-red-600 hover:text-red-800'
+                    }`}
+                    onClick={() => selectedCourse && !loading && handleCourseDelete(selectedCourse.id)}
+                    disabled={loading}>
+              {loading ? 'Deleting...' : 'Delete'}
+            </button>
+
+            </div>
             
             <div className="flex items-start mb-8">
               <img src={selectedCourse.imageUrl} alt={selectedCourse.title} className="w-40 h-auto object-cover rounded-4xl mr-6" />
               <div>
-                <h1 className="text-4xl font-bold text-black">{selectedCourse.title}</h1>
-                <p className="text-neutral-600 mt-2">{selectedCourse.description}</p>
+                <h1 className="text-4xl font-bold text-black">{selectedCourse.title.charAt(0).toUpperCase() + selectedCourse.title.slice(1)}</h1>
+                <p className="text-neutral-600 mt-2">{selectedCourse.description.charAt(0).toUpperCase() + selectedCourse.description.slice(1)}</p>
               </div>
             </div>
             <h2 className="text-2xl font-bold text-black mb-4 border-b-[1px] border-gray-600/50 pb-2">Topics</h2>
@@ -227,22 +280,44 @@ export default function LibraryPage() {
               <Icons.ArrowLeft className="w-4 h-4 mr-2" />
               Back to {selectedCourse.title}
             </button>
-            <h1 className="text-4xl font-bold mb-4 text-black">{selectedTopic.title}</h1>
+            <h1 className="text-4xl font-bold mb-4 text-black">{selectedTopic.title.charAt(0).toUpperCase() + selectedTopic.title.slice(1)}</h1>
             <p className="text-neutral-600 border-b-gray-600/50 border-b-[1px] mb-4 pb-4">All lessons for this topic.</p>
             <div className="space-y-3 mb-14">
               {selectedTopic.lessons && selectedTopic.lessons.length > 0 ? (
                 selectedTopic.lessons.map((lesson) => (
-                  <div key={lesson.id} className="bg-white p-4 px-6 cursor-pointer rounded-4xl shadow-sm hover:shadow-xl transition-all duration-300 flex justify-between items-center">
-                    <div className="flex items-center">
-                      {lesson.type === 'video' ? 
-                        <Icons.Video className="w-5 h-5 mr-4 text-gray-500"/> : 
-                        <Icons.FileText className="w-5 h-5 mr-4 text-gray-500"/>
-                      }
-                      <span className="font-medium">{lesson.title}</span>
+                  <div key={lesson.id} className="bg-white p-4 px-6 cursor-pointer rounded-4xl shadow-sm hover:shadow-xl transition-all duration-300">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        {lesson.type === 'video' ? (
+                          <Icons.Video className="w-5 h-5 mr-4 text-blue-500"/> 
+                        ) : lesson.type === 'pptx' ? (
+                          <Icons.Presentation className="w-5 h-5 mr-4 text-orange-500"/>
+                        ) : (
+                          <Icons.FileText className="w-5 h-5 mr-4 text-red-500"/>
+                        )}
+                        <div className="flex flex-col">
+                          <span className="font-medium">{lesson.title.charAt(0).toUpperCase() + lesson.title.slice(1)}</span>
+                          <span className="text-xs text-gray-400 capitalize">{lesson.type} file</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {lesson.type === 'video' && lesson.duration && (
+                          <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-md">{lesson.duration}</span>
+                        )}
+                        {lesson.fileUrl && (
+                          <a
+                            href={lesson.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Icons.ExternalLink className="w-4 h-4 mr-1" />
+                            Open File
+                          </a>
+                        )}
+                      </div>
                     </div>
-                    {lesson.type === 'video' && lesson.duration && (
-                      <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-md">{lesson.duration}</span>
-                    )}
                   </div>
                 ))
               ) : (
@@ -263,12 +338,12 @@ export default function LibraryPage() {
             <div className='w-11/12 px-6 pt-34 '>
               <div className='flex justify-between items-center '>
                 <div><h1 className='text-left text-2xl font-semibold'>Library</h1>
-              <p className="text-gray-600- text-left mb-8">Explore your courses or create a new one to get started.</p></div>
+              <p className="text-gray-600- text-left mt-4 mb-6">Explore your courses or create a new one to get started.</p></div>
               <CreateCourseCard onClick={handleCreateCourse} />
               </div>
               {loading ? (
-                <div className="flex justify-center items-center h-64">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+                <div className="flex justify-center text-xl h-[50vh] items-center">
+                  <div className="loader"></div>
                 </div>
               ) : (
                 <div className='rounded-4xl w-full  py-8 mb-14'>
