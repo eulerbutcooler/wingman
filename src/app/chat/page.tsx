@@ -19,6 +19,7 @@ function ChatContent() {
   const [input, setInput] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [chatId, setChatId] = useState<string | undefined>();
+  const [mode, setMode] = useState<"normal" | "deep">("normal");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const router = useRouter();
@@ -67,7 +68,7 @@ function ChatContent() {
         messages,
         newMessage,
         chatId: returnedChatId,
-      } = await continueConversation(newConversation, chatId);
+      } = await continueConversation(newConversation, chatId, true, mode);
 
       if (returnedChatId && !chatId) {
         setChatId(returnedChatId);
@@ -219,19 +220,33 @@ function ChatContent() {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Ask Wingman about your studies..."
-                    className="w-full px-4 py-3 border border-gray-600/40  rounded-4xl shadow-lg  focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-transparent resize-none min-h-[48px] max-h-32 "
+                    className="w-full px-4 py-4 border border-gray-600/40  rounded-4xl shadow-lg  focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-transparent resize-none min-h-[48px] max-h-32 "
                     rows={1}
                     disabled={isLoading}
                   />
                 </div>
-                <button
-                  type="submit"
-                  disabled={!input.trim() || isLoading}
-                  className="p-5 bg-navy/80 text-white rounded-4xl hover:bg-navy cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
-                >
-                  <FaArrowUp size={14} />
-                  
-                </button>
+                <div className="flex items-center gap-6">
+                  <button
+                    type="button"
+                    onClick={() => setMode(mode === "normal" ? "deep" : "normal")}
+                    className={`px-4 py-4 text-base rounded-4xl cursor-pointer transition-all duration-300  ${
+                      mode === "deep"
+                        ? "bg-navy text-white shadow-sm  hover:shadow-xl"
+                        : "bg-white shadow-sm text-neutral-800 hover:shadow-xl "
+                    }`}
+                    disabled={isLoading}
+                  >
+                    Deep Mode
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!input.trim() || isLoading}
+                    className="p-5 bg-navy/80 text-white rounded-4xl hover:bg-navy cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
+                  >
+                    <FaArrowUp size={14} />
+                    
+                  </button>
+                </div>
               </form>
               
             </div>

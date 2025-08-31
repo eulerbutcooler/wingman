@@ -101,7 +101,7 @@ Format each question with:
   console.log('Generating quiz with AI...');
   
   const result = await generateObject({
-    model: google('gemini-1.5-flash'),
+    model: google('gemini-2.5-flash-lite'),
     prompt,
     schema: QuizGenerationSchema,
     temperature: 0.7,

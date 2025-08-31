@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Upload, FileText, FileX, CheckCircle, Clock, AlertCircle, Video, FileImage, Presentation } from 'lucide-react'
+import { Upload, FileText, FileX, CheckCircle, Clock, AlertCircle, Presentation } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface UploadedFile {
@@ -14,7 +14,7 @@ interface UploadedFile {
   progress: number
   error?: string
   url?: string
-  fileType?: 'video' | 'pdf' | 'pptx' | 'docx' | 'image'
+  fileType?: 'pdf' | 'pptx' | 'docx'
 }
 
 interface DocumentUploaderProps {
@@ -139,14 +139,7 @@ export default function DocumentUploader({
       'application/msword': ['.doc'],
       'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
       'application/vnd.ms-powerpoint': ['.ppt'],
-      'application/vnd.openxmlformats-officedocument.presentationml.slideshow': ['.ppsx'],
-      'video/mp4': ['.mp4'],
-      'video/webm': ['.webm'],
-      'video/mov': ['.mov'],
-      'video/avi': ['.avi'],
-      'image/jpeg': ['.jpg', '.jpeg'],
-      'image/png': ['.png'],
-      'image/webp': ['.webp']
+      'application/vnd.openxmlformats-officedocument.presentationml.slideshow': ['.ppsx']
     },
     maxSize: 100 * 1024 * 1024, // 100MB
     multiple: true
@@ -156,16 +149,12 @@ export default function DocumentUploader({
     const fileName = 'name' in file ? file.name : file.file.name
     const fileType = fileName.toLowerCase()
     
-    if (fileType.includes('.mp4') || fileType.includes('.webm') || fileType.includes('.mov') || fileType.includes('.avi')) {
-      return <Video className="h-8 w-8 text-red-500" />
-    } else if (fileType.includes('.pdf')) {
+    if (fileType.includes('.pdf')) {
       return <FileText className="h-8 w-8 text-red-500" />
     } else if (fileType.includes('.pptx') || fileType.includes('.ppt') || fileType.includes('.ppsx')) {
       return <Presentation className="h-8 w-8 text-orange-500" />
     } else if (fileType.includes('.docx') || fileType.includes('.doc')) {
       return <FileText className="h-8 w-8 text-blue-500" />
-    } else if (fileType.includes('.jpg') || fileType.includes('.jpeg') || fileType.includes('.png') || fileType.includes('.webp')) {
-      return <FileImage className="h-8 w-8 text-green-500" />
     }
     
     return <FileText className="h-8 w-8 text-gray-500" />
@@ -229,7 +218,7 @@ export default function DocumentUploader({
                   Drag & drop files here, or click to select files
                 </p>
                 <p className="text-sm text-gray-500">
-                  Supports PDF, DOCX, PPTX, PPSX, MP4, and image files
+                  Supports PDF, DOCX, PPTX, and PPSX files
                 </p>
               </div>
             )}

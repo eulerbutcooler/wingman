@@ -4,7 +4,6 @@ import { db } from '@/lib/db/drizzle';
 import { files } from '@/lib/db/schema/courses';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
-const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/mov', 'video/avi'];
 const ALLOWED_PDF_TYPES = ['application/pdf'];
 const ALLOWED_PPTX_TYPES = [
   'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
@@ -15,7 +14,6 @@ const ALLOWED_DOCX_TYPES = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
   'application/msword', // .doc
 ];
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 // Validate file type and size
 function validateFile(file: File, expectedType?: string) {
@@ -25,27 +23,19 @@ function validateFile(file: File, expectedType?: string) {
     errors.push(`File size must be less than ${MAX_FILE_SIZE / (1024 * 1024)}MB`);
   }
   
-  const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type);
   const isPDF = ALLOWED_PDF_TYPES.includes(file.type);
   const isPPTX = ALLOWED_PPTX_TYPES.includes(file.type);
   const isDOCX = ALLOWED_DOCX_TYPES.includes(file.type);
-  const isImage = ALLOWED_IMAGE_TYPES.includes(file.type);
   
-  // If expectedType is specified, validate against it
-  if (expectedType === 'image' && !isImage) {
-    errors.push('Only JPEG, PNG, and WebP images are supported');
-  } else if (expectedType !== 'image' && !isVideo && !isPDF && !isPPTX && !isDOCX) {
-    errors.push('Only MP4, WebM, MOV, AVI videos, PDF files, PowerPoint presentations (.pptx, .ppsx), and Word documents (.docx) are supported');
-  } else if (!expectedType && !isVideo && !isPDF && !isPPTX && !isDOCX && !isImage) {
-    errors.push('Only MP4, WebM, MOV, AVI videos, PDF files, PowerPoint presentations (.pptx, .ppsx), Word documents (.docx), and JPEG/PNG/WebP images are supported');
+  // Validate against allowed document types only
+  if (!isPDF && !isPPTX && !isDOCX) {
+    errors.push('Only PDF files, PowerPoint presentations (.pptx, .ppt, .ppsx), and Word documents (.docx, .doc) are supported');
   }
   
-  let fileType: 'video' | 'pdf' | 'pptx' | 'docx' | 'image';
-  if (isVideo) fileType = 'video';
-  else if (isPDF) fileType = 'pdf';
+  let fileType: 'pdf' | 'pptx' | 'docx';
+  if (isPDF) fileType = 'pdf';
   else if (isPPTX) fileType = 'pptx';
-  else if (isDOCX) fileType = 'docx';
-  else fileType = 'image';
+  else fileType = 'docx';
   
   return {
     isValid: errors.length === 0,
@@ -64,7 +54,7 @@ export async function POST(request: NextRequest) {
     const userId = formData.get('userId') as string;
     const lessonId = formData.get('lessonId') as string | null;
     const topicId = formData.get('topicId') as string | null;
-    const type = formData.get('type') as string | null; // 'image' for course images
+    const type = formData.get('type') as string | null; // Reserved for future use
 
     console.log('📝 Upload parameters:', {
       fileName: file?.name,
@@ -110,11 +100,7 @@ export async function POST(request: NextRequest) {
     
     // Organize files by type and user
     let folderPath;
-    if (validation.fileType === 'image' && type === 'image') {
-      folderPath = `course-images/${userId}`;
-    } else if (validation.fileType === 'video') {
-      folderPath = `lesson-videos/${userId}`;
-    } else if (validation.fileType === 'pdf') {
+    if (validation.fileType === 'pdf') {
       folderPath = `lesson-pdfs/${userId}`;
     } else if (validation.fileType === 'pptx') {
       folderPath = `lesson-presentations/${userId}`;
@@ -158,22 +144,8 @@ export async function POST(request: NextRequest) {
     const publicUrl = publicUrlData.publicUrl;
     console.log('🔗 Public URL:', publicUrl);
 
-    // For images, we don't need to save to files table if it's a course image
-    if (validation.fileType === 'image' && type === 'image') {
-      console.log('✅ Image upload completed (not saved to database)');
-      return NextResponse.json({
-        success: true,
-        message: 'Image uploaded successfully to Supabase Storage',
-        file: {
-          url: publicUrl,
-          filename: fileName,
-          type: validation.fileType,
-        },
-      });
-    }
-
     console.log('💾 Saving file metadata to database...');
-    // Save file metadata to database for videos, PDFs, PPTX, and DOCX
+        // Save file metadata to database for PDFs, PPTX, and DOCX
     
     // Validate UUIDs or set to null
     const validUuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -205,17 +177,24 @@ export async function POST(request: NextRequest) {
       lessonId: savedFile.lessonId,
       topicId: savedFile.topicId
     });
-
-    // Extract additional metadata for videos
-    const metadata: any = {};
-    if (validation.fileType === 'video') {
-      // For videos uploaded to Supabase, we can't easily extract duration
-      // You might want to use a video processing library or service for this
-      metadata.thumbnail = publicUrl; // Use the video file URL as thumbnail for now
-      console.log('🎥 Video uploaded:', metadata);
-    }
-
     console.log('🎉 Upload process completed successfully');
+    
+    // Trigger document processing for text-based files
+    if (validation.fileType === 'pdf' || validation.fileType === 'docx' || validation.fileType === 'pptx') {
+      console.log('🔄 Triggering document processing for RAG...');
+      
+      // Process document asynchronously (don't wait for completion)
+      fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/process-document`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fileId: savedFile.id }),
+      }).catch(error => {
+        console.error('❌ Failed to trigger document processing:', error);
+      });
+    }
+    
     return NextResponse.json({
       success: true,
       message: 'File uploaded successfully to Supabase Storage',
@@ -228,7 +207,7 @@ export async function POST(request: NextRequest) {
         type: validation.fileType,
         lessonId: savedFile.lessonId,
         topicId: savedFile.topicId,
-        ...metadata,
+        processingTriggered: validation.fileType === 'pdf' || validation.fileType === 'docx' || validation.fileType === 'pptx',
       },
     });
 
@@ -265,9 +244,7 @@ export async function GET(request: NextRequest) {
       bucket: 'wingman-files',
       maxFileSize: MAX_FILE_SIZE,
       allowedTypes: {
-        videos: ALLOWED_VIDEO_TYPES,
-        documents: [...ALLOWED_PDF_TYPES, ...ALLOWED_PPTX_TYPES, ...ALLOWED_DOCX_TYPES],
-        images: ALLOWED_IMAGE_TYPES
+        documents: [...ALLOWED_PDF_TYPES, ...ALLOWED_PPTX_TYPES, ...ALLOWED_DOCX_TYPES]
       }
     });
 

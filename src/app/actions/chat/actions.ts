@@ -4,6 +4,7 @@ import { streamText } from "ai";
 import { google } from "@ai-sdk/google";
 import { createStreamableValue } from "@ai-sdk/rsc";
 import { saveMessage, getChatHistory, createChat } from "@/lib/db/actions/chat-actions";
+import { searchAllCourses, formatContextForWingman } from "@/lib/rag/user-search";
 
 export interface Message {
   role: "user" | "assistant";
@@ -16,7 +17,8 @@ export interface Message {
 export async function continueConversation(
   history: Message[], 
   chatId?: string,
-  shouldSave: boolean = true
+  shouldSave: boolean = true,
+  mode: "normal" | "deep" = "normal"
 ) {
   "use server";
 
@@ -42,9 +44,12 @@ export async function continueConversation(
   }
 
   (async () => {
-    const { textStream } = streamText({
-      model: google("gemini-2.5-flash-lite"),
-      system: `
+    // Get user query for RAG search (last user message)
+    const lastUserMessage = history[history.length - 1];
+    const userQuery = lastUserMessage?.role === 'user' ? lastUserMessage.content : '';
+    
+    // Build system prompt
+    let systemPrompt = `
 You are "Wingman" a virtual teaching assistant and study buddy for students at the Indian Naval Institute of Aeronautical Technology (INAT). Your purpose is to provide clear, in-depth explanations, guide students through complex concepts, and foster a better understanding of their curriculum.
 Persona and Tone
 
@@ -89,7 +94,40 @@ Your Response: That's a great question, it's a fundamental concept in aerodynami
 User: Can you give me the solution to problem #5 on the homework?
 Your Response: I cannot provide a direct solution to homework problems. However, I can help you understand the concepts needed to solve it. Can you tell me what part of the problem you are stuck on? We can break it down together.
 
-Remember to follow these instructions to maintain a consistent, helpful, and ethical persona.`,
+Remember to follow these instructions to maintain a consistent, helpful, and ethical persona.`;
+
+    // Add RAG context for Deep Mode
+    if (mode === 'deep' && userQuery) {
+      try {
+        console.log('🔍 Deep Mode: Searching ALL course materials globally...');
+        
+        const relevantChunks = await searchAllCourses(
+          userQuery,
+          5,  // maxResults
+          0.8 // similarityThreshold
+        );
+        
+        if (relevantChunks.length > 0) {
+          const context = formatContextForWingman(relevantChunks);
+          systemPrompt += `
+
+ADDITIONAL CONTEXT FROM COURSE MATERIALS:
+${context}
+
+When relevant to the student's question, reference the course materials above using [Source X] citations while maintaining your teaching approach. Blend your general knowledge with the specific course content provided.`;
+          console.log(`✅ Added ${relevantChunks.length} relevant sources to context`);
+        } else {
+          console.log('📝 No relevant course materials found above threshold');
+        }
+      } catch (error) {
+        console.error('🚨 RAG search failed:', error);
+        // Continue with normal mode if RAG fails
+      }
+    }
+
+    const { textStream } = streamText({
+      model: google("gemini-2.5-flash-lite"),
+      system: systemPrompt,
       messages: history,
     });
 

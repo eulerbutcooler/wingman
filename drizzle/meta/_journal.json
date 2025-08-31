@@ -43,6 +43,13 @@
       "when": 1756633178350,
       "tag": "0005_dear_speed",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1756659555005,
+      "tag": "0006_lucky_lucky_pierre",
+      "breakpoints": true
     }
   ]
 }
