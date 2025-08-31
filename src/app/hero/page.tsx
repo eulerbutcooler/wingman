@@ -51,7 +51,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
             className="overflow-hidden"
           >
             {/* Put padding inside inner wrapper to avoid height measurement glitches */}
-            <div className="pt-3 text-sm leading-6 navyblue">{a}</div>
+            <div className="pt-3 text-sm leading-6 text-navy">{a}</div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -81,7 +81,7 @@ export default function Hero() {
               wrapper="span"
               cursor={true}
               repeat={Infinity}
-              className="text-[#041270]"
+              className="text-navy"
             />
           </p>
 
@@ -91,22 +91,22 @@ export default function Hero() {
           </p>
         </div>
 
-        <Image src="/su-7.png" alt="Hero Image" className="navyblue" width={500} height={600} />
+        <Image src="/su-7.png" alt="Hero Image" className="text-navy" width={500} height={600} />
       </div>
       <div className="flex w-11/12 cards gap-4 justify-evenly">
               <div className="flex p-8 bg-white shadow-sm hover:shadow-xl transition-all duration-300 rounded-4xl flex-col justify-evenly gap-4">
                 <h1 className="text-2xl font-bold text-black">Chat bot</h1>
-                <p className="text-xl navyblue">Talk to your PDFs</p>
+                <p className="text-xl text-navy">Talk to your PDFs</p>
                 <p className="text-base text-black">Chat with documents, websites, and notes in natural language, and get cited answers, summaries, and follow ups instantly.</p>
               </div>
               <div className="flex p-8 bg-white hover:shadow-xl transition-all duration-300 shadow-sm rounded-4xl flex-col justify-evenly gap-4">
                 <h1 className="text-2xl font-bold text-black">Library</h1>
-                <p className="text-xl navyblue">Build courses from your knowledge</p>
+                <p className="text-xl text-navy">Build courses from your knowledge</p>
                 <p className="text-base text-black">Turn saved content into structured study plans and bite‑sized courses, complete with milestones, reminders, and progress tracking.</p>
               </div>
               <div className="flex p-8 bg-white hover:shadow-xl transition-all duration-300 shadow-sm rounded-4xl flex-col justify-evenly gap-4">
                 <h1 className="text-2xl font-bold text-black">Quiz</h1>
-                <p className="text-xl navyblue">Quiz me from your data</p>
+                <p className="text-xl text-navy">Quiz me from your data</p>
                 <p className="text-base text-black">Auto‑generate personalized quizzes from uploaded files, chats, and bookmarks, with adaptive difficulty and instant feedback.</p>
               </div>
               

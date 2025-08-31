@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db/drizzle';
 import { courses, topics, lessons } from '@/lib/db/schema/courses';
 import { eq, desc } from 'drizzle-orm';
+import { generateQuizForCourse } from '../quiz/generate/route';
 
 // GET /api/courses - Fetch all courses
 export async function GET(request: NextRequest) {
@@ -144,16 +145,146 @@ export async function POST(request: NextRequest) {
       return newCourse;
     });
 
+    // After creating the course, fetch it with topics and lessons to return complete data
+    const courseWithContent = await db
+      .select()
+      .from(courses)
+      .where(eq(courses.id, result.id))
+      .limit(1);
+
+    if (courseWithContent.length === 0) {
+      throw new Error('Course not found after creation');
+    }
+
+    const course = courseWithContent[0];
+
+    // Get topics for this course
+    const courseTopicsData = await db
+      .select()
+      .from(topics)
+      .where(eq(topics.courseId, course.id))
+      .orderBy(topics.order);
+
+    // Get lessons for each topic
+    const topicsWithLessons = await Promise.all(
+      courseTopicsData.map(async (topic) => {
+        const topicLessons = await db
+          .select()
+          .from(lessons)
+          .where(eq(lessons.topicId, topic.id))
+          .orderBy(lessons.order);
+
+        return {
+          ...topic,
+          lessons: topicLessons,
+        };
+      })
+    );
+
+    const courseWithTopicsAndLessons = {
+      ...course,
+      topics: topicsWithLessons,
+    };
+
+    // After course creation, generate quizzes for all difficulties
+    // This is done asynchronously to not block the response
+    if (result.id) {
+      generateQuizzesForCourse(result.id, userId, title, description).catch(console.error);
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Course created successfully',
-      course: result,
+      course: courseWithTopicsAndLessons,
     });
+
   } catch (error) {
     console.error('Error creating course:', error);
     return NextResponse.json(
       { error: 'Failed to create course' },
       { status: 500 }
     );
+  }
+}
+
+// DELETE /api/courses?courseId=xxx - Delete a course and all associated data
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const courseId = searchParams.get('courseId');
+    const userId = searchParams.get('userId');
+
+    if (!courseId) {
+      return NextResponse.json({ error: 'Course ID is required' }, { status: 400 });
+    }
+
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
+
+    // First verify the course exists and belongs to the user
+    const existingCourse = await db
+      .select()
+      .from(courses)
+      .where(eq(courses.id, courseId))
+      .limit(1);
+
+    if (existingCourse.length === 0) {
+      return NextResponse.json({ error: 'Course not found' }, { status: 404 });
+    }
+
+    if (existingCourse[0].userId !== userId) {
+      return NextResponse.json({ error: 'Unauthorized to delete this course' }, { status: 403 });
+    }
+
+    // Delete the course - cascade delete will handle quizzes, topics, and lessons automatically
+    const deletedCourse = await db
+      .delete(courses)
+      .where(eq(courses.id, courseId))
+      .returning();
+
+    if (deletedCourse.length === 0) {
+      return NextResponse.json({ error: 'Failed to delete course' }, { status: 500 });
+    }
+
+    console.log(`Successfully deleted course ${courseId} and all associated data`);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Course and all associated data deleted successfully',
+      deletedCourse: deletedCourse[0],
+    });
+
+  } catch (error) {
+    console.error('Error deleting course:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete course' },
+      { status: 500 }
+    );
+  }
+}
+
+// Helper function to generate quizzes for a course
+async function generateQuizzesForCourse(
+  courseId: string, 
+  userId: string, 
+  title: string, 
+  description: string
+) {
+  const difficulties: ('easy' | 'medium' | 'hard')[] = ['easy', 'medium', 'hard'];
+  
+  for (const difficulty of difficulties) {
+    try {
+      // Call the quiz generation function directly
+      const result = await generateQuizForCourse(courseId, userId, difficulty);
+      
+      if (result.success) {
+        console.log(`Successfully generated ${difficulty} quiz for course ${courseId}`);
+      } else {
+        console.error(`Failed to generate ${difficulty} quiz for course ${courseId}`);
+      }
+    } catch (error) {
+      console.error(`Error generating ${difficulty} quiz for course ${courseId}:`, error);
+    }
   }
 }

@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Upload, FileText, FileX, CheckCircle, Clock, AlertCircle } from 'lucide-react'
+import { Upload, FileText, FileX, CheckCircle, Clock, AlertCircle, Video, FileImage, Presentation } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface UploadedFile {
@@ -13,10 +13,50 @@ interface UploadedFile {
   status: 'uploading' | 'processing' | 'ready' | 'error'
   progress: number
   error?: string
+  url?: string
+  fileType?: 'video' | 'pdf' | 'pptx' | 'docx' | 'image'
 }
 
-export default function DocumentUploader() {
+interface DocumentUploaderProps {
+  userId?: string
+  lessonId?: string
+  topicId?: string
+  onFileUploaded?: (file: UploadedFile) => void
+}
+
+export default function DocumentUploader({ 
+  userId, 
+  lessonId, 
+  topicId, 
+  onFileUploaded 
+}: DocumentUploaderProps) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
+
+  const uploadToSupabase = async (file: File, fileId: string) => {
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('userId', userId || 'anonymous')
+      if (lessonId) formData.append('lessonId', lessonId)
+      if (topicId) formData.append('topicId', topicId)
+
+      const response = await fetch('/api/upload-supabase', {
+        method: 'POST',
+        body: formData
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Upload failed')
+      }
+
+      return result
+    } catch (error) {
+      console.error('Upload error:', error)
+      throw error
+    }
+  }
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles = acceptedFiles.map(file => ({
@@ -28,32 +68,67 @@ export default function DocumentUploader() {
     
     setUploadedFiles(prev => [...prev, ...newFiles])
     
-    // Simulate upload and processing
+    // Upload files to Supabase
     newFiles.forEach(uploadedFile => {
-      simulateUpload(uploadedFile.id)
+      uploadFile(uploadedFile.id)
     })
-  }, [])
+  }, [userId, lessonId, topicId])
 
-  const simulateUpload = (fileId: string) => {
-    const interval = setInterval(() => {
+  const uploadFile = async (fileId: string) => {
+    const fileToUpload = uploadedFiles.find(f => f.id === fileId)
+    if (!fileToUpload) return
+
+    try {
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadedFiles(prev => 
+          prev.map(file => {
+            if (file.id === fileId && file.status === 'uploading' && file.progress < 90) {
+              return { ...file, progress: file.progress + 10 }
+            }
+            return file
+          })
+        )
+      }, 200)
+
+      const result = await uploadToSupabase(fileToUpload.file, fileId)
+      
+      clearInterval(progressInterval)
+
       setUploadedFiles(prev => 
         prev.map(file => {
           if (file.id === fileId) {
-            if (file.status === 'uploading' && file.progress < 100) {
-              return { ...file, progress: file.progress + 10 }
-            } else if (file.status === 'uploading' && file.progress >= 100) {
-              return { ...file, status: 'processing', progress: 0 }
-            } else if (file.status === 'processing' && file.progress < 100) {
-              return { ...file, progress: file.progress + 20 }
-            } else if (file.status === 'processing' && file.progress >= 100) {
-              clearInterval(interval)
-              return { ...file, status: 'ready', progress: 100 }
+            const updatedFile = {
+              ...file,
+              status: 'ready' as const,
+              progress: 100,
+              url: result.file.url,
+              fileType: result.file.type
+            }
+            if (onFileUploaded) {
+              onFileUploaded(updatedFile)
+            }
+            return updatedFile
+          }
+          return file
+        })
+      )
+
+    } catch (error) {
+      setUploadedFiles(prev => 
+        prev.map(file => {
+          if (file.id === fileId) {
+            return {
+              ...file,
+              status: 'error' as const,
+              progress: 0,
+              error: error instanceof Error ? error.message : 'Upload failed'
             }
           }
           return file
         })
       )
-    }, 500)
+    }
   }
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -61,11 +136,40 @@ export default function DocumentUploader() {
     accept: {
       'application/pdf': ['.pdf'],
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-      'text/plain': ['.txt']
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
+      'application/vnd.ms-powerpoint': ['.ppt'],
+      'application/vnd.openxmlformats-officedocument.presentationml.slideshow': ['.ppsx'],
+      'video/mp4': ['.mp4'],
+      'video/webm': ['.webm'],
+      'video/mov': ['.mov'],
+      'video/avi': ['.avi'],
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png'],
+      'image/webp': ['.webp']
     },
-    maxSize: 10 * 1024 * 1024, // 10MB
+    maxSize: 100 * 1024 * 1024, // 100MB
     multiple: true
   })
+
+  const getFileIcon = (file: File | UploadedFile) => {
+    const fileName = 'name' in file ? file.name : file.file.name
+    const fileType = fileName.toLowerCase()
+    
+    if (fileType.includes('.mp4') || fileType.includes('.webm') || fileType.includes('.mov') || fileType.includes('.avi')) {
+      return <Video className="h-8 w-8 text-red-500" />
+    } else if (fileType.includes('.pdf')) {
+      return <FileText className="h-8 w-8 text-red-500" />
+    } else if (fileType.includes('.pptx') || fileType.includes('.ppt') || fileType.includes('.ppsx')) {
+      return <Presentation className="h-8 w-8 text-orange-500" />
+    } else if (fileType.includes('.docx') || fileType.includes('.doc')) {
+      return <FileText className="h-8 w-8 text-blue-500" />
+    } else if (fileType.includes('.jpg') || fileType.includes('.jpeg') || fileType.includes('.png') || fileType.includes('.webp')) {
+      return <FileImage className="h-8 w-8 text-green-500" />
+    }
+    
+    return <FileText className="h-8 w-8 text-gray-500" />
+  }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -100,9 +204,9 @@ export default function DocumentUploader() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Upload Documents</CardTitle>
+          <CardTitle>Upload Documents & Media</CardTitle>
           <CardDescription>
-            Upload PDF, DOCX, or TXT files to start analyzing them with AI. Maximum file size: 10MB.
+            Upload PDF, DOCX, PPTX, PPSX, MP4 files, or images for your course content. Maximum file size: 100MB.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -125,7 +229,7 @@ export default function DocumentUploader() {
                   Drag & drop files here, or click to select files
                 </p>
                 <p className="text-sm text-gray-500">
-                  Supports PDF, DOCX, and TXT files
+                  Supports PDF, DOCX, PPTX, PPSX, MP4, and image files
                 </p>
               </div>
             )}
@@ -149,14 +253,24 @@ export default function DocumentUploader() {
                   className="flex items-center justify-between p-4 border rounded-lg"
                 >
                   <div className="flex items-center space-x-3 flex-1">
-                    <FileText className="h-8 w-8 text-blue-500" />
+                    {getFileIcon(uploadedFile)}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {uploadedFile.file.name}
                       </p>
                       <p className="text-sm text-gray-500">
                         {(uploadedFile.file.size / 1024 / 1024).toFixed(2)} MB
+                        {uploadedFile.fileType && (
+                          <span className="ml-2 px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                            {uploadedFile.fileType.toUpperCase()}
+                          </span>
+                        )}
                       </p>
+                      {uploadedFile.error && (
+                        <p className="text-sm text-red-500 mt-1">
+                          {uploadedFile.error}
+                        </p>
+                      )}
                     </div>
                   </div>
                   
@@ -184,7 +298,15 @@ export default function DocumentUploader() {
                     </div>
                     
                     {uploadedFile.status === 'ready' && (
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => {
+                          if (uploadedFile.url) {
+                            window.open(uploadedFile.url, '_blank')
+                          }
+                        }}
+                      >
                         View
                       </Button>
                     )}

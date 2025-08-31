@@ -2,13 +2,13 @@
 
 import React, { useState, useRef } from 'react';
 import { courseService } from '@/lib/services/course-service';
-import { useCourseCreator } from '@/hooks/use-course-creator';
 import {FaArrowRight} from "react-icons/fa";
 import {FaArrowLeft} from "react-icons/fa";
 
 
 interface CourseCreatorProps {
   userId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSuccess: (course: any) => void;
   onCancel: () => void;
 }
@@ -18,7 +18,9 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    imageUrl: ''
+    imageUrl: '',
+    imageFile: null as File | null,
+    imageUploading: false
   });
   const [topics, setTopics] = useState<Array<{
     id: string;
@@ -26,7 +28,7 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
     lessons: Array<{
       id: string;
       title: string;
-      type: 'video' | 'pdf';
+      type: 'video' | 'pdf' | 'pptx';
       file?: File;
       uploading?: boolean;
       uploadProgress?: number;
@@ -34,6 +36,7 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
   }>>([]);
 
   const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
 
   const addTopic = () => {
     const newTopic = {
@@ -58,7 +61,7 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
     const newLesson = {
       id: `lesson-${Date.now()}`,
       title: 'New Lesson',
-      type: 'video' as const
+      type: 'pdf' as const
     };
     setTopics(topics.map(topic => 
       topic.id === topicId 
@@ -67,6 +70,7 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
     ));
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateLesson = (topicId: string, lessonId: string, updates: any) => {
     setTopics(topics.map(topic => 
       topic.id === topicId 
@@ -89,17 +93,49 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
   };
 
   const handleFileSelect = (topicId: string, lessonId: string, file: File) => {
+    console.log('📎 File selected:', file.name, 'for lesson:', lessonId, 'topic:', topicId);
     const validation = courseService.validateFile(file);
     if (!validation.isValid) {
+      console.error('❌ File validation failed:', validation.error);
       alert(validation.error);
       return;
     }
 
+    console.log('✅ File validation passed:', validation.fileType);
     updateLesson(topicId, lessonId, { 
       file, 
       type: validation.fileType,
       uploading: false 
     });
+    console.log('📝 Lesson updated with file');
+  };
+
+  const handleImageSelect = async (file: File) => {
+    // Validate image file
+    const validation = courseService.validateImage(file);
+    if (!validation.isValid) {
+      alert(validation.error);
+      return;
+    }
+
+    setFormData(prev => ({ ...prev, imageFile: file, imageUploading: true }));
+
+    try {
+      const result = await courseService.uploadImage(file, userId);
+      setFormData(prev => ({ 
+        ...prev, 
+        imageUrl: result.url, 
+        imageUploading: false 
+      }));
+    } catch (error) {
+      console.error('Image upload failed:', error);
+      alert(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setFormData(prev => ({ 
+        ...prev, 
+        imageFile: null, 
+        imageUploading: false 
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -111,7 +147,7 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
       const courseData = {
         title: formData.title,
         description: formData.description,
-        imageUrl: formData.imageUrl || `https://placehold.co/600x400/000000/FFFFFF?text=${encodeURIComponent(formData.title)}`,
+        imageUrl: formData.imageUrl || `https://placehold.co/600x400/000000/FFFFFF?text=${encodeURIComponent(formData.title.charAt(0).toUpperCase() + formData.title.slice(1))}`,
         userId,
         topics: topics.map(topic => ({
           title: topic.title,
@@ -128,29 +164,52 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
       console.log('Course created:', createdCourse);
 
       // Upload files for lessons that have them
+      console.log('🔍 Checking for files to upload...');
       for (const topic of topics) {
+        console.log(`📁 Topic: ${topic.title}, lessons:`, topic.lessons.length);
         for (const lesson of topic.lessons) {
+          console.log(`📝 Lesson: ${lesson.title}, has file:`, !!lesson.file, 'file:', lesson.file);
           if (lesson.file) {
             try {
+              console.log(`🚀 Starting upload for lesson: ${lesson.title}`);
               updateLesson(topic.id, lesson.id, { uploading: true, uploadProgress: 0 });
               
               // Find the corresponding lesson in the created course
               const createdTopic = createdCourse.topics?.find(t => t.title === topic.title);
               const createdLesson = createdTopic?.lessons?.find(l => l.title === lesson.title);
               
-              if (createdLesson) {
-                await courseService.uploadFile(
+              console.log('🔍 Found created topic:', createdTopic?.id);
+              console.log('🔍 Found created lesson:', createdLesson?.id);
+              
+              if (createdLesson && createdTopic) {
+                console.log(`📤 Uploading file for lesson ${createdLesson.id}`);
+                const uploadedFile = await courseService.uploadFile(
                   lesson.file,
                   userId,
                   createdLesson.id,
+                  createdTopic.id,
                   (progress) => {
+                    console.log(`📊 Upload progress for ${lesson.title}: ${progress}%`);
                     updateLesson(topic.id, lesson.id, { uploadProgress: progress });
                   }
                 );
+                
+                console.log('✅ File uploaded successfully:', uploadedFile);
+                
+                // Update lesson with file URL
+                console.log(`🔄 Updating lesson ${createdLesson.id} with file URL`);
+                await courseService.updateLesson(createdLesson.id, {
+                  fileUrl: uploadedFile.url,
+                  duration: uploadedFile.duration
+                });
+                
+                console.log('✅ Lesson updated with file URL');
                 updateLesson(topic.id, lesson.id, { uploading: false, uploadProgress: 100 });
+              } else {
+                console.error('❌ Could not find created lesson or topic');
               }
             } catch (error) {
-              console.error('File upload failed:', error);
+              console.error('💥 File upload failed for lesson:', lesson.title, error);
               updateLesson(topic.id, lesson.id, { uploading: false, uploadProgress: 0 });
             }
           }
@@ -213,6 +272,46 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-2">
+                Course Image
+              </label>
+              <div className="flex items-center gap-4">
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleImageSelect(file);
+                    }
+                  }}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => imageInputRef.current?.click()}
+                  disabled={formData.imageUploading}
+                  className="px-4 py-2 bg-black text-white rounded-4xl cursor-pointer disabled:bg-gray-400 transition-colors"
+                >
+                  {formData.imageUploading ? 'Uploading...' : 'Upload Image'}
+                </button>
+                {formData.imageUrl && (
+                  <div className="flex items-center gap-2">
+                    <img 
+                      src={formData.imageUrl} 
+                      alt="Course preview" 
+                      className="w-12 h-12 object-cover rounded-lg"
+                    />
+                    <span className="text-sm text-green-600">✓ Image uploaded</span>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Upload a course image (JPEG, PNG, WebP - max 10MB) or leave empty for auto-generated
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-2">
                 Course Image URL (optional)
               </label>
               <input
@@ -220,7 +319,7 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
                 value={formData.imageUrl}
                 onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-4xl "
-                placeholder="https://example.com/image.jpg"
+                placeholder="https://example.com/image.jpg or upload image above"
               />
             </div>
           </div>
@@ -296,19 +395,25 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
                       />
                       <select
                         value={lesson.type}
-                        onChange={(e) => updateLesson(topic.id, lesson.id, { type: e.target.value as 'video' | 'pdf' })}
+                        onChange={(e) => updateLesson(topic.id, lesson.id, { type: e.target.value as 'video' | 'pdf' | 'pptx' })}
                         className="px-4 py-2 border border-gray-300 rounded-4xl  text-sm"
                       >
                         <option value="pdf">PDF</option>
                         <option value="video">Video</option>
-                        
+                        <option value="pptx">PowerPoint</option>
                       </select>
                       <input
                         ref={(el) => {
                           fileInputRefs.current[`${topic.id}-${lesson.id}`] = el;
                         }}
                         type="file"
-                        accept={lesson.type === 'video' ? 'video/*' : '.pdf'}
+                        accept={
+                          lesson.type === 'video' 
+                            ? 'video/*' 
+                            : lesson.type === 'pdf' 
+                              ? '.pdf' 
+                              : '.pptx,.ppt'
+                        }
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
@@ -322,10 +427,16 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
                         onClick={() => {
                           fileInputRefs.current[`${topic.id}-${lesson.id}`]?.click();
                         }}
-                        className="px-4 py-2 bg-black text-white rounded-4xl cursor-pointer transition-colors text-sm"
+                        disabled={lesson.uploading}
+                        className="px-4 py-2 bg-black text-white rounded-4xl cursor-pointer disabled:bg-gray-400 transition-colors text-sm"
                       >
-                        {lesson.file ? 'Change' : 'Select'}
+                        {lesson.uploading ? `${lesson.uploadProgress || 0}%` : lesson.file ? 'Change' : 'Select'}
                       </button>
+                      {lesson.file && (
+                        <span className="text-xs text-green-600">
+                          ✓ {lesson.file.name}
+                        </span>
+                      )}
                       <button
                         type="button"
                         onClick={() => removeLesson(topic.id, lesson.id)}

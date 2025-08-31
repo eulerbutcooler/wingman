@@ -29,6 +29,20 @@
       "when": 1756488753844,
       "tag": "0003_equal_scrambler",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1756587597201,
+      "tag": "0004_nasty_lester",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1756633178350,
+      "tag": "0005_dear_speed",
+      "breakpoints": true
     }
   ]
 }

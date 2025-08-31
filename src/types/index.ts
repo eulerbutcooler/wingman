@@ -33,12 +33,14 @@ export interface Quiz {
   id: string;
   title: string;
   description?: string;
-  documentId: string;
+  courseId?: string;
+  documentId?: string;
   questions: Question[];
   createdAt: Date;
   difficulty: 'easy' | 'medium' | 'hard';
   totalQuestions: number;
   timeLimit?: number;
+  latestResult?: QuizResult;
 }
 
 export interface Question {
@@ -57,9 +59,9 @@ export interface QuizResult {
   userId: string;
   answers: Record<string, string | string[]>;
   score: number;
-  totalPoints: number;
+  totalQuestions: number;
   completedAt: Date;
-  timeSpent: number;
+  timeSpent?: number;
 }
 
 export interface YouTubeVideo {

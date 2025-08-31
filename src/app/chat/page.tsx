@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import {
   Message,
   continueConversation,
@@ -14,7 +14,7 @@ import ChatSidebar from "@/components/chat/ChatSidebar";
 
 export const maxDuration = 30;
 
-export default function ChatPage() {
+function ChatContent() {
   const [conversation, setConversation] = useState<Message[]>([]);
   const [input, setInput] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -229,7 +229,7 @@ export default function ChatPage() {
                   disabled={!input.trim() || isLoading}
                   className="p-5 bg-navy/80 text-white rounded-4xl hover:bg-navy cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
                 >
-                  <FaArrowUp size={16} />
+                  <FaArrowUp size={14} />
                   
                 </button>
               </form>
@@ -239,5 +239,13 @@ export default function ChatPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ChatContent />
+    </Suspense>
   );
 }
