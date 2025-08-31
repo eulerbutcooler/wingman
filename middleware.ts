@@ -18,6 +18,11 @@ export default withAuth(
                         pathname.startsWith('/api/auth') ||
                         pathname.startsWith('/api/upload-supabase') ||
                         pathname.startsWith('/api/setup-storage') ||
+                        pathname.startsWith('/api/process-documents') ||
+                        pathname.startsWith('/api/process-document') ||
+                        pathname.startsWith('/api/manual-process') ||
+                        pathname.startsWith('/api/test-rag') ||
+                        pathname.startsWith('/api/chat') ||
                         pathname.startsWith('/api/courses') ||
                         pathname.startsWith('/api/topics') ||
                         pathname.startsWith('/api/lessons') ||
@@ -51,6 +56,11 @@ export default withAuth(
         if (pathname.startsWith('/api/auth') ||
             pathname.startsWith('/api/upload-supabase') ||
             pathname.startsWith('/api/setup-storage') ||
+            pathname.startsWith('/api/process-documents') ||
+            pathname.startsWith('/api/process-document') ||
+            pathname.startsWith('/api/manual-process') ||
+            pathname.startsWith('/api/test-rag') ||
+            pathname.startsWith('/api/chat') ||
             pathname.startsWith('/api/courses') ||
             pathname.startsWith('/api/topics') ||
             pathname.startsWith('/api/lessons')) {

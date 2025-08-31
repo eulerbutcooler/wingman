@@ -26,6 +26,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Wingman App",
   description: "AI-powered learning assistant",
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
