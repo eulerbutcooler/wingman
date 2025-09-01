@@ -42,7 +42,7 @@ export default function Navbar() {
       <div
         ref={navRef}
         className={[
-          "flex w-11/12 z-10 items-center justify-between pl-5 pr-3 py-3 fixed top-2 left-1/2 -translate-x-1/2 rounded-4xl",
+          "lg:flex w-11/12 z-10 hidden items-center justify-between pl-5 pr-3 py-3 fixed top-2 left-1/2 -translate-x-1/2 rounded-4xl",
           // Smooth color fade
           "transition-colors duration-150 ease-in-out",
           // Top-of-page background (your requested f5f5f5)
