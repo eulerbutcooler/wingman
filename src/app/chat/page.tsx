@@ -11,6 +11,7 @@ import { Send, MessageSquare, Bot, User } from "lucide-react";
 import { FaArrowUp } from "react-icons/fa6";
 import { useSearchParams, useRouter } from "next/navigation";
 import ChatSidebar from "@/components/chat/ChatSidebar";
+import ReactMarkdown from "react-markdown";
 
 export const maxDuration = 30;
 
@@ -173,8 +174,8 @@ function ChatContent() {
                           : "bg-white border border-gray-200 text-gray-900 shadow-sm"
                       }`}
                     >
-                      <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                        {message.content}
+                      <div className="text-sm leading-relaxed prose whitespace-pre-wrap">
+                        <ReactMarkdown>{message.content}</ReactMarkdown>
                       </div>
                     </div>
                     {message.role === "user" && (
