@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Quiz, Question } from '@/types';
 import { quizService } from '@/lib/services/quiz-service';
 import { courseService } from '@/lib/services/course-service';
+import AuthGuard from '@/components/AuthGuard';
 
 const cn = (...classes: (string | boolean | undefined)[]) => {
   return classes.filter(Boolean).join(' ');
@@ -280,7 +281,7 @@ const QuizResults = ({ quiz, score, totalQuestions, answers, onRestart, onReview
     <div className="bg-white rounded-4xl shadow-sm mt-16 mb-14 p-8 text-center mx-auto w-full">
       <Award className={cn("w-12 h-12 mx-auto mb-4", getScoreColor())} />
       <h1 className="text-2xl font-bold mb-2">Quiz complete!</h1>
-      <p className="text-neutral-600 mb-6">You've successfully completed the {quiz.difficulty} quiz.</p>
+      <p className="text-neutral-600 mb-6">You&apos;ve successfully completed the {quiz.difficulty} quiz.</p>
       <div className="bg-white rounded-4xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 mb-6">
         <p className="text-xl font-semibold">Your Score</p>
         <p className={cn("text-2xl font-bold my-2", getScoreColor())}>
@@ -501,10 +502,11 @@ function QuizContent() {
   if (loading) {
     return (
       <div className='flex flex-col items-center min-h-screen bg-[#f5f5f5] w-[100vw]'>
-        <div className='w-11/12 px-6 pt-34 text-center'>
-          <div className="flex justify-center text-xl h-[70vh] items-center">
-                            <div className="loader"></div>
-                          </div>
+        <div className='w-11/12 px-6 pt-34'>
+          <h1 className="text-2xl font-semibold text-left mb-8">Select a course for quiz</h1>
+          <div className="flex justify-center text-xl h-[50vh] items-center">
+            <div className="loader"></div>
+          </div>
         </div>
       </div>
     );
@@ -594,5 +596,9 @@ function QuizContent() {
 }
 
 export default function QuizPage() {
-  return <QuizContent />;
+  return (
+    <AuthGuard>
+      <QuizContent />
+    </AuthGuard>
+  );
 }

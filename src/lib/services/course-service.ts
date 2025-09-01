@@ -335,7 +335,7 @@ class CourseService {
     });
   }
 
-  async processFile(filePath: string, fileType: 'video' | 'pdf', originalName: string) {
+  async processFile(filePath: string, fileType: 'video' | 'pdf' | 'pptx', originalName: string) {
     const response = await fetch(`${this.baseUrl}/process-file`, {
       method: 'POST',
       headers: {

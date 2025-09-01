@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import type { FC } from 'react';
 import DashboardLayout from '@/components/layout';
 import CourseCreator from '@/components/CourseCreator';
+import AuthGuard from '@/components/AuthGuard';
 import { FaPlus } from "react-icons/fa6";
 import Image from 'next/image';
 import { 
@@ -12,6 +13,7 @@ import {
   type Lesson as LessonType 
 } from '@/lib/services/course-service';
 import { div } from 'framer-motion/client';
+import { generateCourseSummary } from '@/app/actions/course-summary';
 
 // Icons
 const Icons = {
@@ -86,14 +88,38 @@ interface Course extends CourseType {
 type ViewType = 'library' | 'course' | 'topic' | 'create';
 
 export default function LibraryPage() {
+  return (
+    <AuthGuard>
+      <LibraryContent />
+    </AuthGuard>
+  );
+}
+
+function LibraryContent() {
   const [view, setView] = useState<ViewType>('library');
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [courseSummary, setCourseSummary] = useState<string>('');
+  const [generatingSummary, setGeneratingSummary] = useState(false);
   
   const userId = '550e8400-e29b-41d4-a716-446655440000';
+
+  // Generate course summary using Wingman's persona
+  const generateSummary = async (title: string, description: string) => {
+    setGeneratingSummary(true);
+    try {
+      const summary = await generateCourseSummary(title, description);
+      setCourseSummary(summary);
+    } catch (error) {
+      console.error('Error generating summary:', error);
+      setCourseSummary('This course will provide valuable insights to enhance your understanding of aeronautical engineering principles.');
+    } finally {
+      setGeneratingSummary(false);
+    }
+  };
 
   useEffect(() => {
     loadCourses();
@@ -116,6 +142,8 @@ export default function LibraryPage() {
   const handleCourseSelect = (course: Course) => {
     setSelectedCourse(course);
     setView('course');
+    // Generate summary when course is selected
+    generateSummary(course.title, course.description);
   };
 
   const handleCourseDelete = async (courseId: string) => {
@@ -243,9 +271,18 @@ export default function LibraryPage() {
               <div>
                 <h1 className="text-4xl font-bold text-black">{selectedCourse.title.charAt(0).toUpperCase() + selectedCourse.title.slice(1)}</h1>
                 <p className="text-neutral-600 mt-2">{selectedCourse.description.charAt(0).toUpperCase() + selectedCourse.description.slice(1)}</p>
+                <div className="text-navy mt-3 font-medium italic">
+                  {generatingSummary ? (
+                    <span className="flex items-center">
+                      <div className="loader-sm mr-2"></div>
+                    </span>
+                  ) : (
+                    courseSummary || "This course will enhance your aeronautical engineering knowledge."
+                  )}
+                </div>
               </div>
             </div>
-            <h2 className="text-2xl font-bold text-black mb-4 border-b-[1px] border-gray-600/50 pb-2">Topics</h2>
+            <h2 className="text-2xl font-bold text-black mb-4  pb-2">Topics</h2>
             <div className="space-y-4 mb-14">
               {selectedCourse.topics && selectedCourse.topics.length > 0 ? (
                 selectedCourse.topics.map((topic) => (

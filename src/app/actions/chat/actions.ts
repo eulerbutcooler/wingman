@@ -18,7 +18,8 @@ export async function continueConversation(
   history: Message[], 
   chatId?: string,
   shouldSave: boolean = true,
-  mode: "normal" | "deep" = "normal"
+  mode: "normal" | "deep" = "normal",
+  videoMode: boolean = false
 ) {
   "use server";
 
@@ -140,6 +141,59 @@ When relevant to the student's question, reference the course materials above us
     // Save assistant message when streaming is complete
     if (currentChatId && shouldSave && fullContent) {
       await saveMessage(currentChatId, 'assistant', fullContent);
+    }
+
+    // Handle video mode - generate YouTube search keywords and fetch videos
+    if (videoMode && userQuery) {
+      try {
+        console.log('🎥 Video mode enabled - generating YouTube search keywords...');
+        
+        // Generate YouTube search keywords using Gemini
+        const keywordResponse = await streamText({
+          model: google("gemini-2.5-flash-lite"),
+          system: "You are Wingman's video search assistant for INAT students. Generate 2-3 educational YouTube search keywords focused on aeronautical engineering, naval technology, aviation, or related STEM topics that would help INAT students understand the concept better. Prioritize content from educational channels, universities, or professional engineering sources. Ignore entertainment or non-academic content. Return only the keywords separated by spaces.",
+          messages: [{ role: 'user', content: userQuery }],
+        });
+
+        let keywords = "";
+        for await (const text of keywordResponse.textStream) {
+          keywords += text;
+        }
+
+        keywords = keywords.trim();
+        console.log('🔍 Generated keywords:', keywords);
+
+        if (keywords) {
+          // Fetch YouTube videos using the generated keywords
+          const youtubeResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/youtube?q=${encodeURIComponent(keywords)}`);
+          
+          if (youtubeResponse.ok) {
+            const videoData = await youtubeResponse.json();
+            
+            if (videoData.success && videoData.videos?.length > 0) {
+              console.log(`✅ Found ${videoData.videos.length} videos`);
+              
+              // Create video message content with embed data
+              const videoMessage = `\n\n---\n\n🎥 **Related Educational Videos:**\n\n${videoData.videos.map((video: { id: string; title: string; channelTitle: string; url: string }, index: number) => 
+                `**${index + 1}. ${video.title}**\n` +
+                `Channel: ${video.channelTitle}\n` +
+                `[YOUTUBE_EMBED:${video.id}]\n` +
+                `[Watch on YouTube](${video.url})\n`
+              ).join('\n')}`;
+
+              // Append video message to the chat
+              stream.update(videoMessage);
+              
+              // Save video message to database
+              if (currentChatId && shouldSave) {
+                await saveMessage(currentChatId, 'assistant', fullContent + videoMessage);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('❌ Video search failed:', error);
+      }
     }
 
     stream.done();

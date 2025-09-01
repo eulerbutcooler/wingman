@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Toaster, toast } from 'sonner'
-import { AuroraBackground } from '@/components/ui/aurora-background'
 
 export default function SignUpPage() {
   const [name, setName] = useState('')
@@ -15,8 +14,9 @@ export default function SignUpPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   
-  // Get the redirect URL from query params
-  const from = searchParams.get('from') || '/dashboard'
+  // Get the redirect URL from query params (unused but available for future use)
+  const redirectPath = searchParams.get('from') || '/dashboard'
+  console.log('Redirect path available:', redirectPath)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

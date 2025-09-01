@@ -48,13 +48,13 @@ export async function searchSimilarChunks(
       LIMIT ${topK}
     `);
     
-    const searchResults: SearchResult[] = results.rows.map((row: any) => ({
-      chunkId: row.chunk_id,
-      chunkText: row.chunk_text,
-      chunkIndex: row.chunk_index,
-      similarity: parseFloat(row.similarity),
-      fileId: row.file_id,
-      courseId: row.course_id,
+    const searchResults: SearchResult[] = results.rows.map((row: Record<string, unknown>) => ({
+      chunkId: row.chunk_id as string,
+      chunkText: row.chunk_text as string,
+      chunkIndex: row.chunk_index as number,
+      similarity: parseFloat(row.similarity as string),
+      fileId: row.file_id as string,
+      courseId: row.course_id as string,
     }));
     
     console.log(`📊 Found ${searchResults.length} similar chunks`);

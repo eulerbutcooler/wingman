@@ -7,11 +7,12 @@ import {
   loadChatHistory,
 } from "../actions/chat/actions";
 import { readStreamableValue } from "@ai-sdk/rsc";
-import { Send, MessageSquare, Bot, User } from "lucide-react";
+import { Bot, User } from "lucide-react";
 import { FaArrowUp } from "react-icons/fa6";
 import { useSearchParams, useRouter } from "next/navigation";
 import ChatSidebar from "@/components/chat/ChatSidebar";
-import ReactMarkdown from "react-markdown";
+import CustomMarkdown from "@/components/CustomMarkdown";
+import AuthGuard from "@/components/AuthGuard";
 
 export const maxDuration = 30;
 
@@ -21,6 +22,7 @@ function ChatContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [chatId, setChatId] = useState<string | undefined>();
   const [mode, setMode] = useState<"normal" | "deep">("normal");
+  const [videoMode, setVideoMode] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const router = useRouter();
@@ -69,7 +71,7 @@ function ChatContent() {
         messages,
         newMessage,
         chatId: returnedChatId,
-      } = await continueConversation(newConversation, chatId, true, mode);
+      } = await continueConversation(newConversation, chatId, true, mode, videoMode);
 
       if (returnedChatId && !chatId) {
         setChatId(returnedChatId);
@@ -94,7 +96,7 @@ function ChatContent() {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit(e as any);
+      handleSubmit(e as React.FormEvent);
     }
   };
 
@@ -129,10 +131,10 @@ function ChatContent() {
                     <Bot size={24} className="text-white" />
                   </div>
                   <p className="text-gray-600 mb-8 leading-relaxed">
-                    I'm your virtual teaching assistant for the Naval Institute
+                    I&apos;m your virtual teaching assistant for the Naval Institute
                     of Aeronautical Technology (NIAT). Ask me about aeronautical
                     engineering, naval technology, or any course-related
-                    questions. I'm here to help you learn and understand complex
+                    questions. I&apos;m here to help you learn and understand complex
                     concepts!
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg">
@@ -175,7 +177,7 @@ function ChatContent() {
                       }`}
                     >
                       <div className="text-sm leading-relaxed prose whitespace-pre-wrap">
-                        <ReactMarkdown>{message.content}</ReactMarkdown>
+                        <CustomMarkdown content={message.content} />
                       </div>
                     </div>
                     {message.role === "user" && (
@@ -232,12 +234,24 @@ function ChatContent() {
                     onClick={() => setMode(mode === "normal" ? "deep" : "normal")}
                     className={`px-4 py-4 text-base rounded-4xl cursor-pointer transition-all duration-300  ${
                       mode === "deep"
-                        ? "bg-navy text-white shadow-sm  hover:shadow-xl"
+                        ? "bg-black text-white shadow-sm  hover:shadow-xl"
                         : "bg-white shadow-sm text-neutral-800 hover:shadow-xl "
                     }`}
                     disabled={isLoading}
                   >
                     Deep Mode
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setVideoMode(!videoMode)}
+                    className={`px-4 py-4 text-base rounded-4xl cursor-pointer transition-all duration-300  ${
+                      videoMode
+                        ? "bg-navy text-white shadow-sm hover:shadow-xl"
+                        : "bg-white shadow-sm text-neutral-800 hover:shadow-xl "
+                    }`}
+                    disabled={isLoading}
+                  >
+                    Video
                   </button>
                   <button
                     type="submit"
@@ -260,8 +274,10 @@ function ChatContent() {
 
 export default function ChatPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ChatContent />
-    </Suspense>
+    <AuthGuard>
+      <Suspense fallback={<div className="flex justify-center items-center min-h-screen"><div className="loader" style={{ fontSize: '56px !important' }}></div></div>}>
+        <ChatContent />
+      </Suspense>
+    </AuthGuard>
   );
 }

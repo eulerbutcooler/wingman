@@ -17,7 +17,6 @@ export default withAuth(
                         pathname.startsWith('/hero') ||
                         pathname.startsWith('/api/auth') ||
                         pathname.startsWith('/api/upload-supabase') ||
-                        pathname.startsWith('/api/setup-storage') ||
                         pathname.startsWith('/api/process-documents') ||
                         pathname.startsWith('/api/process-document') ||
                         pathname.startsWith('/api/manual-process') ||
@@ -29,9 +28,27 @@ export default withAuth(
                         pathname.startsWith('/_next') ||
                         pathname.startsWith('/favicon')
 
+    // Explicitly protected pages that require authentication
+    const isProtectedPage = pathname.startsWith('/chat') ||
+                           pathname.startsWith('/library') ||
+                           pathname.startsWith('/quiz') ||
+                           pathname.startsWith('/dashboard')
+
     if (isAuthPage && isAuth) {
       console.log('Redirecting authenticated user away from auth page')
       return NextResponse.redirect(new URL('/dashboard', req.url))
+    }
+
+    // Force authentication for protected pages
+    if (isProtectedPage && !isAuth) {
+      console.log('Redirecting unauthenticated user from protected page to sign-in')
+      let from = pathname;
+      if (req.nextUrl.search) {
+        from += req.nextUrl.search;
+      }
+      return NextResponse.redirect(
+        new URL(`/sign-in?from=${encodeURIComponent(from)}`, req.url)
+      );
     }
 
     if (!isAuth && !isAuthPage && !isPublicPage) {
@@ -55,7 +72,6 @@ export default withAuth(
         
         if (pathname.startsWith('/api/auth') ||
             pathname.startsWith('/api/upload-supabase') ||
-            pathname.startsWith('/api/setup-storage') ||
             pathname.startsWith('/api/process-documents') ||
             pathname.startsWith('/api/process-document') ||
             pathname.startsWith('/api/manual-process') ||
