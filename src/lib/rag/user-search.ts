@@ -20,7 +20,7 @@ export interface SearchResult {
 export async function searchAllCourses(
   query: string,
   maxResults: number = 5,
-  similarityThreshold: number = 0.8
+  similarityThreshold: number = 0.7
 ): Promise<SearchResult[]> {
   try {
     console.log(`🔍 Searching ALL courses globally for: "${query}"`);

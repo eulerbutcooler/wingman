@@ -9,6 +9,7 @@ import { FiGithub } from "react-icons/fi";
 import { SiGmail } from "react-icons/si";
 import { FaXTwitter } from "react-icons/fa6";
 import { FiLinkedin } from "react-icons/fi";
+import BorderTracerLoop from "../../components/ui/trace";
 type FAQ = { id: number; q: string; a: string };
 
 const faqs: FAQ[] = [
@@ -65,7 +66,8 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 export default function Hero() {
   return (
     <div className="bg-[#f5f5f5] min-h-screen w-[100vw] flex flex-col pt-34 gap-8 items-center ">
-      <div className="bg-white w-11/12 flex cta justify-evenly p-10 gap-12 shadow-sm  rounded-4xl font-mono">
+      
+        <div className="bg-white w-11/12 flex cta justify-evenly p-10 gap-12 shadow-sm  rounded-4xl font-mono">
         <div className="flex flex-col justify-center gap-10">
           <h1 className="text-4xl font-bold text-black">Welcome to Wingman</h1>
 
@@ -93,6 +95,7 @@ export default function Hero() {
 
         <Image src="/su-7.png" alt="Hero Image" className="text-navy" width={500} height={600} />
       </div>
+      
       <div className="flex w-11/12 cards gap-4 justify-evenly">
               <div className="flex p-8 bg-white shadow-sm hover:shadow-xl transition-all duration-300 rounded-4xl flex-col justify-evenly gap-4">
                 <h1 className="text-2xl font-bold text-black">Chat bot</h1>

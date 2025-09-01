@@ -104,7 +104,7 @@ Remember to follow these instructions to maintain a consistent, helpful, and eth
         const relevantChunks = await searchAllCourses(
           userQuery,
           5,  // maxResults
-          0.8 // similarityThreshold
+          0.7 // similarityThreshold
         );
         
         if (relevantChunks.length > 0) {
