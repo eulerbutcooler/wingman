@@ -181,7 +181,7 @@ export default function RAGTestPage() {
             <Textarea
               placeholder="What would you like to know about the course materials?"
               value={question}
-              onChange={(e) => setQuestion(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setQuestion(e.target.value)}
               rows={3}
             />
             <Button 

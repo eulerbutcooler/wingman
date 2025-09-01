@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react'
 import { PiTimer } from "react-icons/pi";
 import { IoBookOutline } from "react-icons/io5";
 import { AiOutlineThunderbolt } from "react-icons/ai";
-import Image from 'next/image'
 import { signOutUser, deleteAccount } from '@/lib/auth/client'
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -147,7 +146,7 @@ export default function DashboardPage() {
                 <div className="space-y-2 pt-2">
                   <p className='text-navy text-xl'><span className="font-medium text-black">Name:</span> {session.user?.name}</p>
                   <p className='text-navy text-xl'><span className="font-medium text-black">Email:</span> {session.user?.email}</p>
-                  <p className='text-navy text-xl'><span className="font-medium text-black">User ID:</span> {(session.user as any)?.id}</p>
+                  <p className='text-navy text-xl'><span className="font-medium text-black">User ID:</span> {(session.user as { id?: string })?.id}</p>
                 </div>
               </div>
               <div className='p-6 rounded-4xl shadow-sm hover:shadow-xl bg-white gap-2 flex flex-col transition-all duration-300'>
@@ -230,7 +229,7 @@ export default function DashboardPage() {
             <form onSubmit={handleDeleteAccount} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirm by typing "DELETE":
+                  Confirm by typing &quot;DELETE&quot;:
                 </label>
                 <input
                   type="text"

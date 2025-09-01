@@ -22,8 +22,8 @@ const QuizGenerationSchema = z.object({
   questions: z.array(QuestionSchema),
 });
 
-// Exported function for generating quizzes
-export async function generateQuizForCourse(
+// Function for generating quizzes
+async function generateQuizForCourse(
   courseId: string,
   userId: string,
   difficulty: 'easy' | 'medium' | 'hard',
@@ -115,19 +115,19 @@ Format each question with:
   }
 
   // Create quiz in database
+  const newQuizData = {
+    title: `${courseData.title} - ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Quiz`,
+    description: `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} difficulty quiz for ${courseData.title}`,
+    courseId,
+    userId,
+    difficulty: difficulty as 'easy' | 'medium' | 'hard',
+    totalQuestions: 10,
+    questions: result.object.questions,
+  };
+
   const [newQuiz] = await db
     .insert(quizzes)
-    .values({
-      title: `${courseData.title} - ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Quiz`,
-      description: `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} difficulty quiz for ${courseData.title}`,
-      courseId,
-      userId,
-      difficulty,
-      totalQuestions: 10,
-      questions: result.object.questions,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    })
+    .values(newQuizData)
     .returning();
 
   return {

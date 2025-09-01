@@ -1,4 +1,3 @@
-import pdfParse from 'pdf-parse';
 import mammoth from 'mammoth';
 
 export interface ExtractedText {
@@ -14,6 +13,8 @@ export interface ExtractedText {
  */
 export async function extractTextFromPdf(buffer: Buffer): Promise<ExtractedText> {
   try {
+    // Dynamic import to avoid bundling test files during build
+    const pdfParse = (await import('pdf-parse')).default;
     const data = await pdfParse(buffer);
     return {
       text: data.text,

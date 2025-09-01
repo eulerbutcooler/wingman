@@ -1,11 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Toaster, toast } from 'sonner'
-import { AuroraBackground } from '@/components/ui/aurora-background'
 
 export default function SignInPage() {
   const [email, setEmail] = useState('')
@@ -16,6 +15,14 @@ export default function SignInPage() {
   
   // Get the redirect URL from query params
   const from = searchParams.get('from') || '/dashboard'
+
+  // Show success message if coming from verification
+  useEffect(() => {
+    const message = searchParams.get('message')
+    if (message === 'verification-success') {
+      toast.success('Email verified successfully! Please sign in to continue.')
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -126,7 +133,7 @@ export default function SignInPage() {
         {/* Footer Link */}
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500">
-            Don't have an account? 
+            Don&apos;t have an account? 
             <Link href="/sign-up" className="font-medium text-black hover:underline ml-1">Create Account</Link>
           </p>
           

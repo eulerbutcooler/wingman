@@ -23,7 +23,7 @@ export interface TopicFormData {
 export interface LessonFormData {
   id: string;
   title: string;
-  type: 'video' | 'pdf';
+  type: 'video' | 'pdf' | 'pptx';
   file?: UploadedFile;
   duration?: string;
 }
@@ -124,7 +124,8 @@ export function useCourseCreator({ userId, onSuccess, onError }: UseCourseCreato
         file,
         userId,
         undefined,
-        (progress) => {
+        topicId,
+        (progress: number) => {
           setUploadProgress(prev => ({ ...prev, [fileId]: progress }));
         }
       );

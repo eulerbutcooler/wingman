@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useSession, signOut } from 'next-auth/react';
+import Link from 'next/link';
 
 export function AuthStatus() {
   const { data: session, status } = useSession();
@@ -9,7 +10,7 @@ export function AuthStatus() {
   if (status === 'loading') {
     return (
       <div className="flex items-center space-x-2">
-        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+        
         <span className="text-sm text-gray-600">Loading...</span>
       </div>
     );
@@ -18,18 +19,18 @@ export function AuthStatus() {
   if (status === 'unauthenticated' || !session) {
     return (
       <div className="flex items-center space-x-4">
-        <a
+        <Link
           href="/sign-in"
           className="px-4 py-2 text-blue-600 hover:text-blue-800 transition-colors"
         >
           Sign In
-        </a>
-        <a
+        </Link>
+        <Link
           href="/sign-up"
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           Sign Up
-        </a>
+        </Link>
       </div>
     );
   }

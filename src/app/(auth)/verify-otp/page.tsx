@@ -2,14 +2,18 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { Toaster, toast } from 'sonner'
 
 function VerifyOTPContent() {
   const [otp, setOtp] = useState('')
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isResending, setIsResending] = useState(false)
+  const [isVerified, setIsVerified] = useState(false)
+  const [isSigningIn, setIsSigningIn] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -46,9 +50,11 @@ function VerifyOTPContent() {
       const data = await response.json()
 
       if (response.ok) {
-        toast.success('Email verified successfully! Redirecting to sign in...')
+        toast.success('Email verified successfully! Please sign in to continue.')
+        setIsVerified(true)
+        // Redirect to sign-in page after successful verification
         setTimeout(() => {
-          router.push('/dashboard')
+          router.push('/sign-in?message=verification-success')
         }, 2000)
       } else {
         toast.error(data.error || 'Verification failed')
@@ -58,6 +64,37 @@ function VerifyOTPContent() {
       console.error('OTP verification error:', error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSigningIn(true)
+
+    if (!password) {
+      toast.error('Password is required')
+      setIsSigningIn(false)
+      return
+    }
+
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      })
+
+      if (result?.ok) {
+        toast.success('Signed in successfully! Redirecting to dashboard...')
+        router.push('/dashboard')
+      } else {
+        toast.error('Invalid password. Please try again.')
+      }
+    } catch (error) {
+      toast.error('An error occurred during sign in. Please try again.')
+      console.error('Signin error:', error)
+    } finally {
+      setIsSigningIn(false)
     }
   }
 
@@ -101,7 +138,7 @@ function VerifyOTPContent() {
         {/* Header Section */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold tracking-tight text-black">Verify Your Email</h1>
-          <p className="text-gray-600 mt-2">We've sent a 6-digit verification code to your email address</p>
+          <p className="text-gray-600 mt-2">We&apos;ve sent a 6-digit verification code to your email address</p>
         </div>
 
         {/* Verify OTP Form */}

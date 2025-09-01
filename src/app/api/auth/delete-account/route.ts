@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { db } from "@/lib/db/drizzle";
 import { users } from "@/lib/db/schema/users";
-import { courses } from "@/lib/db/schema/courses";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 

@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Quiz, QuizResult } from '@/types';
+import { Quiz } from '@/types';
 import { quizService } from '@/lib/services/quiz-service';
-import { courseService } from '@/lib/services/course-service';
+import { courseService, Course } from '@/lib/services/course-service';
 
 interface CourseQuizzesProps {
   courseId: string;
@@ -121,7 +121,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, onStart, onReset, onReview })
 
 const CourseQuizzes: React.FC<CourseQuizzesProps> = ({ courseId, userId, onBackToList }) => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [course, setCourse] = useState<any>(null);
+  const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeQuiz, setActiveQuiz] = useState<Quiz | null>(null);
@@ -144,7 +144,7 @@ const CourseQuizzes: React.FC<CourseQuizzesProps> = ({ courseId, userId, onBackT
         quizService.getQuizzesForCourse(courseId, userId)
       ]);
 
-      setCourse(courseData);
+      setCourse(courseData || null);
       setQuizzes(quizzesData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data');
@@ -206,10 +206,10 @@ const CourseQuizzes: React.FC<CourseQuizzesProps> = ({ courseId, userId, onBackT
       </button>
       
       <h1 className="text-2xl font-semibold text-left mb-2">
-        {course?.title.charAt(0).toUpperCase() + course?.title.slice(1) || 'Course'} Quizzes
+        {course?.title ? (course.title.charAt(0).toUpperCase() + course.title.slice(1)) : 'Course'} Quizzes
       </h1>
       <p className="text-gray-600 mb-8">
-        {course?.description.charAt(0).toUpperCase() + course?.description.slice(1) || 'Complete these AI-generated quizzes to test your knowledge'}
+        {course?.description ? (course.description.charAt(0).toUpperCase() + course.description.slice(1)) : 'Complete these AI-generated quizzes to test your knowledge'}
       </p>
 
       {quizzes.length === 0 ? (

@@ -90,7 +90,9 @@ export async function POST(request: NextRequest) {
           email: foundUser.email,
           emailVerified: true
         },
-        welcomeEmailSent: welcomeEmailResult.success
+        welcomeEmailSent: welcomeEmailResult.success,
+        // Add a verification success flag for auto-signin
+        verificationSuccess: true
       },
       { status: 200 }
     );

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db/drizzle';
 import { courses, topics, lessons } from '@/lib/db/schema/courses';
 import { eq, desc } from 'drizzle-orm';
-import { generateQuizForCourse } from '../quiz/generate/route';
 
 // GET /api/courses - Fetch all courses
 export async function GET(request: NextRequest) {
@@ -275,10 +274,21 @@ async function generateQuizzesForCourse(
   
   for (const difficulty of difficulties) {
     try {
-      // Call the quiz generation function directly
-      const result = await generateQuizForCourse(courseId, userId, difficulty);
-      
-      if (result.success) {
+      // Make internal API call to quiz generation endpoint
+      const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/quiz/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          courseId,
+          userId,
+          difficulty,
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
         console.log(`Successfully generated ${difficulty} quiz for course ${courseId}`);
       } else {
         console.error(`Failed to generate ${difficulty} quiz for course ${courseId}`);
