@@ -7,7 +7,7 @@ import { eq } from 'drizzle-orm';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, type, topicId, fileId, duration } = body;
+    const { title, type, topicId, fileId } = body;
 
     // Validate required fields
     if (!title || !type || !topicId) {
@@ -18,9 +18,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate type
-    if (!['video', 'pdf', 'pptx'].includes(type)) {
+    if (!['pdf', 'pptx', 'docx'].includes(type)) {
       return NextResponse.json(
-        { error: 'Type must be "video", "pdf", or "pptx"' },
+        { error: 'Type must be "pdf", "pptx", or "docx"' },
         { status: 400 }
       );
     }
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
         title,
         type,
         fileUrl,
-        duration: type === 'video' ? duration : null,
+        duration: null, // Duration not applicable for document files
         topicId,
         order: nextOrder,
         createdAt: new Date(),

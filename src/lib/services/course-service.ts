@@ -25,7 +25,7 @@ export interface Topic {
 export interface Lesson {
   id: string;
   title: string;
-  type: 'video' | 'pdf' | 'pptx';
+  type: 'pdf' | 'pptx' | 'docx';
   fileUrl?: string;
   duration?: string;
   topicId: string;
@@ -40,7 +40,7 @@ export interface UploadedFile {
   filename: string;
   url: string;
   size: number;
-  type: 'video' | 'pdf' | 'pptx';
+  type: 'pdf' | 'pptx' | 'docx';
   duration?: string;
   pageCount?: number;
   thumbnail?: string;
@@ -55,7 +55,7 @@ export interface CreateCourseData {
     title: string;
     lessons?: {
       title: string;
-      type: 'video' | 'pdf' | 'pptx';
+      type: 'pdf' | 'pptx' | 'docx';
       fileUrl?: string;
       duration?: string;
     }[];
@@ -172,7 +172,7 @@ class CourseService {
   // Lesson management
   async createLesson(lessonData: {
     title: string;
-    type: 'video' | 'pdf' | 'pptx';
+    type: 'pdf' | 'pptx' | 'docx';
     topicId: string;
     fileId?: string;
     duration?: string;
@@ -335,7 +335,7 @@ class CourseService {
     });
   }
 
-  async processFile(filePath: string, fileType: 'video' | 'pdf' | 'pptx', originalName: string) {
+  async processFile(filePath: string, fileType: 'pdf' | 'pptx' | 'docx', originalName: string) {
     const response = await fetch(`${this.baseUrl}/process-file`, {
       method: 'POST',
       headers: {
@@ -376,21 +376,20 @@ class CourseService {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
-  validateFile(file: File): { isValid: boolean; error?: string; fileType?: 'video' | 'pdf' | 'pptx' } {
+  validateFile(file: File): { isValid: boolean; error?: string; fileType?: 'pdf' | 'pptx' | 'docx' } {
     const maxSize = 100 * 1024 * 1024; // 100MB
-    const videoTypes = ['video/mp4', 'video/webm', 'video/mov', 'video/avi'];
     const pdfTypes = ['application/pdf'];
     const pptxTypes = [
       'application/vnd.openxmlformats-officedocument.presentationml.presentation',
       'application/vnd.ms-powerpoint'
     ];
+    const docxTypes = [
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword'
+    ];
     
     if (file.size > maxSize) {
       return { isValid: false, error: 'File size must be less than 100MB' };
-    }
-    
-    if (videoTypes.includes(file.type)) {
-      return { isValid: true, fileType: 'video' };
     }
     
     if (pdfTypes.includes(file.type)) {
@@ -401,7 +400,11 @@ class CourseService {
       return { isValid: true, fileType: 'pptx' };
     }
     
-        return { isValid: false, error: 'Only MP4, WebM, MOV, AVI videos, PDF files, and PowerPoint presentations are supported' };
+    if (docxTypes.includes(file.type)) {
+      return { isValid: true, fileType: 'docx' };
+    }
+    
+        return { isValid: false, error: 'Only PDF files, PowerPoint presentations (.pptx, .ppt), and Word documents (.docx, .doc) are supported' };
   }
 
   validateImage(file: File): { isValid: boolean; error?: string } {

@@ -26,9 +26,9 @@ export const topics = pgTable('topics', {
 export const lessons = pgTable('lessons', {
   id: uuid('id').primaryKey().defaultRandom(),
   title: text('title').notNull(),
-  type: text('type', { enum: ['video', 'pdf', 'pptx', 'docx'] }).notNull(),
+  type: text('type', { enum: ['pdf', 'pptx', 'docx'] }).notNull(),
   fileUrl: text('file_url'),
-  duration: text('duration'), // For videos (e.g., "12:45")
+  duration: text('duration'), // Legacy field (not used for document files)
   topicId: uuid('topic_id').references(() => topics.id, { onDelete: 'cascade' }).notNull(),
   order: integer('order').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
