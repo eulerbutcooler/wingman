@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { courseService, type Course, type Topic, type Lesson, type UploadedFile } from '@/lib/services/course-service';
+import { courseService, type Course, type UploadedFile } from '@/lib/services/course-service';
 
 export interface UseCourseCreatorOptions {
   userId: string;
@@ -23,7 +23,7 @@ export interface TopicFormData {
 export interface LessonFormData {
   id: string;
   title: string;
-  type: 'video' | 'pdf' | 'pptx';
+  type: 'pdf' | 'pptx' | 'docx';
   file?: UploadedFile;
   duration?: string;
 }

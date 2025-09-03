@@ -28,7 +28,7 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
     lessons: Array<{
       id: string;
       title: string;
-      type: 'video' | 'pdf' | 'pptx';
+      type: 'pdf' | 'pptx' | 'docx';
       file?: File;
       uploading?: boolean;
       uploadProgress?: number;
@@ -154,7 +154,7 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
           lessons: topic.lessons.map(lesson => ({
             title: lesson.title,
             type: lesson.type,
-            duration: lesson.type === 'video' ? '0:00' : undefined
+            duration: undefined
           }))
         }))
       };
@@ -395,11 +395,11 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
                       />
                       <select
                         value={lesson.type}
-                        onChange={(e) => updateLesson(topic.id, lesson.id, { type: e.target.value as 'video' | 'pdf' | 'pptx' })}
+                        onChange={(e) => updateLesson(topic.id, lesson.id, { type: e.target.value as 'pdf' | 'pptx' | 'docx' })}
                         className="px-4 py-2 border border-gray-300 rounded-4xl  text-sm"
                       >
                         <option value="pdf">PDF</option>
-                        <option value="video">Video</option>
+                        <option value="docx">Word Document</option>
                         <option value="pptx">PowerPoint</option>
                       </select>
                       <input
@@ -408,10 +408,10 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
                         }}
                         type="file"
                         accept={
-                          lesson.type === 'video' 
-                            ? 'video/*' 
-                            : lesson.type === 'pdf' 
-                              ? '.pdf' 
+                          lesson.type === 'pdf' 
+                            ? '.pdf' 
+                            : lesson.type === 'docx'
+                              ? '.docx,.doc'
                               : '.pptx,.ppt'
                         }
                         onChange={(e) => {

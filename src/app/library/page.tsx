@@ -318,17 +318,17 @@ function LibraryContent() {
               Back to {selectedCourse.title}
             </button>
             <h1 className="text-4xl font-bold mb-4 text-black">{selectedTopic.title.charAt(0).toUpperCase() + selectedTopic.title.slice(1)}</h1>
-            <p className="text-neutral-600 border-b-gray-600/50 border-b-[1px] mb-4 pb-4">All lessons for this topic.</p>
+            <p className="text-neutral-600  mb-4 pb-4">All lessons for this topic.</p>
             <div className="space-y-3 mb-14">
               {selectedTopic.lessons && selectedTopic.lessons.length > 0 ? (
                 selectedTopic.lessons.map((lesson) => (
                   <div key={lesson.id} className="bg-white p-4 px-6 cursor-pointer rounded-4xl shadow-sm hover:shadow-xl transition-all duration-300">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
-                        {lesson.type === 'video' ? (
-                          <Icons.Video className="w-5 h-5 mr-4 text-blue-500"/> 
-                        ) : lesson.type === 'pptx' ? (
+                        {lesson.type === 'pptx' ? (
                           <Icons.Presentation className="w-5 h-5 mr-4 text-orange-500"/>
+                        ) : lesson.type === 'docx' ? (
+                          <Icons.FileText className="w-5 h-5 mr-4 text-blue-500"/>
                         ) : (
                           <Icons.FileText className="w-5 h-5 mr-4 text-red-500"/>
                         )}
@@ -338,7 +338,7 @@ function LibraryContent() {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        {lesson.type === 'video' && lesson.duration && (
+                        {lesson.duration && (
                           <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-md">{lesson.duration}</span>
                         )}
                         {lesson.fileUrl && (
