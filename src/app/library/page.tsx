@@ -250,7 +250,7 @@ function LibraryContent() {
       case 'course':
         return selectedCourse && (
           <div className='flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw]'>
-            <div className='w-11/12 pt-34 px-6'>
+            <div className='w-11/12 pt-30 px-2 lg:px-4'>
             <div className='flex justify-between'>
               <button onClick={backToLibrary} className="flex items-center cursor-pointer font-semibold text-gray-600 hover:text-black mb-6 transition-colors duration-300">
               <Icons.ArrowLeft className="w-4 h-4 mr-2" />
@@ -266,7 +266,7 @@ function LibraryContent() {
 
             </div>
             
-            <div className="flex items-start mb-8">
+            <div className="flex flex-col lg:flex-row gap-8 items-start mb-8">
               <img src={selectedCourse.imageUrl} alt={selectedCourse.title} className="w-40 h-auto object-cover rounded-4xl mr-6" />
               <div>
                 <h1 className="text-4xl font-bold text-black">{selectedCourse.title.charAt(0).toUpperCase() + selectedCourse.title.slice(1)}</h1>
@@ -312,7 +312,7 @@ function LibraryContent() {
       case 'topic':
         return selectedTopic && selectedCourse && (
           <div className='flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw]'>
-            <div className='w-11/12 pt-34 px-6'>
+            <div className='w-11/12 pt-30 px-2 lg:px-4'>
             <button onClick={backToCourse} className="flex items-center cursor-pointer font-semibold text-gray-600 hover:text-black mb-6 transition-colors duration-300">
               <Icons.ArrowLeft className="w-4 h-4 mr-2" />
               Back to {selectedCourse.title}
@@ -372,8 +372,8 @@ function LibraryContent() {
       default:
         return (
           <div className='flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw]'>
-            <div className='w-11/12 px-6 pt-34 '>
-              <div className='flex justify-between items-center '>
+            <div className='w-11/12 px-2 lg:px-4 pt-30 '>
+              <div className='flex flex-col lg:flex-row text-left justify-between items-center '>
                 <div><h1 className='text-left text-2xl font-semibold'>Library</h1>
               <p className="text-gray-600- text-left mt-4 mb-6">Explore your courses or create a new one to get started.</p></div>
               <CreateCourseCard onClick={handleCreateCourse} />
@@ -384,7 +384,7 @@ function LibraryContent() {
                 </div>
               ) : (
                 <div className='rounded-4xl w-full  py-8 mb-14'>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+                  <div className="grid grid-cols-1  lg:grid-cols-4 gap-8">
                     {courses.map((course) => (
                       <CourseCard key={course.id} course={course} onClick={() => handleCourseSelect(course)} />
                     ))}

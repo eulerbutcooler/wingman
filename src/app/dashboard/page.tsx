@@ -77,9 +77,9 @@ export default function DashboardPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
+      <div className="flex justify-center text-xl w-[100vw] bg-[#f5f5f5] h-[100vh] items-center">
+                        <div className="loader"></div>
+                      </div>
     )
   }
 
@@ -89,8 +89,8 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen w-[100vw] bg-[#f5f5f5]">
-      <div className=" mx-auto max-w-11/12 px-6 pt-34 pb-12">
-        <div className=" ">
+      <div className=" mx-auto max-w-11/12 px-2 lg:px-4 pt-30 pb-10">
+        <div className="  ">
           <div className="">
             <h1 className="text-2xl font-bold text-black mb-4">
               Welcome to your Dashboard, <span className="text-navy">{session.user?.name}!</span>
@@ -140,7 +140,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className='flex mt-8 gap-8 justify-between'>
+            <div className='flex flex-col lg:flex-row mt-8 gap-8 justify-between'>
               <div className=" bg-white p-6 flex-col flex justify-between flex-1 rounded-4xl shadow-sm">
                 <div className="text-2xl font-semibold text-black ">Account Information</div>
                 <div className="space-y-2 pt-2">
@@ -158,12 +158,12 @@ export default function DashboardPage() {
 
               </div>
             </div>
-            <div className='flex justify-between gap-8 mt-8'>
+            <div className='flex flex-col lg:flex-row justify-between gap-8 mt-8'>
               <div className='p-6 rounded-4xl bg-white   transition-all flex flex-col  duration-300 shadow-sm'>
 
                 <h3 className='text-lg font-semibold text-black'>Your learning snapshot</h3>
-                <div className='gap-6  flex pt-4'>
-                  <div className=' flex items-center rounded-4xl shadow-sm hover:shadow-xl transition-all duration-300 p-4 px-8 gap-3'>
+                <div className='gap-6  flex flex-col lg:flex-row pt-4'>
+                  <div className=' flex  items-center rounded-4xl shadow-sm hover:shadow-xl transition-all duration-300 p-4 px-8 gap-3'>
                     <PiTimer className='text-3xl text-black mr-2' />
                     <div className='flex flex-col'>
                       <p className='text-lg font-semibold'>7.2 Hours</p>

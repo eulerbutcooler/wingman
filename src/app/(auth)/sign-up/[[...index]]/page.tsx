@@ -74,7 +74,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="flex items-center w-[100vw] justify-center pt-34 pb-10 min-h-screen bg-[#f5f5f5]" >
+    <div className="flex items-center w-[100vw] justify-center pt-6 px-2 min-h-screen bg-[#f5f5f5]" >
       {/* Main container for the signup form */}
       <div className="bg-white text-black w-lg  mx-4 p-10 rounded-4xl shadow-sm ">
         

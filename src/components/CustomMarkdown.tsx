@@ -1,5 +1,8 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import YouTubeEmbed from './YouTubeEmbed';
 
 interface CustomMarkdownProps {
@@ -21,10 +24,14 @@ export default function CustomMarkdown({ content }: CustomMarkdownProps) {
           return <YouTubeEmbed key={index} videoId={videoId} />;
         }
         
-        // Regular markdown content
+        // Regular markdown content with LaTeX math support
         if (part.trim()) {
           return (
-            <ReactMarkdown key={index}>
+            <ReactMarkdown 
+              key={index}
+              remarkPlugins={[remarkMath]}
+              rehypePlugins={[rehypeKatex]}
+            >
               {part}
             </ReactMarkdown>
           );

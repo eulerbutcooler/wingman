@@ -16,7 +16,7 @@ const faqs: FAQ[] = [
   { id: 1, q: "How does chat with PDFs work?", a: "Upload a PDF and start a natural conversation; answers include citations and page links." },
   { id: 2, q: "Can quizzes use my data?", a: "Yes. Quizzes are generated from uploaded files, notes, and bookmarks with adaptive difficulty." },
   { id: 3, q: "What’s the Library feature?", a: "Create courses and study plans from saved content, with milestones and tracking." },
-  {id:4, q: "How does privacy work with uploaded documents?", a: "Files are processed to extract text and generate answers/quizzes, then cleared from temporary processing; data isn’t used to train public models and access controls restrict who can view content." },
+  {id:4, q: "How are the documents secured?", a: "Files are processed to extract text and generate answers/quizzes, then cleared from temporary processing; data isn’t used to train public models and access controls restrict who can view content." },
 ];
 
 function FAQItem({ q, a }: { q: string; a: string }) {
@@ -67,12 +67,14 @@ export default function Hero() {
   return (
     <div className="bg-[#f5f5f5] min-h-screen w-[100vw] flex flex-col pt-34 gap-8 items-center ">
       
-        <div className="bg-white w-11/12 flex cta justify-evenly p-10 gap-12 shadow-sm  rounded-4xl font-mono">
+        <div className="bg-white w-11/12 lg:flex-row flex flex-col cta justify-evenly p-10 gap-12 shadow-sm  rounded-4xl font-mono">
         <div className="flex flex-col justify-center gap-10">
           <h1 className="text-4xl font-bold text-black">Welcome to Wingman</h1>
-
+          <div>
+            <p className="text-black text-2xl" >your personal AI</p>
           <p className="text-black text-2xl">
-            your personal AI{" "}
+            
+            {" "}
             <TypeAnimation
               sequence={[
                 "tutor.", 1000,
@@ -86,6 +88,7 @@ export default function Hero() {
               className="text-navy"
             />
           </p>
+          </div>
 
           <p className="text-black">
             Wingman is an AI-powered learning assistant that helps you learn and
@@ -96,7 +99,7 @@ export default function Hero() {
         <Image src="/su-7.png" alt="Hero Image" className="text-navy" width={500} height={600} />
       </div>
       
-      <div className="flex w-11/12 cards gap-4 justify-evenly">
+      <div className="flex flex-col lg:flex-row w-11/12 cards gap-4 justify-evenly">
               <div className="flex p-8 bg-white shadow-sm hover:shadow-xl transition-all duration-300 rounded-4xl flex-col justify-evenly gap-4">
                 <h1 className="text-2xl font-bold text-black">Chat bot</h1>
                 <p className="text-xl text-navy">Talk to your PDFs</p>
@@ -122,8 +125,8 @@ export default function Hero() {
       ))}
     </div>
       
-        <div className="flex w-11/12 mt-24 gap-24 justify-between mb-24">
-          <div className="flex flex-col w-1/2 gap-4">
+        <div className="flex flex-col px-2 lg:flex-row w-11/12 mt-24 gap-12 lg:gap-24 justify-between mb-16">
+          <div className="flex flex-col lg:w-1/2 gap-4">
           <h1 className="text-lg font-bold text-black">
               N.I.A.T 
             </h1>
@@ -137,17 +140,18 @@ export default function Hero() {
             <p className="text-xs text-neutral-600">© 2025 NIAT. All rights reserved.</p>
 
           </div>
-          <div className="flex flex-col justify-between w-1/2 gap-4">
+          <div className="flex flex-col justify-between lg:w-1/2 gap-8">
             <div className="flex justify-between">
               
-              <div className="flex flex-col  w-1/3 gap-4">
+              <div className="flex flex-col w-1/2  lg:w-1/3 gap-4">
                   <h1 className="text-lg font-bold text-black">Contact us</h1>
                   <p className="text-sm text-neutral-600">Email: wingmanai.contact@gmail.com</p>
                   <p className="text-sm text-neutral-600">Phone: +91 9876543210</p>
                   <p className="text-sm text-neutral-600">Address: 123 Main St, Kochi, Kerala</p>
               </div>
-              <div className="flex flex-col   gap-4">
-                <h1 className="text-lg font-bold text-black">Quick links</h1>
+              <div className="flex flex-col    gap-4">
+                <h1 className="text-lg font-bold hidden lg:block text-black">Quick links</h1>
+                <h1 className="text-lg lg:hidden font-bold text-black">Links</h1>
                 <p className="text-sm text-neutral-600">Home</p>
                 <p className="text-sm text-neutral-600">Chat</p>
                 <p className="text-sm text-neutral-600">Library</p>

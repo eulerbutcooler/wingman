@@ -1,14 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import router from "next/router";
-import { useEffect, useRef } from "react";
-import { useSession } from "next-auth/react"
+import { useEffect, useRef, useState } from "react";
+import { useSession } from "next-auth/react";
+import { 
+  FaHome, 
+  FaComments, 
+  FaBookOpen, 
+  FaQuestionCircle, 
+  FaUser 
+} from "react-icons/fa";
 
 export default function Navbar() {
-  const { data: session, status } = useSession()
+  const { data: session } = useSession();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navRef = useRef<HTMLDivElement | null>(null);
   const sentRef = useRef<HTMLDivElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const nav = navRef.current;
@@ -31,6 +39,20 @@ export default function Navbar() {
     return () => io.disconnect();
   }, []);
 
+  // Handle clicks outside dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <>
       {/* Sentinel sits at the very top of the page */}
@@ -42,7 +64,7 @@ export default function Navbar() {
       <div
         ref={navRef}
         className={[
-          "lg:flex w-11/12 z-10 hidden items-center justify-between pl-5 pr-3 py-3 fixed top-2 left-1/2 -translate-x-1/2 rounded-4xl",
+          "flex w-11/12 z-80  items-center justify-between pl-4 lg:pl-5 pr-3 py-3 fixed top-2 left-1/2 -translate-x-1/2 rounded-4xl",
           // Smooth color fade
           "transition-colors duration-150 ease-in-out",
           // Top-of-page background (your requested f5f5f5)
@@ -53,26 +75,70 @@ export default function Navbar() {
           <h1 className="text-2xl font-bold">Wingman<span className="text-navy">AI</span></h1>
         </div>
 
-        <div className="flex text-black space-x-6">
+        <div className="lg:flex hidden text-black text-sm lg:text-base space-x-3 lg:space-x-6">
           <Link href="/">Home</Link>
           <Link href="/chat">Chat</Link>
           <Link href="/library">Library</Link>
           <Link href="/quiz">Quiz</Link>
         </div>
 
-        <div className="font-bold">
+        <div className="font-bold relative" ref={dropdownRef}>
         {!session ? (
   <Link href="/sign-in">
-    <button className="py-2 px-4 bg-black cursor-pointer rounded-full text-white">
+    <button className="py-2 px-4 bg-black text-base cursor-pointer rounded-full text-white">
       Get started
     </button>
   </Link>
 ) : (
-  <Link href="/dashboard">
-    <button className="py-2 px-4 bg-black cursor-pointer rounded-full text-white">
-      {session.user?.name?.charAt(0).toUpperCase()}
-    </button>
-  </Link>
+  <>
+    {/* Desktop view - unchanged */}
+    <Link href="/dashboard" className="hidden lg:block">
+      <button className="py-2 px-4 bg-black cursor-pointer rounded-full text-white">
+        {session.user?.name?.charAt(0).toUpperCase()}
+      </button>
+    </Link>
+    
+    {/* Mobile view - dropdown */}
+    <div className="lg:hidden">
+      <button 
+        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        className="py-2 px-4 bg-black cursor-pointer rounded-full text-white"
+      >
+        {session.user?.name?.charAt(0).toUpperCase()}
+      </button>
+      
+      {/* Dropdown menu */}
+      {isDropdownOpen && (
+        <div className="absolute right-0 top-full mt-2 bg-white rounded-4xl shadow-lg  py-2 z-50">
+          <Link href="/hero" onClick={() => setIsDropdownOpen(false)}>
+            <div className="flex items-center justify-center p-3 hover:bg-gray-50 cursor-pointer transition-colors">
+              <FaHome className="text-gray-600" size={20} />
+            </div>
+          </Link>
+          <Link href="/chat" onClick={() => setIsDropdownOpen(false)}>
+            <div className="flex items-center justify-center p-3 hover:bg-gray-50 cursor-pointer transition-colors">
+              <FaComments className="text-gray-600" size={20} />
+            </div>
+          </Link>
+          <Link href="/library" onClick={() => setIsDropdownOpen(false)}>
+            <div className="flex items-center justify-center p-3 hover:bg-gray-50 cursor-pointer transition-colors">
+              <FaBookOpen className="text-gray-600" size={20} />
+            </div>
+          </Link>
+          <Link href="/quiz" onClick={() => setIsDropdownOpen(false)}>
+            <div className="flex items-center justify-center p-3 hover:bg-gray-50 cursor-pointer transition-colors">
+              <FaQuestionCircle className="text-gray-600" size={20} />
+            </div>
+          </Link>
+          <Link href="/dashboard" onClick={() => setIsDropdownOpen(false)}>
+            <div className="flex items-center justify-center p-3 hover:bg-gray-50 cursor-pointer transition-colors">
+              <FaUser className="text-gray-600" size={20} />
+            </div>
+          </Link>
+        </div>
+      )}
+    </div>
+  </>
 )}
         </div>
       </div>

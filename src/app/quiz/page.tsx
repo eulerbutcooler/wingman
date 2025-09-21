@@ -343,7 +343,7 @@ const ReviewAnswers = ({ quiz, answers, onBackToResults }: {
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to results
       </button>
-      <div className=" p-8 mb-14 mx-auto w-full">
+      <div className="  mb-8 mx-auto w-full">
         <h1 className="text-2xl font-semibold mb-6">Review Answers</h1>
         <div className="space-y-8">
           {questions.map((question, index) => (
@@ -588,7 +588,7 @@ function QuizContent() {
 
   return (
     <div className='flex flex-col items-center min-h-screen bg-[#f5f5f5] w-[100vw]'>
-      <div className='w-11/12 mb-14 px-6 pt-34'>
+      <div className='w-11/12 mb-14 pt-30 px-2 lg:px-4'>
         {renderContent()}
       </div>
     </div>

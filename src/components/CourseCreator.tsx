@@ -227,7 +227,7 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
 
   return (
     <div className='flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw] pt-34'>
-      <div className='w-11/12 px-6 pb-12'>
+      <div className='w-11/12 px-2 lg:px-4 pb-12'>
         <div className="flex  items-center justify-between mb-8">
         
         <button
@@ -240,8 +240,8 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
 
       <form onSubmit={handleSubmit} className="space-y-8 w-full ">
         {/* Course Details */}
-        <div className='flex gap-8'>
-          <div className="bg-white p-6 h-fit rounded-4xl w-1/2 shadow-sm">
+        <div className='flex flex-col lg:flex-row gap-8'>
+          <div className="bg-white p-6 h-fit rounded-4xl  shadow-sm">
           <h2 className="text-xl font-semibold mb-4">Course Information</h2>
           <div className="space-y-4">
             <div>
@@ -270,7 +270,7 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
                 placeholder="Describe what students will learn"
               />
             </div>
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-gray-600 mb-2">
                 Course Image
               </label>
@@ -321,7 +321,7 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
                 className="w-full px-4 py-2 border border-gray-300 rounded-4xl "
                 placeholder="https://example.com/image.jpg or upload image above"
               />
-            </div>
+            </div> */}
           </div>
           <div className="flex justify-end mt-8 gap-4">
             <button
@@ -342,13 +342,13 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
         </div>
 
         {/* Topics */}
-        <div className=" p-6 rounded-4xl shadow-sm bg-white w-1/2 ">
-          <div className="flex items-center justify-between mb-4">
+        <div className="p-6 rounded-4xl shadow-sm bg-white">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-4">
             <h2 className="text-xl font-semibold">Course Topics</h2>
             <button
               type="button"
               onClick={addTopic}
-              className="px-4 py-2 bg-black text-white rounded-4xl cursor-pointer transition-colors"
+              className="px-4 py-2 bg-black text-white rounded-4xl cursor-pointer transition-colors w-full sm:w-auto"
             >
               Add Topic
             </button>
@@ -357,93 +357,101 @@ export default function CourseCreator({ userId, onSuccess, onCancel }: CourseCre
           <div className="space-y-6">
             {topics.map((topic, topicIndex) => (
               <div key={topic.id} className="shadow-sm bg-white rounded-4xl p-4">
-                <div className="flex items-center  gap-4 mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">
                   <input
                     type="text"
                     value={topic.title}
                     onChange={(e) => updateTopic(topic.id, e.target.value)}
-                    className="flex-1 px-4 py-2 shadow-sm rounded-4xl focus:ring-2 "
+                    className="flex-1 px-4 py-2 shadow-sm rounded-4xl focus:ring-2"
                     placeholder="Topic title"
                   />
-                  <button
-                    type="button"
-                    onClick={() => addLesson(topic.id)}
-                    className="px-4 py-2 bg-black text-white rounded-4xl cursor-pointer transition-colors text-sm"
-                  >
-                    Add Lesson
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => removeTopic(topic.id)}
-                    className="px-4 py-2 cursor-pointer border border-gray-300 text-gray-600 rounded-4xl hover:border-gray-600 transition-colors text-sm"
-                  >
-                    Remove
-                  </button>
+                  <div className="flex gap-2 sm:gap-2">
+                    <button
+                      type="button"
+                      onClick={() => addLesson(topic.id)}
+                      className="px-4 py-2 bg-black text-white rounded-4xl cursor-pointer transition-colors text-sm"
+                    >
+                      Add Lesson
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeTopic(topic.id)}
+                      className="px-4 py-2 cursor-pointer border border-gray-300 text-gray-600 rounded-4xl hover:border-gray-600 transition-colors text-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
 
                 {/* Lessons */}
                 <div className="space-y-3 ml-4">
                   {topic.lessons.map((lesson, lessonIndex) => (
-                    <div key={lesson.id} className="flex items-center gap-3 p-3  rounded-lg">
-                      <FaArrowRight/>
-                      <input
-                        type="text"
-                        value={lesson.title}
-                        onChange={(e) => updateLesson(topic.id, lesson.id, { title: e.target.value })}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-4xl text-sm"
-                        placeholder="Lesson title"
-                      />
-                      <select
-                        value={lesson.type}
-                        onChange={(e) => updateLesson(topic.id, lesson.id, { type: e.target.value as 'pdf' | 'pptx' | 'docx' })}
-                        className="px-4 py-2 border border-gray-300 rounded-4xl  text-sm"
-                      >
-                        <option value="pdf">PDF</option>
-                        <option value="docx">Word Document</option>
-                        <option value="pptx">PowerPoint</option>
-                      </select>
-                      <input
-                        ref={(el) => {
-                          fileInputRefs.current[`${topic.id}-${lesson.id}`] = el;
-                        }}
-                        type="file"
-                        accept={
-                          lesson.type === 'pdf' 
-                            ? '.pdf' 
-                            : lesson.type === 'docx'
-                              ? '.docx,.doc'
-                              : '.pptx,.ppt'
-                        }
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            handleFileSelect(topic.id, lesson.id, file);
+                    <div key={lesson.id} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-lg">
+                      <div className="flex items-center gap-3 flex-1">
+                        <FaArrowRight className="flex-shrink-0"/>
+                        <input
+                          type="text"
+                          value={lesson.title}
+                          onChange={(e) => updateLesson(topic.id, lesson.id, { title: e.target.value })}
+                          className="flex-1 px-4 py-2 border border-gray-300 rounded-4xl text-sm"
+                          placeholder="Lesson title"
+                        />
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:items-center">
+                        <select
+                          value={lesson.type}
+                          onChange={(e) => updateLesson(topic.id, lesson.id, { type: e.target.value as 'pdf' | 'pptx' | 'docx' })}
+                          className="px-4 py-2 border border-gray-300 rounded-4xl text-sm"
+                        >
+                          <option value="pdf">PDF</option>
+                          <option value="docx">Word Document</option>
+                          <option value="pptx">PowerPoint</option>
+                        </select>
+                        <input
+                          ref={(el) => {
+                            fileInputRefs.current[`${topic.id}-${lesson.id}`] = el;
+                          }}
+                          type="file"
+                          accept={
+                            lesson.type === 'pdf' 
+                              ? '.pdf' 
+                              : lesson.type === 'docx'
+                                ? '.docx,.doc'
+                                : '.pptx,.ppt'
                           }
-                        }}
-                        className="hidden"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          fileInputRefs.current[`${topic.id}-${lesson.id}`]?.click();
-                        }}
-                        disabled={lesson.uploading}
-                        className="px-4 py-2 bg-black text-white rounded-4xl cursor-pointer disabled:bg-gray-400 transition-colors text-sm"
-                      >
-                        {lesson.uploading ? `${lesson.uploadProgress || 0}%` : lesson.file ? 'Change' : 'Select'}
-                      </button>
-                      {lesson.file && (
-                        <span className="text-xs text-green-600">
-                          ✓ {lesson.file.name}
-                        </span>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => removeLesson(topic.id, lesson.id)}
-                        className="px-4 py-2 bg-white border border-gray-300 cursor-pointer text-gray-600 rounded-4xl hover:border-gray-600 transition-colors text-sm"
-                      >
-                        Remove
-                      </button>
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              handleFileSelect(topic.id, lesson.id, file);
+                            }
+                          }}
+                          className="hidden"
+                        />
+                        <div className="flex gap-2 items-center flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              fileInputRefs.current[`${topic.id}-${lesson.id}`]?.click();
+                            }}
+                            disabled={lesson.uploading}
+                            className="px-4 py-2 bg-black text-white rounded-4xl cursor-pointer disabled:bg-gray-400 transition-colors text-sm"
+                          >
+                            {lesson.uploading ? `${lesson.uploadProgress || 0}%` : lesson.file ? 'Change' : 'Select'}
+                          </button>
+                          {lesson.file && (
+                            <span className="text-xs text-green-600 truncate max-w-[120px] sm:max-w-none">
+                              ✓ 
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => removeLesson(topic.id, lesson.id)}
+                            className="px-4 py-2 bg-white border border-gray-300 cursor-pointer text-gray-600 rounded-4xl hover:border-gray-600 transition-colors text-sm"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

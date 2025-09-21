@@ -131,7 +131,7 @@ function VerifyOTPContent() {
   }
 
   return (
-    <div className="flex items-center w-[100vw] justify-center pt-34 pb-10 min-h-screen bg-[#f5f5f5]">
+    <div className="flex items-center w-[100vw] justify-center px-2 pt-2 min-h-screen bg-[#f5f5f5]">
       {/* Main container for the verify OTP form */}
       <div className="bg-white text-black w-lg mx-4 p-8 md:p-10 rounded-4xl shadow-sm border border-gray-200">
         
@@ -202,7 +202,7 @@ function VerifyOTPContent() {
         {/* Footer Link */}
         <div className="mt-8 text-center">
           <Link href="/sign-up" className="text-sm text-gray-400 ">
-            Back to <span className='text-black hover:underline'>Sign Up</span>
+            Back to <span className='text-black hover:underline'>Sign up?</span>
           </Link>
         </div>
       </div>

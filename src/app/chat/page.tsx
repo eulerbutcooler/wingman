@@ -7,7 +7,7 @@ import {
   loadChatHistory,
 } from "../actions/chat/actions";
 import { readStreamableValue } from "@ai-sdk/rsc";
-import { Bot, User } from "lucide-react";
+import { Bot, User, Menu } from "lucide-react";
 import { FaArrowUp } from "react-icons/fa6";
 import { useSearchParams, useRouter } from "next/navigation";
 import ChatSidebar from "@/components/chat/ChatSidebar";
@@ -23,13 +23,18 @@ function ChatContent() {
   const [chatId, setChatId] = useState<string | undefined>();
   const [mode, setMode] = useState<"normal" | "deep">("normal");
   const [videoMode, setVideoMode] = useState<boolean>(false);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "instant",
+      block: "end",
+      inline: "nearest",
+    });
   };
 
   useEffect(() => {
@@ -100,31 +105,55 @@ function ChatContent() {
     }
   };
 
-  const startNewChat = () => {
-    setConversation([]);
-    setChatId(undefined);
-    setInput("");
-    router.replace("/chat");
+  const toggleSidebar = () => {
+    setIsSidebarVisible(!isSidebarVisible);
   };
 
-  const selectChat = (id: string) => {
+  const handleSelectChat = (id: string) => {
     router.push(`/chat?id=${id}`);
+    if (isSidebarVisible) {
+      toggleSidebar();
+    }
+  };
+
+  const handleNewChat = () => {
+    setChatId(undefined);
+    setConversation([]);
+    router.replace("/chat");
+    if (isSidebarVisible) {
+      toggleSidebar();
+    }
   };
 
   return (
-    <div className="w-[100vw] h-screen bg-[#f5f5f5] overflow-hidden pb-12 pt-34">
-      <div className="w-11/12 px-6 mx-auto justify-between flex h-full">
-        <div className="flex h-full flex-1 gap-8  ">
-          <ChatSidebar
-            currentChatId={chatId}
-            onSelectChat={selectChat}
-            onNewChat={startNewChat}
-          />
+    <div className="w-[100vw] h-screen bg-[#f5f5f5] overflow-hidden  pb-10 pt-30">
+      <div className="w-11/12 px-2 mx-auto gap-8 flex h-full">
+        <ChatSidebar
+          currentChatId={chatId}
+          onSelectChat={handleSelectChat}
+          onNewChat={handleNewChat}
+          isOpen={isSidebarVisible}
+          onClose={toggleSidebar}
+          mode={mode}
+          setMode={setMode}
+          videoMode={videoMode}
+          setVideoMode={setVideoMode}
+          isLoading={isLoading}
+        />
 
-          <div className="flex-1 flex flex-col bg-white rounded-4xl shadow-sm h-full">
+        <div
+          className={`relative  flex flex-col bg-white rounded-4xl shadow-sm h-full ${
+            isSidebarVisible ? "hidden lg:flex lg:flex-1" : "w-full lg:flex-1"
+          }`}
+        >
+            <div className="lg:hidden absolute bg-navy rounded-full text-white shadow-lg top-4 right-4 z-20">
+              <button onClick={toggleSidebar} className="p-2">
+                <Menu size={24} />
+              </button>
+            </div>
             {/* <div className="z-20 shadow-[0_15px_30px_15px] shadow-white/80"></div> */}
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
+            <div className="flex-1 overflow-y-auto scrollbar-hide p-6 space-y-6 min-h-0">
               {conversation.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center max-w-2xl mx-auto">
                   <div className="w-16 h-16 bg-navy rounded-full flex items-center justify-center mb-6">
@@ -160,31 +189,37 @@ function ChatContent() {
                 conversation.map((message, index) => (
                   <div
                     key={index}
-                    className={`flex gap-4 ${
-                      message.role === "user" ? "justify-end" : "justify-start"
+                    className={`${
+                      message.role === "user" ? "flex justify-end" : "flex justify-start"
                     }`}
                   >
-                    {message.role === "assistant" && (
-                      <div className="w-8 h-8 bg-navy rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <Bot size={16} className="text-white" />
+                    <div className={`${
+                      message.role === "user" 
+                        ? "flex flex-col-reverse sm:flex-row sm:gap-4 items-end" 
+                        : "flex flex-col sm:flex-row sm:gap-4 items-start"
+                    }`}>
+                      {message.role === "assistant" && (
+                        <div className="w-8 h-8 bg-navy rounded-full flex items-center justify-center flex-shrink-0 mb-2 sm:mb-0 sm:mt-1">
+                          <Bot size={16} className="text-white" />
+                        </div>
+                      )}
+                      <div
+                        className={`max-w-3xl rounded-4xl px-4 py-3 ${
+                          message.role === "user"
+                            ? "bg-navy text-white"
+                            : "bg-white border border-gray-200 text-gray-900 shadow-sm"
+                        }`}
+                      >
+                        <div className="text-sm leading-relaxed prose whitespace-pre-wrap">
+                          <CustomMarkdown content={message.content} />
+                        </div>
                       </div>
-                    )}
-                    <div
-                      className={`max-w-3xl rounded-4xl px-4 py-3 ${
-                        message.role === "user"
-                          ? "bg-navy text-white ml-12"
-                          : "bg-white border border-gray-200 text-gray-900 shadow-sm"
-                      }`}
-                    >
-                      <div className="text-sm leading-relaxed prose whitespace-pre-wrap">
-                        <CustomMarkdown content={message.content} />
-                      </div>
+                      {message.role === "user" && (
+                        <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 mb-2 sm:mb-0 sm:mt-1">
+                          <User size={16} className="text-gray-600" />
+                        </div>
+                      )}
                     </div>
-                    {message.role === "user" && (
-                      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <User size={16} className="text-gray-600" />
-                      </div>
-                    )}
                   </div>
                 ))
               )}
@@ -214,25 +249,65 @@ function ChatContent() {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="px-6  pb-6 rounded-4xl shadow-[0_-25px_15px_-4px] shadow-white flex-shrink-0">
-              <form onSubmit={handleSubmit} className="flex items-center gap-4">
-                <div className="flex-1 relative">
-                  <textarea
-                    ref={inputRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Ask Wingman about your studies..."
-                    className="w-full px-4 py-4 border border-gray-600/40  rounded-4xl shadow-lg  focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-transparent resize-none min-h-[48px] max-h-32 "
-                    rows={1}
-                    disabled={isLoading}
-                  />
+            <div className="px-3  pb-2 rounded-4xl shadow-[0_-25px_15px_-4px] shadow-white flex-shrink-0">
+              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="flex items-center gap-4 w-full">
+                  <div className="flex-1 relative">
+                    <textarea
+                      ref={inputRef}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Ask wingman..."
+                      className="w-full px-3 py-3  border border-gray-600/40  rounded-4xl shadow-lg  focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-transparent resize-none min-h-[40px] max-h-32 scrollbar-hide"
+                      rows={1}
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div className="hidden sm:flex items-center gap-6">
+                    <div className="flex flex-col lg:flex-row gap-2">
+                      <button
+                      type="button"
+                      onClick={() => setMode(mode === "normal" ? "deep" : "normal")}
+                      className={`px-2 py-2 text-xs sm:px-3 sm:py-3 sm:text-base rounded-4xl cursor-pointer transition-all duration-300  ${
+                        mode === "deep"
+                          ? "bg-black text-white shadow-sm  hover:shadow-xl"
+                          : "bg-white shadow-sm text-neutral-800 hover:shadow-xl "
+                      }`}
+                      disabled={isLoading}
+                    >
+                      Deep Mode
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setVideoMode(!videoMode)}
+                      className={`px-2 py-2 text-xs sm:px-3 sm:py-3 sm:text-base rounded-4xl cursor-pointer transition-all duration-300  ${
+                        videoMode
+                          ? "bg-navy text-white shadow-sm hover:shadow-xl"
+                          : "bg-white shadow-sm text-neutral-800 hover:shadow-xl "
+                      }`}
+                      disabled={isLoading}
+                    >
+                      Video
+                    </button>
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={!input.trim() || isLoading}
+                    className="px-4 py-4 sm:p-3.5 bg-navy text-white rounded-4xl hover:bg-navy cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center shadow-sm"
+                  >
+                    <FaArrowUp size={18} />
+                    
+                  </button>
                 </div>
-                <div className="flex items-center gap-6">
+                
+                {/* Mobile buttons below input - Hidden */}
+                <div className="hidden sm:hidden items-center gap-3 justify-center">
                   <button
                     type="button"
                     onClick={() => setMode(mode === "normal" ? "deep" : "normal")}
-                    className={`px-4 py-4 text-base rounded-4xl cursor-pointer transition-all duration-300  ${
+                    className={`px-4 py-3 text-sm rounded-4xl cursor-pointer transition-all duration-300  ${
                       mode === "deep"
                         ? "bg-black text-white shadow-sm  hover:shadow-xl"
                         : "bg-white shadow-sm text-neutral-800 hover:shadow-xl "
@@ -244,7 +319,7 @@ function ChatContent() {
                   <button
                     type="button"
                     onClick={() => setVideoMode(!videoMode)}
-                    className={`px-4 py-4 text-base rounded-4xl cursor-pointer transition-all duration-300  ${
+                    className={`px-4 py-3 text-sm rounded-4xl cursor-pointer transition-all duration-300  ${
                       videoMode
                         ? "bg-navy text-white shadow-sm hover:shadow-xl"
                         : "bg-white shadow-sm text-neutral-800 hover:shadow-xl "
@@ -253,20 +328,11 @@ function ChatContent() {
                   >
                     Video
                   </button>
-                  <button
-                    type="submit"
-                    disabled={!input.trim() || isLoading}
-                    className="p-5 bg-navy/80 text-white rounded-4xl hover:bg-navy cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
-                  >
-                    <FaArrowUp size={14} />
-                    
-                  </button>
                 </div>
               </form>
               
             </div>
           </div>
-        </div>
       </div>
     </div>
   );
