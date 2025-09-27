@@ -62,10 +62,9 @@ export default function SignInPage() {
   );
 
   return (
-    <div className="flex items-center w-[100vw] justify-center px-2  min-h-screen">
-      <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
+    <div className="flex items-center w-[100vw] justify-center px-2  min-h-screen bg-[#f5f5f5]">
       {/* Main container for the signin form */}
-      <div className="relative z-10 bg-white text-black w-lg  mx-4 p-10 rounded-4xl shadow-sm ">
+      <div className="bg-white text-black w-lg  mx-4 p-10 rounded-4xl shadow-sm ">
         {/* Header Section */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold tracking-tight text-black">

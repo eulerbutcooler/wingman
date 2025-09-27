@@ -1,159 +1,5 @@
 @import "tailwindcss";
 
-/* Modern Card Animations and Effects */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
-}
-
-@keyframes glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(28, 28, 132, 0.2); }
-  50% { box-shadow: 0 0 20px rgba(28, 28, 132, 0.4), 0 0 30px rgba(28, 28, 132, 0.2); }
-}
-
-@keyframes slideInUp {
-  from { 
-    opacity: 0; 
-    transform: translateY(30px); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
-  }
-}
-
-@keyframes slideInLeft {
-  from { 
-    opacity: 0; 
-    transform: translateX(-30px); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translateX(0); 
-  }
-}
-
-@keyframes fadeInScale {
-  from { 
-    opacity: 0; 
-    transform: scale(0.95); 
-  }
-  to { 
-    opacity: 1; 
-    transform: scale(1); 
-  }
-}
-
-/* Modern Card Classes */
-.modern-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1px solid rgba(148, 163, 184, 0.1);
-  box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.24);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: slideInUp 0.6s ease-out;
-}
-
-.modern-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 
-    0 10px 25px rgba(0, 0, 0, 0.15),
-    0 8px 10px rgba(0, 0, 0, 0.1);
-  border-color: rgba(28, 28, 132, 0.2);
-}
-
-.modern-card-dark {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  box-shadow: 
-    0 4px 6px rgba(0, 0, 0, 0.3),
-    0 1px 3px rgba(0, 0, 0, 0.4);
-  color: white;
-}
-
-.modern-card-dark:hover {
-  transform: translateY(-8px);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.4),
-    0 8px 16px rgba(0, 0, 0, 0.3);
-  border-color: rgba(59, 130, 246, 0.5);
-}
-
-.gradient-border {
-  position: relative;
-  background: white;
-  border-radius: 1rem;
-}
-
-.gradient-border::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 1rem;
-  padding: 2px;
-  background: linear-gradient(45deg, #1c1c84, #3b82f6, #1e293b);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: subtract;
-  -webkit-mask-composite: xor;
-}
-
-.glass-effect {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.shimmer {
-  position: relative;
-  overflow: hidden;
-}
-
-.shimmer::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
-  );
-  transform: translateX(-100%);
-  animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-glow {
-  animation: glow 2s ease-in-out infinite alternate;
-}
-
-.animate-slide-in-up {
-  animation: slideInUp 0.6s ease-out;
-}
-
-.animate-slide-in-left {
-  animation: slideInLeft 0.6s ease-out;
-}
-
-.animate-fade-in-scale {
-  animation: fadeInScale 0.6s ease-out;
-}
-
 /* Mobile responsive improvements */
 @media (max-width: 768px) {
   .rounded-4xl {
@@ -163,16 +9,13 @@
   .pt-34 {
     padding-top: 6rem !important;
   }
-  
-  .modern-card:hover {
-    transform: translateY(-4px);
-  }
 }
 
 .scrolled {
-  background: rgba(255, 255, 255, 0.9) !important;
-  backdrop-filter: blur(12px) !important;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15);
+  background-color: white; /* or any color you want */
+  /* optional glass effect */
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+ /* optional subtle elevation */
 }
 @theme inline {
   --animate-aurora: aurora 60s linear infinite;
@@ -248,29 +91,12 @@
 body {
   color: rgb(var(--foreground-rgb));
   font-family: var(--font-geist-mono);
-  background-image: url('/scketch.jpeg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-}
-
-/* Default page background for non-hero pages */
-.page-background {
-  background-image: url('/scketch.jpeg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-}
-
-/* Override background for hero page specifically */
-.hero-background {
-  background-image: url('/su9.png');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
 }
 
 /* Mobile-specific adjustments */

@@ -120,9 +120,8 @@ function ChatContent() {
   };
 
   return (
-    <div className="w-full h-screen overflow-hidden pb-12 pt-24 md:pt-34">
-      <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
-      <div className="relative z-10 w-full px-2 md:px-6 md:w-11/12 mx-auto justify-between flex h-full">
+    <div className="w-full h-screen bg-[#f5f5f5] overflow-hidden pb-12 pt-24 md:pt-34">
+      <div className="w-full px-2 md:px-6 md:w-11/12 mx-auto justify-between flex h-full">
         <div className="flex h-full flex-1 gap-2 md:gap-8">
           {/* Desktop: Show sidebar normally */}
           <div className="hidden md:block">
@@ -136,10 +135,9 @@ function ChatContent() {
           {/* Mobile: Sidebar overlay */}
           {isMobileSidebarOpen && (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden">
-              <div className="fixed left-0 top-0 h-full w-80 z-50 transform transition-transform">
-                <div className="absolute inset-0 bg-white/50 backdrop-blur-sm"></div>
+              <div className="fixed left-0 top-0 h-full w-80 bg-[#f5f5f5] z-50 transform transition-transform">
                 {/* Mobile sidebar header */}
-                <div className="relative z-10 flex items-center justify-between p-4 bg-white shadow-sm">
+                <div className="flex items-center justify-between p-4 bg-white shadow-sm">
                   <h2 className="text-lg font-semibold text-black">Chat History</h2>
                   <button
                     onClick={() => setIsMobileSidebarOpen(false)}
@@ -150,7 +148,7 @@ function ChatContent() {
                 </div>
                 
                 {/* Sidebar content */}
-                <div className="relative z-10 pt-4 h-full">
+                <div className="pt-4 h-full">
                   <ChatSidebar
                     currentChatId={chatId}
                     onSelectChat={selectChat}

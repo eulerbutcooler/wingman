@@ -2,6 +2,6 @@ import Hero from "./hero/page"
 
 export default function Home() {
   return (
-    <div className='w-full'><Hero /></div>
+    <div className='bg-[#f5f5f5] w-full'><Hero /></div>
   )
 }
