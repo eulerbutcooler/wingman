@@ -1,8 +1,9 @@
 "use client";
 
+import React from "react";
 import Image from "next/image";
 import { TypeAnimation } from "react-type-animation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { FiGithub } from "react-icons/fi";
@@ -40,20 +41,22 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   return (
     <motion.div
       layout
-      className="w-full   rounded-2xl hover:shadow-xl transition-all duration-300 cursor-pointer   bg-white px-4 py-4 shadow-sm"
+      className="w-full modern-card hover:modern-card-hover rounded-2xl transition-all duration-300 cursor-pointer animate-fade-in-scale"
       initial={false}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
     >
       <button
-        className="flex w-full items-center cursor-pointer justify-between text-left"
+        className="flex w-full items-center cursor-pointer justify-between text-left p-4 md:p-6"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={`panel-${q}`}
       >
-        <span className="font-medium cursor-pointer text-black">{q}</span>
+        <span className="font-medium cursor-pointer text-black text-sm md:text-base">{q}</span>
         <motion.span
           animate={{ rotate: open ? 45 : 0 }}
           transition={{ duration: 0.2 }}
-          className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-[#f5f5f5] text-black"
+          className="inline-flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full bg-gradient-to-r from-navy to-blue-600 text-white font-bold text-lg md:text-xl shadow-lg"
         >
           +
         </motion.span>
@@ -75,7 +78,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
             className="overflow-hidden"
           >
             {/* Put padding inside inner wrapper to avoid height measurement glitches */}
-            <div className="pt-3 text-sm leading-6 text-navy">{a}</div>
+            <div className="pt-3 text-sm leading-6 text-navy font-medium">{a}</div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -84,13 +87,48 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function Hero() {
-  return (
-    <div className="bg-[#f5f5f5] min-h-screen w-full flex flex-col pt-24 md:pt-34 gap-8 items-center px-4 md:px-0">
-      <div className="bg-white w-full md:w-11/12 flex flex-col lg:flex-row cta justify-center lg:justify-evenly p-6 md:p-10 gap-8 lg:gap-12 shadow-sm rounded-4xl font-mono">
-        <div className="flex flex-col justify-center gap-6 lg:gap-10 text-center lg:text-left">
-          <h1 className="text-2xl md:text-4xl font-bold text-black">Welcome to Wingman</h1>
+  // Override body background for hero page
+  React.useEffect(() => {
+    document.body.style.backgroundImage = "url('/su9.png')";
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundAttachment = "fixed";
+    document.body.style.backgroundRepeat = "no-repeat";
+    
+    // Cleanup: restore original background when component unmounts
+    return () => {
+      document.body.style.backgroundImage = "url('/scketch.jpeg')";
+      document.body.style.backgroundSize = "cover";
+      document.body.style.backgroundPosition = "center";
+      document.body.style.backgroundAttachment = "fixed";
+      document.body.style.backgroundRepeat = "no-repeat";
+    };
+  }, []);
 
-          <p className="text-black text-lg md:text-2xl">
+  return (
+    <div className="min-h-screen w-full relative">
+      {/* Background overlay for better readability */}
+      <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
+      
+      {/* Content container with higher z-index */}
+      <div className="relative z-10 flex flex-col pt-24 md:pt-34 gap-8 items-center px-4 md:px-0">
+      <div className="bg-white w-full md:w-11/12 flex flex-col lg:flex-row cta justify-center lg:justify-evenly p-6 md:p-10 gap-8 lg:gap-12 modern-card animate-slide-in-up font-mono">
+        <div className="flex flex-col justify-center gap-6 lg:gap-10 text-center lg:text-left">
+          <motion.h1 
+            className="text-2xl md:text-4xl font-bold text-black"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            Welcome to Wingman
+          </motion.h1>
+
+          <motion.p 
+            className="text-black text-lg md:text-2xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
             your personal AI{" "}
             <TypeAnimation
               sequence={[
@@ -106,53 +144,101 @@ export default function Hero() {
               wrapper="span"
               cursor={true}
               repeat={Infinity}
-              className="text-navy"
+              className="font-semibold bg-gradient-to-r from-navy to-blue-600 bg-clip-text text-transparent"
             />
-          </p>
+          </motion.p>
 
-          <p className="text-black text-sm md:text-base">
+          <motion.p 
+            className="text-black text-sm md:text-base opacity-80"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
             Wingman is an AI-powered learning assistant that helps you learn and
             study more effectively.
-          </p>
+          </motion.p>
         </div>
 
-        <div className="flex justify-center lg:justify-end">
+        <motion.div 
+          className="flex justify-center lg:justify-end animate-float"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+        >
           <Image
             src="/su-7.png"
             alt="Hero Image"
-            className="text-navy max-w-full h-auto"
+            className="text-navy max-w-full h-auto drop-shadow-2xl"
             width={400}
             height={480}
             priority
           />
-        </div>
+        </motion.div>
       </div>
 
       <div className="flex w-full md:w-11/12 flex-col md:flex-row cards gap-4 justify-center md:justify-evenly px-4 md:px-0">
-        <div className="flex p-6 md:p-8 bg-white shadow-sm hover:shadow-xl transition-all duration-300 rounded-4xl flex-col justify-evenly gap-4">
-          <h1 className="text-xl md:text-2xl font-bold text-black">Chat bot</h1>
-          <p className="text-lg md:text-xl text-navy">Talk to your PDFs</p>
-          <p className="text-sm md:text-base text-black">
+        <motion.div 
+          className="flex p-6 md:p-8 modern-card transition-all duration-300 rounded-2xl md:rounded-4xl flex-col justify-evenly gap-4 group animate-slide-in-left"
+          whileHover={{ scale: 1.05 }}
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
+              <span className="text-white text-xl">💬</span>
+            </div>
+            <h1 className="text-xl md:text-2xl font-bold text-black">Chat bot</h1>
+          </div>
+          <p className="text-lg md:text-xl text-navy font-semibold">Talk to your PDFs</p>
+          <p className="text-sm md:text-base text-gray-600 leading-relaxed">
             Chat with documents, websites, and notes in natural language, and
             get cited answers, summaries, and follow ups instantly.
           </p>
-        </div>
-        <div className="flex p-6 md:p-8 bg-white hover:shadow-xl transition-all duration-300 shadow-sm rounded-4xl flex-col justify-evenly gap-4">
-          <h1 className="text-xl md:text-2xl font-bold text-black">Library</h1>
-          <p className="text-lg md:text-xl text-navy">Build courses from your knowledge</p>
-          <p className="text-sm md:text-base text-black">
+          <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-2 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+        </motion.div>
+
+        <motion.div 
+          className="flex p-6 md:p-8 modern-card transition-all duration-300 rounded-2xl md:rounded-4xl flex-col justify-evenly gap-4 group animate-slide-in-up"
+          whileHover={{ scale: 1.05 }}
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.7 }}
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
+              <span className="text-white text-xl">📚</span>
+            </div>
+            <h1 className="text-xl md:text-2xl font-bold text-black">Library</h1>
+          </div>
+          <p className="text-lg md:text-xl text-navy font-semibold">Build courses from your knowledge</p>
+          <p className="text-sm md:text-base text-gray-600 leading-relaxed">
             Turn saved content into structured study plans and bite‑sized
             courses, complete with milestones, reminders, and progress tracking.
           </p>
-        </div>
-        <div className="flex p-6 md:p-8 bg-white hover:shadow-xl transition-all duration-300 shadow-sm rounded-4xl flex-col justify-evenly gap-4">
-          <h1 className="text-xl md:text-2xl font-bold text-black">Quiz</h1>
-          <p className="text-lg md:text-xl text-navy">Quiz me from your data</p>
-          <p className="text-sm md:text-base text-black">
+          <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-2 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+        </motion.div>
+
+        <motion.div 
+          className="flex p-6 md:p-8 modern-card transition-all duration-300 rounded-2xl md:rounded-4xl flex-col justify-evenly gap-4 group animate-slide-in-left"
+          whileHover={{ scale: 1.05 }}
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.9 }}
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
+              <span className="text-white text-xl">🧠</span>
+            </div>
+            <h1 className="text-xl md:text-2xl font-bold text-black">Quiz</h1>
+          </div>
+          <p className="text-lg md:text-xl text-navy font-semibold">Quiz me from your data</p>
+          <p className="text-sm md:text-base text-gray-600 leading-relaxed">
             Auto‑generate personalized quizzes from uploaded files, chats, and
             bookmarks, with adaptive difficulty and instant feedback.
           </p>
-        </div>
+          <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-2 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+        </motion.div>
       </div>
 
       <div className="flex flex-col w-full md:w-11/12 faqs gap-4 items-center justify-center px-4 md:px-0">
@@ -211,6 +297,8 @@ export default function Hero() {
             </div>
           </div>
         </div>
+      </div>
+      
       </div>
     </div>
   );
