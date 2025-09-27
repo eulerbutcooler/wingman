@@ -85,12 +85,12 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 
 export default function Hero() {
   return (
-    <div className="bg-[#f5f5f5] min-h-screen w-[100vw] flex flex-col pt-34 gap-8 items-center ">
-      <div className="bg-white w-11/12 flex cta justify-evenly p-10 gap-12 shadow-sm  rounded-4xl font-mono">
-        <div className="flex flex-col justify-center gap-10">
-          <h1 className="text-4xl font-bold text-black">Welcome to Wingman</h1>
+    <div className="bg-[#f5f5f5] min-h-screen w-full flex flex-col pt-24 md:pt-34 gap-8 items-center px-4 md:px-0">
+      <div className="bg-white w-full md:w-11/12 flex flex-col lg:flex-row cta justify-center lg:justify-evenly p-6 md:p-10 gap-8 lg:gap-12 shadow-sm rounded-4xl font-mono">
+        <div className="flex flex-col justify-center gap-6 lg:gap-10 text-center lg:text-left">
+          <h1 className="text-2xl md:text-4xl font-bold text-black">Welcome to Wingman</h1>
 
-          <p className="text-black text-2xl">
+          <p className="text-black text-lg md:text-2xl">
             your personal AI{" "}
             <TypeAnimation
               sequence={[
@@ -110,60 +110,63 @@ export default function Hero() {
             />
           </p>
 
-          <p className="text-black">
+          <p className="text-black text-sm md:text-base">
             Wingman is an AI-powered learning assistant that helps you learn and
             study more effectively.
           </p>
         </div>
 
-        <Image
-          src="/su-7.png"
-          alt="Hero Image"
-          className="text-navy"
-          width={500}
-          height={600}
-        />
+        <div className="flex justify-center lg:justify-end">
+          <Image
+            src="/su-7.png"
+            alt="Hero Image"
+            className="text-navy max-w-full h-auto"
+            width={400}
+            height={480}
+            priority
+          />
+        </div>
       </div>
 
-      <div className="flex w-11/12 cards gap-4 justify-evenly">
-        <div className="flex p-8 bg-white shadow-sm hover:shadow-xl transition-all duration-300 rounded-4xl flex-col justify-evenly gap-4">
-          <h1 className="text-2xl font-bold text-black">Chat bot</h1>
-          <p className="text-xl text-navy">Talk to your PDFs</p>
-          <p className="text-base text-black">
+      <div className="flex w-full md:w-11/12 flex-col md:flex-row cards gap-4 justify-center md:justify-evenly px-4 md:px-0">
+        <div className="flex p-6 md:p-8 bg-white shadow-sm hover:shadow-xl transition-all duration-300 rounded-4xl flex-col justify-evenly gap-4">
+          <h1 className="text-xl md:text-2xl font-bold text-black">Chat bot</h1>
+          <p className="text-lg md:text-xl text-navy">Talk to your PDFs</p>
+          <p className="text-sm md:text-base text-black">
             Chat with documents, websites, and notes in natural language, and
             get cited answers, summaries, and follow ups instantly.
           </p>
         </div>
-        <div className="flex p-8 bg-white hover:shadow-xl transition-all duration-300 shadow-sm rounded-4xl flex-col justify-evenly gap-4">
-          <h1 className="text-2xl font-bold text-black">Library</h1>
-          <p className="text-xl text-navy">Build courses from your knowledge</p>
-          <p className="text-base text-black">
+        <div className="flex p-6 md:p-8 bg-white hover:shadow-xl transition-all duration-300 shadow-sm rounded-4xl flex-col justify-evenly gap-4">
+          <h1 className="text-xl md:text-2xl font-bold text-black">Library</h1>
+          <p className="text-lg md:text-xl text-navy">Build courses from your knowledge</p>
+          <p className="text-sm md:text-base text-black">
             Turn saved content into structured study plans and bite‑sized
             courses, complete with milestones, reminders, and progress tracking.
           </p>
         </div>
-        <div className="flex p-8 bg-white hover:shadow-xl transition-all duration-300 shadow-sm rounded-4xl flex-col justify-evenly gap-4">
-          <h1 className="text-2xl font-bold text-black">Quiz</h1>
-          <p className="text-xl text-navy">Quiz me from your data</p>
-          <p className="text-base text-black">
+        <div className="flex p-6 md:p-8 bg-white hover:shadow-xl transition-all duration-300 shadow-sm rounded-4xl flex-col justify-evenly gap-4">
+          <h1 className="text-xl md:text-2xl font-bold text-black">Quiz</h1>
+          <p className="text-lg md:text-xl text-navy">Quiz me from your data</p>
+          <p className="text-sm md:text-base text-black">
             Auto‑generate personalized quizzes from uploaded files, chats, and
             bookmarks, with adaptive difficulty and instant feedback.
           </p>
         </div>
       </div>
 
-      <div className="flex  flex-col w-11/12 faqs gap-4 items-center justify-evenly flex-wrap">
+      <div className="flex flex-col w-full md:w-11/12 faqs gap-4 items-center justify-center px-4 md:px-0">
         {faqs.map((f) => (
           <FAQItem key={f.id} q={f.q} a={f.a} />
         ))}
       </div>
 
-      <div className="flex w-11/12 mt-24 gap-24 justify-between mb-24">
-        <div className="flex flex-col w-1/2 gap-4">
+      <div className="flex flex-col lg:flex-row w-full md:w-11/12 mt-12 md:mt-24 gap-8 md:gap-24 justify-between mb-12 md:mb-24 px-4 md:px-0">
+        <div className="flex flex-col w-full lg:w-1/2 gap-4">
           <h1 className="text-lg font-bold text-black">N.I.A.T</h1>
-          <div className="flex gap-10">
-            <Image src="/crest.png" alt="Hero Image" width={80} height={80} />
-            <Image src="/niat.png" alt="Hero Image" width={80} height={80} />
+          <div className="flex gap-6 md:gap-10">
+            <Image src="/crest.png" alt="Hero Image" width={60} height={60} className="md:w-20 md:h-20" />
+            <Image src="/niat.png" alt="Hero Image" width={60} height={60} className="md:w-20 md:h-20" />
           </div>
 
           <p className="text-sm text-neutral-600">
@@ -178,9 +181,9 @@ export default function Hero() {
             © 2025 NIAT. All rights reserved.
           </p>
         </div>
-        <div className="flex flex-col justify-between w-1/2 gap-4">
-          <div className="flex justify-between">
-            <div className="flex flex-col  w-1/3 gap-4">
+        <div className="flex flex-col justify-between w-full lg:w-1/2 gap-6 md:gap-4">
+          <div className="flex flex-col md:flex-row justify-between gap-6 md:gap-4">
+            <div className="flex flex-col w-full md:w-1/3 gap-4">
               <h1 className="text-lg font-bold text-black">Contact us</h1>
               <p className="text-sm text-neutral-600">
                 Email: wingmanai.contact@gmail.com
@@ -190,22 +193,21 @@ export default function Hero() {
                 Address: 123 Main St, Kochi, Kerala
               </p>
             </div>
-            <div className="flex flex-col   gap-4">
+            <div className="flex flex-col gap-4">
               <h1 className="text-lg font-bold text-black">Quick links</h1>
-              <p className="text-sm text-neutral-600">Home</p>
-              <p className="text-sm text-neutral-600">Chat</p>
-              <p className="text-sm text-neutral-600">Library</p>
-              <p className="text-sm text-neutral-600">Quiz</p>
+              <p className="text-sm text-neutral-600 cursor-pointer hover:text-navy">Home</p>
+              <p className="text-sm text-neutral-600 cursor-pointer hover:text-navy">Chat</p>
+              <p className="text-sm text-neutral-600 cursor-pointer hover:text-navy">Library</p>
+              <p className="text-sm text-neutral-600 cursor-pointer hover:text-navy">Quiz</p>
             </div>
           </div>
           <div className="flex flex-col gap-4">
             <h1 className="text-lg font-bold text-black">Socials</h1>
-            <div className="flex text-neutral-600  gap-6">
-              <SiGmail />
-              <FiGithub />
-
-              <FaXTwitter />
-              <FiLinkedin />
+            <div className="flex text-neutral-600 gap-6 text-xl">
+              <SiGmail className="cursor-pointer hover:text-navy transition-colors" />
+              <FiGithub className="cursor-pointer hover:text-navy transition-colors" />
+              <FaXTwitter className="cursor-pointer hover:text-navy transition-colors" />
+              <FiLinkedin className="cursor-pointer hover:text-navy transition-colors" />
             </div>
           </div>
         </div>

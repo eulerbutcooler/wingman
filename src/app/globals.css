@@ -1,6 +1,15 @@
 @import "tailwindcss";
 
-
+/* Mobile responsive improvements */
+@media (max-width: 768px) {
+  .rounded-4xl {
+    border-radius: 1rem !important;
+  }
+  
+  .pt-34 {
+    padding-top: 6rem !important;
+  }
+}
 
 .scrolled {
   background-color: white; /* or any color you want */
@@ -78,6 +87,7 @@
   }
 }
 
+/* Mobile and desktop optimized styles */
 body {
   color: rgb(var(--foreground-rgb));
   font-family: var(--font-geist-mono);
@@ -87,6 +97,13 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
 }
 
 @layer utilities {

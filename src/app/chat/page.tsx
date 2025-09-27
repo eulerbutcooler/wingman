@@ -7,7 +7,7 @@ import {
   loadChatHistory,
 } from "../../lib/actions/chat/actions";
 import { readStreamableValue } from "@ai-sdk/rsc";
-import { Bot, User } from "lucide-react";
+import { Bot, User, History, X } from "lucide-react";
 import { FaArrowUp } from "react-icons/fa6";
 import { useSearchParams, useRouter } from "next/navigation";
 import ChatSidebar from "@/components/chat/ChatSidebar";
@@ -22,6 +22,7 @@ function ChatContent() {
   const [chatId, setChatId] = useState<string | undefined>();
   const [mode, setMode] = useState<"normal" | "deep">("normal");
   const [videoMode, setVideoMode] = useState<boolean>(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const router = useRouter();
@@ -115,37 +116,85 @@ function ChatContent() {
 
   const selectChat = (id: string) => {
     router.push(`/chat?id=${id}`);
+    setIsMobileSidebarOpen(false); // Close mobile sidebar when selecting a chat
   };
 
   return (
-    <div className="w-[100vw] h-screen bg-[#f5f5f5] overflow-hidden pb-12 pt-34">
-      <div className="w-11/12 px-6 mx-auto justify-between flex h-full">
-        <div className="flex h-full flex-1 gap-8  ">
-          <ChatSidebar
-            currentChatId={chatId}
-            onSelectChat={selectChat}
-            onNewChat={startNewChat}
-          />
+    <div className="w-full h-screen bg-[#f5f5f5] overflow-hidden pb-12 pt-24 md:pt-34">
+      <div className="w-full px-2 md:px-6 md:w-11/12 mx-auto justify-between flex h-full">
+        <div className="flex h-full flex-1 gap-2 md:gap-8">
+          {/* Desktop: Show sidebar normally */}
+          <div className="hidden md:block">
+            <ChatSidebar
+              currentChatId={chatId}
+              onSelectChat={selectChat}
+              onNewChat={startNewChat}
+            />
+          </div>
 
-          <div className="flex-1 flex flex-col bg-white rounded-4xl shadow-sm h-full">
-            {/* <div className="z-20 shadow-[0_15px_30px_15px] shadow-white/80"></div> */}
+          {/* Mobile: Sidebar overlay */}
+          {isMobileSidebarOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden">
+              <div className="fixed left-0 top-0 h-full w-80 bg-[#f5f5f5] z-50 transform transition-transform">
+                {/* Mobile sidebar header */}
+                <div className="flex items-center justify-between p-4 bg-white shadow-sm">
+                  <h2 className="text-lg font-semibold text-black">Chat History</h2>
+                  <button
+                    onClick={() => setIsMobileSidebarOpen(false)}
+                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                
+                {/* Sidebar content */}
+                <div className="pt-4 h-full">
+                  <ChatSidebar
+                    currentChatId={chatId}
+                    onSelectChat={selectChat}
+                    onNewChat={() => {
+                      startNewChat();
+                      setIsMobileSidebarOpen(false);
+                    }}
+                    isMobile={true}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
+          <div className="flex-1 flex flex-col bg-white rounded-2xl md:rounded-4xl shadow-sm h-full">
+            {/* Mobile: Add history button */}
+            <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-100">
+              <button
+                onClick={() => setIsMobileSidebarOpen(true)}
+                className="flex items-center gap-2 px-3 py-2 bg-[#f5f5f5] rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <History size={18} />
+                <span className="text-sm font-medium">History</span>
+              </button>
+              
+              <div className="text-sm font-medium text-gray-600">
+                Wingman Chat
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-4 md:space-y-6 min-h-0">
               {conversation.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center max-w-2xl mx-auto">
-                  <div className="w-16 h-16 bg-navy rounded-full flex items-center justify-center mb-6">
-                    <Bot size={24} className="text-white" />
+                <div className="flex flex-col items-center justify-center h-full text-center max-w-2xl mx-auto px-4">
+                  <div className="w-12 h-12 md:w-16 md:h-16 bg-navy rounded-full flex items-center justify-center mb-4 md:mb-6">
+                    <Bot size={20} className="text-white md:w-6 md:h-6" />
                   </div>
-                  <p className="text-gray-600 mb-8 leading-relaxed">
+                  <p className="text-gray-600 mb-6 md:mb-8 leading-relaxed text-sm md:text-base">
                     I&apos;m your virtual teaching assistant for the Naval
                     Institute of Aeronautical Technology (NIAT). Ask me about
                     aeronautical engineering, naval technology, or any
                     course-related questions. I&apos;m here to help you learn
                     and understand complex concepts!
                   </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg">
-                    <div className="p-4 bg-white rounded-4xl border border-gray-200 shadow-sm">
-                      <h3 className="font-medium text-gray-900 mb-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full max-w-lg">
+                    <div className="p-3 md:p-4 bg-white rounded-2xl md:rounded-4xl border border-gray-200 shadow-sm">
+                      <h3 className="font-medium text-gray-900 mb-2 text-sm md:text-base">
                         Engineering Concepts
                       </h3>
                       <p className="text-sm text-gray-600">
@@ -220,30 +269,30 @@ function ChatContent() {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="px-6  pb-6 rounded-4xl shadow-[0_-25px_15px_-4px] shadow-white flex-shrink-0">
-              <form onSubmit={handleSubmit} className="flex items-center gap-4">
-                <div className="flex-1 relative">
+            <div className="px-3 md:px-6 pb-3 md:pb-6 rounded-2xl md:rounded-4xl shadow-[0_-25px_15px_-4px] shadow-white flex-shrink-0">
+              <form onSubmit={handleSubmit} className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
+                <div className="flex-1 relative w-full">
                   <textarea
                     ref={inputRef}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Ask Wingman about your studies..."
-                    className="w-full px-4 py-4 border border-gray-600/40  rounded-4xl shadow-lg  focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-transparent resize-none min-h-[48px] max-h-32 "
+                    className="w-full px-3 md:px-4 py-3 md:py-4 border border-gray-600/40 rounded-2xl md:rounded-4xl shadow-lg focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-transparent resize-none min-h-[48px] max-h-32 text-sm md:text-base"
                     rows={1}
                     disabled={isLoading}
                   />
                 </div>
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2 md:gap-6 w-full md:w-auto">
                   <button
                     type="button"
                     onClick={() =>
                       setMode(mode === "normal" ? "deep" : "normal")
                     }
-                    className={`px-4 py-4 text-base rounded-4xl cursor-pointer transition-all duration-300  ${
+                    className={`px-3 md:px-4 py-3 md:py-4 text-sm md:text-base rounded-2xl md:rounded-4xl cursor-pointer transition-all duration-300 flex-1 md:flex-none ${
                       mode === "deep"
-                        ? "bg-black text-white shadow-sm  hover:shadow-xl"
-                        : "bg-white shadow-sm text-neutral-800 hover:shadow-xl "
+                        ? "bg-black text-white shadow-sm hover:shadow-xl"
+                        : "bg-white shadow-sm text-neutral-800 hover:shadow-xl"
                     }`}
                     disabled={isLoading}
                   >
@@ -252,10 +301,10 @@ function ChatContent() {
                   <button
                     type="button"
                     onClick={() => setVideoMode(!videoMode)}
-                    className={`px-4 py-4 text-base rounded-4xl cursor-pointer transition-all duration-300  ${
+                    className={`px-3 md:px-4 py-3 md:py-4 text-sm md:text-base rounded-2xl md:rounded-4xl cursor-pointer transition-all duration-300 flex-1 md:flex-none ${
                       videoMode
                         ? "bg-navy text-white shadow-sm hover:shadow-xl"
-                        : "bg-white shadow-sm text-neutral-800 hover:shadow-xl "
+                        : "bg-white shadow-sm text-neutral-800 hover:shadow-xl"
                     }`}
                     disabled={isLoading}
                   >
@@ -264,7 +313,7 @@ function ChatContent() {
                   <button
                     type="submit"
                     disabled={!input.trim() || isLoading}
-                    className="p-5 bg-navy/80 text-white rounded-4xl hover:bg-navy cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
+                    className="p-3 md:p-5 bg-navy/80 text-white rounded-2xl md:rounded-4xl hover:bg-navy cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
                   >
                     <FaArrowUp size={14} />
                   </button>

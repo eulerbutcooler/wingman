@@ -281,24 +281,24 @@ export default function CourseCreator({
   };
 
   return (
-    <div className="flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw] pt-34">
-      <div className="w-11/12 px-6 pb-12">
-        <div className="flex  items-center justify-between mb-8">
+    <div className="flex flex-col items-center bg-[#f5f5f5] min-h-screen w-full pt-24 md:pt-34">
+      <div className="w-full md:w-11/12 px-4 md:px-6 pb-12">
+        <div className="flex items-center justify-between mb-6 md:mb-8">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-neutral-600 cursor-pointer flex hover:text-black items-center gap-4 transition-colors"
+            className="px-3 md:px-4 py-2 text-neutral-600 cursor-pointer flex hover:text-black items-center gap-2 md:gap-4 transition-colors text-sm md:text-base"
           >
             <FaArrowLeft />
             Go back
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8 w-full ">
+        <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8 w-full">
           {/* Course Details */}
-          <div className="flex gap-8">
-            <div className="bg-white p-6 h-fit rounded-4xl w-1/2 shadow-sm">
-              <h2 className="text-xl font-semibold mb-4">Course Information</h2>
-              <div className="space-y-4">
+          <div className="flex flex-col lg:flex-row gap-6 md:gap-8">
+            <div className="bg-white p-4 md:p-6 h-fit rounded-2xl md:rounded-4xl w-full lg:w-1/2 shadow-sm">
+              <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Course Information</h2>
+              <div className="space-y-3 md:space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-2">
                     Course Title *
@@ -310,7 +310,7 @@ export default function CourseCreator({
                     onChange={(e) =>
                       setFormData({ ...formData, title: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-4xl "
+                    className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-2xl md:rounded-4xl text-sm md:text-base"
                     placeholder="Enter course title"
                   />
                 </div>
