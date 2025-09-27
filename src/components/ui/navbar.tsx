@@ -4,10 +4,12 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
+import { FiMenu, FiX } from "react-icons/fi";
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navRef = useRef<HTMLDivElement | null>(null);
   const sentRef = useRef<HTMLDivElement | null>(null);
 
@@ -74,30 +76,42 @@ export default function Navbar() {
         ].join(" ")}
       >
         <div>
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-xl md:text-2xl font-bold">
             Wingman<span className="text-navy">AI</span>
           </h1>
         </div>
 
-        <div className="flex text-black space-x-6">
-          <Link href="/">Home</Link>
-          <Link href="/chat">Chat</Link>
-          <Link href="/library">Library</Link>
-          <Link href="/quiz">Quiz</Link>
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex text-black space-x-6">
+          <Link href="/" className="hover:text-navy transition-colors">Home</Link>
+          <Link href="/chat" className="hover:text-navy transition-colors">Chat</Link>
+          <Link href="/library" className="hover:text-navy transition-colors">Library</Link>
+          <Link href="/quiz" className="hover:text-navy transition-colors">Quiz</Link>
         </div>
 
-        <div className="font-bold">
+        {/* Mobile Menu Button */}
+        <div className="md:hidden">
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            {isMobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+          </button>
+        </div>
+
+        {/* Desktop Auth Button */}
+        <div className="hidden md:block font-bold">
           {loading ? (
             <div className="py-2 px-4 bg-gray-200 rounded-full animate-pulse w-20 h-10" />
           ) : !user ? (
             <Link href="/signin">
-              <button className="py-2 px-4 bg-black cursor-pointer rounded-full text-white">
+              <button className="py-2 px-4 bg-black cursor-pointer rounded-full text-white hover:bg-gray-800 transition-colors">
                 Get started
               </button>
             </Link>
           ) : (
             <Link href="/dashboard">
-              <button className="py-2 px-4 bg-black cursor-pointer rounded-full text-white">
+              <button className="py-2 px-4 bg-black cursor-pointer rounded-full text-white hover:bg-gray-800 transition-colors">
                 {user.user_metadata?.name?.charAt(0).toUpperCase() ||
                   user.email?.charAt(0).toUpperCase() ||
                   "U"}
@@ -106,6 +120,64 @@ export default function Navbar() {
           )}
         </div>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
+          <div className="fixed top-16 right-4 left-4 bg-white rounded-2xl shadow-2xl p-6 z-30" onClick={(e) => e.stopPropagation()}>
+            <div className="flex flex-col space-y-6">
+              {/* Mobile Navigation Links */}
+              <Link 
+                href="/" 
+                className="text-lg font-medium text-black hover:text-navy transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link 
+                href="/chat" 
+                className="text-lg font-medium text-black hover:text-navy transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Chat
+              </Link>
+              <Link 
+                href="/library" 
+                className="text-lg font-medium text-black hover:text-navy transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Library
+              </Link>
+              <Link 
+                href="/quiz" 
+                className="text-lg font-medium text-black hover:text-navy transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Quiz
+              </Link>
+              
+              {/* Mobile Auth Button */}
+              <div className="pt-4 border-t border-gray-200">
+                {loading ? (
+                  <div className="py-3 px-6 bg-gray-200 rounded-full animate-pulse h-12" />
+                ) : !user ? (
+                  <Link href="/signin" onClick={() => setIsMobileMenuOpen(false)}>
+                    <button className="w-full py-3 px-6 bg-black text-white rounded-full hover:bg-gray-800 transition-colors">
+                      Get started
+                    </button>
+                  </Link>
+                ) : (
+                  <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+                    <button className="w-full py-3 px-6 bg-black text-white rounded-full hover:bg-gray-800 transition-colors">
+                      Go to Dashboard
+                    </button>
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

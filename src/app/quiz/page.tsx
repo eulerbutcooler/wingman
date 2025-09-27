@@ -47,10 +47,10 @@ const capitalizeText = (text: string) =>
 
 // ✅ Loading component
 const LoadingSpinner = ({ message = "Loading..." }: { message?: string }) => (
-  <div className="flex flex-col items-center min-h-screen bg-[#f5f5f5] w-[100vw]">
-    <div className="w-11/12 px-6 pt-34">
-      <h1 className="text-2xl font-semibold text-left mb-8">{message}</h1>
-      <div className="flex justify-center text-xl h-[50vh] items-center">
+  <div className="flex flex-col items-center min-h-screen bg-[#f5f5f5] w-full">
+    <div className="w-full md:w-11/12 px-4 md:px-6 pt-24 md:pt-34">
+      <h1 className="text-xl md:text-2xl font-semibold text-left mb-6 md:mb-8">{message}</h1>
+      <div className="flex justify-center text-lg md:text-xl h-[50vh] items-center">
         <div className="loader"></div>
       </div>
     </div>
@@ -65,13 +65,13 @@ const ErrorDisplay = ({
   error: string;
   onRetry: () => void;
 }) => (
-  <div className="flex flex-col items-center min-h-screen bg-[#f5f5f5] w-[100vw]">
-    <div className="w-11/12 px-6 pt-34 text-center">
-      <div className="bg-white p-8 rounded-4xl shadow-sm">
-        <p className="text-red-600 mb-4">{error}</p>
+  <div className="flex flex-col items-center min-h-screen bg-[#f5f5f5] w-full">
+    <div className="w-full md:w-11/12 px-4 md:px-6 pt-24 md:pt-34 text-center">
+      <div className="bg-white p-6 md:p-8 rounded-2xl md:rounded-4xl shadow-sm">
+        <p className="text-red-600 mb-4 text-sm md:text-base">{error}</p>
         <button
           onClick={onRetry}
-          className="px-4 py-2 bg-black text-white rounded-4xl hover:bg-gray-800 transition-colors"
+          className="px-4 py-2 bg-black text-white rounded-2xl md:rounded-4xl hover:bg-gray-800 transition-colors text-sm md:text-base"
         >
           Try Again
         </button>
@@ -174,25 +174,25 @@ const CourseList = ({
   onSelectCourse: (course: Course) => void;
 }) => (
   <div>
-    <h1 className="text-2xl font-semibold text-left mb-8">
+    <h1 className="text-xl md:text-2xl font-semibold text-left mb-6 md:mb-8">
       Select a course for quiz
     </h1>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
       {courses.map((course) => (
         <div
           key={course.id}
           onClick={() => onSelectCourse(course)}
-          className="bg-white p-6 flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 rounded-4xl cursor-pointer"
+          className="bg-white p-4 md:p-6 flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl md:rounded-4xl cursor-pointer"
         >
-          <div className="flex items-center gap-4 mb-4">
-            <h2 className="text-2xl font-semibold">
+          <div className="flex items-center gap-4 mb-3 md:mb-4">
+            <h2 className="text-lg md:text-2xl font-semibold">
               {capitalizeText(course.title)}
             </h2>
           </div>
-          <p className="text-navy text-lg mb-4">
+          <p className="text-navy text-sm md:text-lg mb-3 md:mb-4">
             {capitalizeText(course.description || "")}
           </p>
-          <div className="text-base text-neutral-800 font-semibold">
+          <div className="text-sm md:text-base text-neutral-800 font-semibold">
             View Quizzes →
           </div>
         </div>
@@ -700,8 +700,8 @@ function QuizContent({ userId }: { userId: string }) {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-[#f5f5f5] w-[100vw]">
-      <div className="w-11/12 mb-14 px-6 pt-34">{renderContent()}</div>
+    <div className="flex flex-col items-center min-h-screen bg-[#f5f5f5] w-full">
+      <div className="w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">{renderContent()}</div>
     </div>
   );
 }
