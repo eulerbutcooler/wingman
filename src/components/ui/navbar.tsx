@@ -68,11 +68,10 @@ export default function Navbar() {
       <div
         ref={navRef}
         className={[
-          "flex w-11/12 z-10 items-center justify-between pl-5 pr-3 py-3 fixed top-2 left-1/2 -translate-x-1/2 rounded-4xl",
+          "flex w-11/12 z-50 items-center justify-between pl-5 pr-3 py-3 fixed top-2 left-1/2 -translate-x-1/2 rounded-4xl",
           // Smooth color fade
           "transition-colors duration-150 ease-in-out",
-          // Top-of-page background
-          "bg-[#f5f5f5]",
+          // Transparent by default, background only when scrolled via CSS
         ].join(" ")}
       >
         <div>
@@ -123,8 +122,8 @@ export default function Navbar() {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
-          <div className="fixed top-16 right-4 left-4 bg-white rounded-2xl shadow-2xl p-6 z-30" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[60] md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
+          <div className="fixed top-16 right-4 left-4 bg-white rounded-2xl shadow-2xl p-6 z-[70]" onClick={(e) => e.stopPropagation()}>
             <div className="flex flex-col space-y-6">
               {/* Mobile Navigation Links */}
               <Link 

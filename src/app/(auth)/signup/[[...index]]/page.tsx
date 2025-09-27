@@ -74,9 +74,10 @@ export default function SignUpPage() {
   );
 
   return (
-    <div className="flex items-center w-[100vw] justify-center pt-6 px-2 min-h-screen bg-[#f5f5f5]">
+    <div className="flex items-center w-[100vw] justify-center pt-6 px-2 min-h-screen">
+      <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
       {/* Main container for the signup form */}
-      <div className="bg-white text-black w-lg  mx-4 p-10 rounded-4xl shadow-sm ">
+      <div className="relative z-10 bg-white text-black w-lg  mx-4 p-10 rounded-4xl shadow-sm ">
         {/* Header Section */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold  text-black">Create Account</h1>
