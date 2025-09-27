@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db/drizzle';
-import { topics, lessons } from '@/lib/db/schema/courses';
-import { eq, desc } from 'drizzle-orm';
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/services/db/drizzle";
+import { topics, lessons } from "@/services/db/schema/courses";
+import { eq, desc } from "drizzle-orm";
 
 // POST /api/topics - Create a new topic
 export async function POST(request: NextRequest) {
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!title || !courseId) {
       return NextResponse.json(
-        { error: 'Title and courseId are required' },
+        { error: "Title and courseId are required" },
         { status: 400 }
       );
     }
@@ -41,14 +41,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Topic created successfully',
+      message: "Topic created successfully",
       topic: newTopic,
     });
-
   } catch (error) {
-    console.error('Error creating topic:', error);
+    console.error("Error creating topic:", error);
     return NextResponse.json(
-      { error: 'Failed to create topic' },
+      { error: "Failed to create topic" },
       { status: 500 }
     );
   }
@@ -58,11 +57,11 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const courseId = searchParams.get('courseId');
+    const courseId = searchParams.get("courseId");
 
     if (!courseId) {
       return NextResponse.json(
-        { error: 'Course ID is required' },
+        { error: "Course ID is required" },
         { status: 400 }
       );
     }
@@ -94,11 +93,10 @@ export async function GET(request: NextRequest) {
       success: true,
       topics: topicsWithLessons,
     });
-
   } catch (error) {
-    console.error('Error fetching topics:', error);
+    console.error("Error fetching topics:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch topics' },
+      { error: "Failed to fetch topics" },
       { status: 500 }
     );
   }
@@ -112,7 +110,7 @@ export async function PUT(request: NextRequest) {
 
     if (!topicId) {
       return NextResponse.json(
-        { error: 'Topic ID is required' },
+        { error: "Topic ID is required" },
         { status: 400 }
       );
     }
@@ -132,14 +130,13 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Topic updated successfully',
+      message: "Topic updated successfully",
       topic: updatedTopic,
     });
-
   } catch (error) {
-    console.error('Error updating topic:', error);
+    console.error("Error updating topic:", error);
     return NextResponse.json(
-      { error: 'Failed to update topic' },
+      { error: "Failed to update topic" },
       { status: 500 }
     );
   }
@@ -149,11 +146,11 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const topicId = searchParams.get('topicId');
+    const topicId = searchParams.get("topicId");
 
     if (!topicId) {
       return NextResponse.json(
-        { error: 'Topic ID is required' },
+        { error: "Topic ID is required" },
         { status: 400 }
       );
     }
@@ -163,13 +160,12 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Topic deleted successfully',
+      message: "Topic deleted successfully",
     });
-
   } catch (error) {
-    console.error('Error deleting topic:', error);
+    console.error("Error deleting topic:", error);
     return NextResponse.json(
-      { error: 'Failed to delete topic' },
+      { error: "Failed to delete topic" },
       { status: 500 }
     );
   }

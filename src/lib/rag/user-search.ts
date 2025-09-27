@@ -1,7 +1,7 @@
-import { db } from '@/lib/db/drizzle';
-import { documentChunks, files, courses } from '@/lib/db/schema/courses';
-import { eq, sql, desc } from 'drizzle-orm';
-import { generateEmbedding, cosineSimilarity } from './embeddings';
+import { db } from "@/services/db/drizzle";
+import { documentChunks, files, courses } from "@/services/db/schema/courses";
+import { eq, sql, desc } from "drizzle-orm";
+import { generateEmbedding, cosineSimilarity } from "./embeddings";
 
 export interface SearchResult {
   chunkId: string;
@@ -12,6 +12,9 @@ export interface SearchResult {
   courseId: string;
   courseTitle: string;
   similarity: number;
+  pageNumber?: number | null;
+  startPosition?: number | null;
+  endPosition?: number | null;
 }
 
 /**
@@ -24,10 +27,10 @@ export async function searchAllCourses(
 ): Promise<SearchResult[]> {
   try {
     console.log(`🔍 Searching ALL courses globally for: "${query}"`);
-    
+
     // Generate embedding for the search query
     const queryEmbedding = await generateEmbedding(query);
-    console.log('✅ Generated query embedding');
+    console.log("✅ Generated query embedding");
 
     // Get all document chunks with their associated file and course info
     const allChunks = await db
@@ -40,6 +43,9 @@ export async function searchAllCourses(
         fileName: files.originalName,
         courseId: documentChunks.courseId,
         courseTitle: courses.title,
+        pageNumber: documentChunks.pageNumber,
+        startPosition: documentChunks.startPosition,
+        endPosition: documentChunks.endPosition,
       })
       .from(documentChunks)
       .innerJoin(files, eq(documentChunks.fileId, files.id))
@@ -49,17 +55,20 @@ export async function searchAllCourses(
     console.log(`📚 Found ${allChunks.length} total chunks across all courses`);
 
     if (allChunks.length === 0) {
-      console.log('📭 No document chunks found in any course');
+      console.log("📭 No document chunks found in any course");
       return [];
     }
 
     // Calculate similarities and filter
     const results: SearchResult[] = [];
-    
+
     for (const chunk of allChunks) {
       if (chunk.embedding) {
-        const similarity = cosineSimilarity(queryEmbedding, chunk.embedding as number[]);
-        
+        const similarity = cosineSimilarity(
+          queryEmbedding,
+          chunk.embedding as number[]
+        );
+
         if (similarity >= similarityThreshold) {
           results.push({
             chunkId: chunk.chunkId,
@@ -70,6 +79,9 @@ export async function searchAllCourses(
             courseId: chunk.courseId,
             courseTitle: chunk.courseTitle,
             similarity,
+            pageNumber: chunk.pageNumber,
+            startPosition: chunk.startPosition,
+            endPosition: chunk.endPosition,
           });
         }
       }
@@ -79,13 +91,18 @@ export async function searchAllCourses(
     results.sort((a, b) => b.similarity - a.similarity);
     const topResults = results.slice(0, maxResults);
 
-    console.log(`🎯 Found ${topResults.length} relevant chunks (similarity > ${similarityThreshold})`);
-    
+    console.log(
+      `🎯 Found ${topResults.length} relevant chunks (similarity > ${similarityThreshold})`
+    );
+
     return topResults;
-    
   } catch (error) {
-    console.error('❌ Error searching all courses:', error);
-    throw new Error(`Failed to search courses: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error("❌ Error searching all courses:", error);
+    throw new Error(
+      `Failed to search courses: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
   }
 }
 
@@ -94,13 +111,16 @@ export async function searchAllCourses(
  */
 export function formatContextForWingman(searchResults: SearchResult[]): string {
   if (searchResults.length === 0) {
-    return '';
+    return "";
   }
 
   return searchResults
     .map((result, index) => {
-      return `[Source ${index + 1}: ${result.fileName} from ${result.courseTitle}]
+      const pageRef = result.pageNumber ? `, Page ${result.pageNumber}` : "";
+      return `[Source ${index + 1}: ${result.fileName} from ${
+        result.courseTitle
+      }${pageRef}]
 ${result.chunkText}`;
     })
-    .join('\n\n---\n\n');
+    .join("\n\n---\n\n");
 }

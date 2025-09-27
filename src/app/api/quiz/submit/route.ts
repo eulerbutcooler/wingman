@@ -1,18 +1,45 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db/drizzle';
-import { quizResults } from '@/lib/db/schema/quizzes';
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/services/db/drizzle";
+import { quizResults, quizzes } from "@/services/db/schema/quizzes";
+import { getCurrentUser } from "@/lib/auth/auth-utils";
+import { eq, and } from "drizzle-orm";
 
 // POST /api/quiz/submit - Submit quiz results
 export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { quizId, userId, answers, score, totalQuestions, timeSpent } = body;
+  const user = await getCurrentUser();
 
-    if (!quizId || !userId || !answers || score === undefined || !totalQuestions) {
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { quizId, userId, answers, score, totalQuestions, timeSpent } =
+      await request.json();
+
+    if (
+      !quizId ||
+      !userId ||
+      !answers ||
+      score === undefined ||
+      !totalQuestions
+    ) {
       return NextResponse.json(
-        { error: 'Quiz ID, User ID, answers, score, and total questions are required' },
+        {
+          error:
+            "Quiz ID, User ID, answers, score, and total questions are required",
+        },
         { status: 400 }
       );
+    }
+
+    const [quiz] = await db
+      .select()
+      .from(quizzes)
+      .where(eq(quizzes.id, quizId))
+      .limit(1);
+
+    if (!quiz) {
+      return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
     }
 
     // Save quiz result
@@ -20,7 +47,7 @@ export async function POST(request: NextRequest) {
       .insert(quizResults)
       .values({
         quizId,
-        userId,
+        userId: user.id,
         score,
         totalQuestions,
         answers,
@@ -32,13 +59,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       result,
-      message: 'Quiz result saved successfully',
+      message: "Quiz result saved successfully",
     });
-
   } catch (error) {
-    console.error('Error submitting quiz result:', error);
+    console.error("Error submitting quiz result:", error);
     return NextResponse.json(
-      { error: 'Failed to submit quiz result' },
+      { error: "Failed to submit quiz result" },
       { status: 500 }
     );
   }

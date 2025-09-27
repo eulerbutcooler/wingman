@@ -1,0 +1,1 @@
+ALTER TABLE "courses" ADD COLUMN "gendesc" text NOT NULL;

@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db/drizzle';
-import { quizzes, quizResults } from '@/lib/db/schema/quizzes';
-import { eq, desc, and } from 'drizzle-orm';
+import { NextRequest, NextResponse } from "next/server";
+import { getCurrentUser } from "@/lib/auth/auth-utils";
+import { db } from "@/services/db/drizzle";
+import { quizzes, quizResults } from "@/services/db/schema/quizzes";
+import { eq, desc, and } from "drizzle-orm";
 
 // GET /api/quiz/[courseId] - Get all quizzes for a course
 export async function GET(
@@ -9,14 +10,22 @@ export async function GET(
   { params }: { params: Promise<{ courseId: string }> }
 ) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    // ✅ Get user from auth
+    const user = await getCurrentUser();
 
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    if (!user?.id) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
     }
 
+    const userId = user.id;
     const { courseId } = await params;
+
+    console.log(
+      `🔍 Fetching quizzes for course ${courseId} and user ${userId}`
+    );
 
     // Fetch all quizzes for the course
     const courseQuizzes = await db
@@ -25,15 +34,26 @@ export async function GET(
       .where(eq(quizzes.courseId, courseId))
       .orderBy(desc(quizzes.createdAt));
 
+    console.log(
+      `📊 Found ${courseQuizzes.length} quizzes for course ${courseId}`
+    );
+
     // For each quiz, get the user's latest result
     const quizzesWithResults = await Promise.all(
       courseQuizzes.map(async (quiz) => {
         const latestResult = await db
           .select()
           .from(quizResults)
-          .where(and(eq(quizResults.quizId, quiz.id), eq(quizResults.userId, userId)))
+          .where(
+            and(eq(quizResults.quizId, quiz.id), eq(quizResults.userId, userId))
+          )
           .orderBy(desc(quizResults.completedAt))
           .limit(1);
+
+        const hasResult = latestResult.length > 0;
+        console.log(
+          `📝 Quiz ${quiz.id} (${quiz.difficulty}) - User has result: ${hasResult}`
+        );
 
         return {
           ...quiz,
@@ -46,11 +66,13 @@ export async function GET(
       success: true,
       quizzes: quizzesWithResults,
     });
-
   } catch (error) {
-    console.error('Error fetching quizzes:', error);
+    console.error("💥 Error fetching quizzes:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch quizzes' },
+      {
+        error: "Failed to fetch quizzes",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }

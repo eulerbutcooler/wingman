@@ -1,186 +1,191 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import path from 'path';
-import { db } from '@/lib/db/drizzle';
-import { files } from '@/lib/db/schema/courses';
-import { eq, and } from 'drizzle-orm';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { saveFileRecord } from "@/lib/actions/files/file-actions";
+import { getCurrentUser } from "@/lib/auth/auth-utils";
+import { processDocument } from "@/lib/rag/document-processor";
 
-// Configuration for file uploads
-const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
-const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
-const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/mov', 'video/avi'];
-const ALLOWED_PDF_TYPES = ['application/pdf'];
-
-// Ensure upload directory exists
-async function ensureUploadDir() {
-  if (!existsSync(UPLOAD_DIR)) {
-    await mkdir(UPLOAD_DIR, { recursive: true });
-  }
-}
-
-// Validate file type and size
-function validateFile(file: File) {
-  const errors: string[] = [];
-  
-  // Check file size
-  if (file.size > MAX_FILE_SIZE) {
-    errors.push(`File size must be less than ${MAX_FILE_SIZE / (1024 * 1024)}MB`);
-  }
-  
-  // Check file type
-  const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type);
-  const isPDF = ALLOWED_PDF_TYPES.includes(file.type);
-  
-  if (!isVideo && !isPDF) {
-    errors.push('Only MP4, WebM, MOV, AVI videos and PDF files are supported');
-  }
-  
-  return {
-    isValid: errors.length === 0,
-    errors,
-    fileType: isVideo ? 'video' : 'pdf' as 'video' | 'pdf'
-  };
-}
-
-// Generate unique filename
-function generateUniqueFilename(originalName: string): string {
-  const timestamp = Date.now();
-  const randomString = Math.random().toString(36).substring(2, 8);
-  const extension = path.extname(originalName);
-  const nameWithoutExt = path.basename(originalName, extension);
-  
-  return `${nameWithoutExt}_${timestamp}_${randomString}${extension}`;
-}
-
-// POST /api/upload - Upload file (video or PDF)
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     const formData = await request.formData();
-    const file = formData.get('file') as File;
-    const userId = formData.get('userId') as string;
-    const lessonId = formData.get('lessonId') as string | null;
+    const file = formData.get("file") as File;
+    const lessonId = formData.get("lessonId") as string;
+    const topicId = formData.get("topicId") as string;
 
     if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    // Validate file type
+    const allowedTypes = [
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid file type. Only PDF, DOCX, and PPTX files are allowed.",
+        },
+        { status: 400 }
+      );
     }
 
-    // Validate file
-    const validation = validateFile(file);
-    if (!validation.isValid) {
-      return NextResponse.json({ 
-        error: 'File validation failed', 
-        details: validation.errors 
-      }, { status: 400 });
+    // Validate file size (100MB limit)
+    if (file.size > 100 * 1024 * 1024) {
+      return NextResponse.json(
+        { error: "File size must be less than 100MB" },
+        { status: 400 }
+      );
     }
 
-    // Ensure upload directory exists
-    await ensureUploadDir();
+    // Create Supabase client for server-side operations
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    );
 
     // Generate unique filename
-    const uniqueFilename = generateUniqueFilename(file.name);
-    const filePath = path.join(UPLOAD_DIR, uniqueFilename);
+    const timestamp = Date.now();
+    const userId = user.id;
+    const extension = file.name.split(".").pop();
+    const fileName = `${
+      file.name.split(".")[0]
+    }_${userId}_${timestamp}.${extension}`;
 
-    // Convert file to buffer and save
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
+    // Upload to Supabase Storage
+    const filePath = `documents/${fileName}`;
 
-    // Create file URL (this would be your domain in production)
-    const fileUrl = `/uploads/${uniqueFilename}`;
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("course_material")
+      .upload(filePath, file, {
+        contentType: file.type,
+        upsert: false,
+      });
 
-    // Save file metadata to database
-    const [savedFile] = await db.insert(files).values({
+    if (uploadError) {
+      console.error("Supabase upload error:", uploadError);
+      return NextResponse.json(
+        { error: "Failed to upload file to storage" },
+        { status: 500 }
+      );
+    }
+
+    // Get public URL
+    const { data: publicUrlData } = supabase.storage
+      .from("course_material")
+      .getPublicUrl(filePath);
+
+    // Save file record to database
+    const savedFile = await saveFileRecord({
+      lessonId: lessonId || undefined,
       originalName: file.name,
-      filename: uniqueFilename,
+      filename: fileName,
       mimeType: file.type,
       size: file.size,
-      url: fileUrl,
-      lessonId: lessonId || null,
-      userId,
-      createdAt: new Date(),
-    }).returning();
+      publicUrl: publicUrlData.publicUrl, // Public URL for direct access
+    });
 
-    // Extract additional metadata based on file type
-    let metadata: Record<string, unknown> = {};
-    
-    if (validation.fileType === 'video') {
-      // In production, you would use ffmpeg or similar to extract video metadata
-      metadata = {
-        duration: '00:00', // Placeholder - would be extracted from video
-        thumbnail: null, // Placeholder - would generate thumbnail
-      };
-    } else if (validation.fileType === 'pdf') {
-      // In production, you would use pdf-parse or similar to extract PDF metadata
-      metadata = {
-        pageCount: 1, // Placeholder - would be extracted from PDF
-      };
-    }
+    // Trigger RAG processing asynchronously (don't wait for it to complete)
+    console.log(`🚀 Triggering RAG processing for file: ${savedFile.id}`);
+    console.log(`📄 File details:`, {
+      fileId: savedFile.id,
+      originalName: file.name,
+      size: file.size,
+      type: file.type,
+      lessonId: lessonId || "none",
+      topicId: topicId || "none",
+      publicUrl: publicUrlData.publicUrl,
+    });
+
+    // Process document in background
+    processDocument(savedFile.id)
+      .then((result) => {
+        console.log(
+          `✅ RAG processing completed for file ${savedFile.id}:`,
+          result
+        );
+      })
+      .catch((error: unknown) => {
+        console.error(
+          `❌ RAG processing failed for file ${savedFile.id}:`,
+          error
+        );
+        if (error instanceof Error) {
+          console.error(`❌ Error details:`, {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          });
+        }
+      });
 
     return NextResponse.json({
       success: true,
-      message: 'File uploaded successfully',
-      file: {
-        id: savedFile.id,
-        originalName: savedFile.originalName,
-        filename: savedFile.filename,
-        url: savedFile.url,
-        size: savedFile.size,
-        type: validation.fileType,
-        ...metadata,
-      },
+      file: savedFile,
+      message: "File uploaded successfully, processing started",
     });
-
   } catch (error) {
-    console.error('Error uploading file:', error);
+    console.error("File upload error:", error);
     return NextResponse.json(
-      { error: 'Failed to upload file' },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
 }
 
-// GET /api/upload - Get upload progress or file info
+// GET endpoint for fetching file info
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const fileId = searchParams.get('fileId');
-    const userId = searchParams.get('userId');
-
-    if (!fileId || !userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json(
-        { error: 'File ID and User ID are required' },
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const fileId = searchParams.get("fileId");
+
+    if (!fileId) {
+      return NextResponse.json(
+        { error: "File ID is required" },
         { status: 400 }
       );
     }
 
-    // Get file info from database
-    const fileInfo = await db
-      .select()
-      .from(files)
-      .where(and(eq(files.id, fileId), eq(files.userId, userId)))
-      .limit(1);
+    const { getFileInfo } = await import("@/lib/actions/files/file-actions");
+    const fileInfo = await getFileInfo(fileId);
 
-    if (fileInfo.length === 0) {
-      return NextResponse.json(
-        { error: 'File not found' },
-        { status: 404 }
-      );
+    if (!fileInfo) {
+      return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
     return NextResponse.json({
       success: true,
-      file: fileInfo[0],
+      file: fileInfo,
     });
-
   } catch (error) {
-    console.error('Error fetching file info:', error);
+    console.error("Error fetching file info:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch file info' },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

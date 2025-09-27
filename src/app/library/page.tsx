@@ -1,129 +1,120 @@
-'use client';
-import React, { useState, useEffect } from 'react';
-import type { FC } from 'react';
-import DashboardLayout from '@/components/layout';
-import CourseCreator from '@/components/CourseCreator';
-import AuthGuard from '@/components/AuthGuard';
-import { FaPlus } from "react-icons/fa6";
-import Image from 'next/image';
-import { 
-  courseService, 
-  type Course as CourseType, 
-  type Topic as TopicType, 
-  type Lesson as LessonType 
-} from '@/lib/services/course-service';
-import { div } from 'framer-motion/client';
-import { generateCourseSummary } from '@/app/actions/course-summary';
+"use client";
 
-// Icons
-const Icons = {
-  Plus: ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <line x1="12" y1="5" x2="12" y2="19"></line>
-      <line x1="5" y1="12" x2="19" y2="12"></line>
-    </svg>
-  ),
-  
-  ArrowLeft: ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <line x1="19" y1="12" x2="5" y2="12"></line>
-      <polyline points="12 19 5 12 12 5"></polyline>
-    </svg>
-  ),
-  
-  BookOpen: ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-    </svg>
-  ),
-  
-  Video: ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="m22 8-6 4 6 4V8z"></path>
-      <rect x="2" y="6" width="14" height="12" rx="2" ry="2"></rect>
-    </svg>
-  ),
-  
-  FileText: ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-      <polyline points="14 2 14 8 20 8"></polyline>
-      <line x1="16" y1="13" x2="8" y2="13"></line>
-      <line x1="16" y1="17" x2="8" y2="17"></line>
-      <polyline points="10 9 9 9 8 9"></polyline>
-    </svg>
-  ),
-  
-  Presentation: ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-      <line x1="8" y1="21" x2="16" y2="21"></line>
-      <line x1="12" y1="17" x2="12" y2="21"></line>
-    </svg>
-  ),
+import React, { useState, useEffect } from "react";
+import { useRequireAuth } from "@/hooks/use-auth";
+import CourseCreator from "@/components/CourseCreator";
+import { FaPlus, FaArrowLeft } from "react-icons/fa6";
+import { BookOpen, FileText, Presentation, ExternalLink } from "lucide-react";
+import * as courseService from "@/services/course-service";
+import type { Course, Topic, Lesson, ViewType } from "@/types/library";
 
-  ExternalLink: ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-      <polyline points="15 3 21 3 21 9"></polyline>
-      <line x1="10" y1="14" x2="21" y2="3"></line>
-    </svg>
-  )
-};
+const LoadingSpinner = () => (
+  <div className="flex justify-center text-xl h-[50vh] items-center">
+    <div className="loader"></div>
+  </div>
+);
 
-// Types
-interface Lesson extends LessonType {
-  lessons?: Lesson[];
-}
+// ✅ Error component
+const ErrorMessage = ({
+  error,
+  onRetry,
+}: {
+  error: string;
+  onRetry: () => void;
+}) => (
+  <div className="text-center py-12">
+    <p className="text-red-600 mb-4">Error: {error}</p>
+    <button
+      onClick={onRetry}
+      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+    >
+      Retry
+    </button>
+  </div>
+);
 
-interface Topic extends TopicType {
-  lessons?: Lesson[];
-}
+// ✅ Course card component
+const CourseCard = ({
+  course,
+  onClick,
+}: {
+  course: Course;
+  onClick: () => void;
+}) => (
+  <div
+    onClick={onClick}
+    className="bg-white rounded-4xl shadow-sm overflow-hidden cursor-pointer group transition-all duration-300 hover:shadow-xl"
+  >
+    <img
+      src={course.image || course.imageUrl}
+      alt={course.title}
+      className="w-full h-32 object-cover"
+    />
+    <div className="p-6">
+      <h3 className="text-xl font-semibold text-black mb-2 capitalize">
+        {course.title}
+      </h3>
+      <p className="text-navy text-base capitalize">{course.description}</p>
+    </div>
+  </div>
+);
 
-interface Course extends CourseType {
-  topics?: Topic[];
-}
+// ✅ Create course card component
+const CreateCourseCard = ({ onClick }: { onClick: () => void }) => (
+  <div
+    onClick={onClick}
+    className="flex gap-4 text-neutral-600 hover:text-black cursor-pointer items-center pr-4 transition-colors"
+  >
+    Add a new course
+    <FaPlus className="text-xl" />
+  </div>
+);
 
-type ViewType = 'library' | 'course' | 'topic' | 'create';
+// ✅ Navigation button component
+const BackButton = ({
+  onClick,
+  children,
+}: {
+  onClick: () => void;
+  children: React.ReactNode;
+}) => (
+  <button
+    onClick={onClick}
+    className="flex items-center cursor-pointer font-semibold text-gray-600 hover:text-black mb-6 transition-colors duration-300"
+  >
+    <FaArrowLeft className="w-4 h-4 mr-2" />
+    {children}
+  </button>
+);
 
 export default function LibraryPage() {
-  return (
-    <AuthGuard>
-      <LibraryContent />
-    </AuthGuard>
-  );
+  const { user, loading } = useRequireAuth();
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (!user?.id) {
+    return null; // Will redirect via useEffect
+  }
+
+  return <LibraryContent userId={user.id} />;
 }
 
-function LibraryContent() {
-  const [view, setView] = useState<ViewType>('library');
+// ✅ Main content component with userId prop
+function LibraryContent({ userId }: { userId: string }) {
+  const [view, setView] = useState<ViewType>("library");
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [courseSummary, setCourseSummary] = useState<string>('');
-  const [generatingSummary, setGeneratingSummary] = useState(false);
-  
-  const userId = '550e8400-e29b-41d4-a716-446655440000';
+  const [courseSummary, setCourseSummary] = useState<string>("");
 
-  // Generate course summary using Wingman's persona
-  const generateSummary = async (title: string, description: string) => {
-    setGeneratingSummary(true);
-    try {
-      const summary = await generateCourseSummary(title, description);
-      setCourseSummary(summary);
-    } catch (error) {
-      console.error('Error generating summary:', error);
-      setCourseSummary('This course will provide valuable insights to enhance your understanding of aeronautical engineering principles.');
-    } finally {
-      setGeneratingSummary(false);
-    }
-  };
-
+  // ✅ Load courses on mount
   useEffect(() => {
     loadCourses();
-  }, []);
+  }, [userId]);
 
   const loadCourses = async () => {
     try {
@@ -132,42 +123,50 @@ function LibraryContent() {
       const userCourses = await courseService.getCourses(userId);
       setCourses(userCourses);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load courses');
-      console.error('Failed to load courses:', err);
+      setError(err instanceof Error ? err.message : "Failed to load courses");
+      console.error("Failed to load courses:", err);
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ Course summary is now loaded from stored gendesc
+  // No need to generate summary since it's pre-generated and stored in database
+
+  // ✅ Event handlers
   const handleCourseSelect = (course: Course) => {
     setSelectedCourse(course);
-    setView('course');
-    // Generate summary when course is selected
-    generateSummary(course.title, course.description);
+    setView("course");
+    // Use stored AI-generated description instead of generating new one
+    setCourseSummary(
+      course.gendesc ||
+        "This course will enhance your aeronautical engineering knowledge."
+    );
   };
 
   const handleCourseDelete = async (courseId: string) => {
-    if (!window.confirm('Are you sure you want to delete this course? This will also delete all associated quizzes and cannot be undone.')) {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this course? This will also delete all associated quizzes and cannot be undone."
+      )
+    ) {
       return;
     }
 
     try {
       setLoading(true);
       await courseService.deleteCourse(courseId, userId);
-      
-      // Remove the course from the local state
-      setCourses(courses.filter(course => course.id !== courseId));
-      
-      // If the deleted course was currently selected, go back to library
-      if (selectedCourse?.id === courseId) {
+      setCourses((prev) =>
+        prev.filter((course) => course.id.toString() !== courseId)
+      );
+
+      if (selectedCourse?.id.toString() === courseId) {
         setSelectedCourse(null);
-        setView('library');
+        setView("library");
       }
-      
-      console.log('Course deleted successfully');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete course');
-      console.error('Failed to delete course:', err);
+      setError(err instanceof Error ? err.message : "Failed to delete course");
+      console.error("Failed to delete course:", err);
     } finally {
       setLoading(false);
     }
@@ -175,70 +174,35 @@ function LibraryContent() {
 
   const handleTopicSelect = (topic: Topic) => {
     setSelectedTopic(topic);
-    setView('topic');
-  };
-
-  const handleCreateCourse = () => {
-    setView('create');
+    setView("topic");
   };
 
   const handleCourseCreated = (course: Course) => {
-    setCourses(prev => [course, ...prev]);
-    setView('library');
+    setCourses((prev) => [course, ...prev]);
+    setView("library");
   };
 
+  // ✅ Navigation helpers
   const backToLibrary = () => {
     setSelectedCourse(null);
     setSelectedTopic(null);
-    setView('library');
+    setView("library");
   };
 
   const backToCourse = () => {
     setSelectedTopic(null);
-    setView('course');
+    setView("course");
   };
 
-  // Components
-  const CourseCard: FC<{ course: Course; onClick: () => void }> = ({ course, onClick }) => (
-    <div
-      onClick={onClick}
-      className="bg-white rounded-4xl  shadow-sm overflow-hidden cursor-pointer group  transition-all duration-300 hover:shadow-xl"
-    >
-      <img src={course.imageUrl} alt={course.title.charAt(0).toUpperCase() + course.title.slice(1)}  className="w-full h-32 object-cover" />
-      <div className=" p-6">
-        <h3 className="text-xl font-semibold text-black mb-2">{course.title.charAt(0).toUpperCase() + course.title.slice(1)}</h3>
-        <p className="text-navy text-base">{course.description.charAt(0).toUpperCase() + course.description.slice(1)}</p>
-      </div>
-    </div>
-  );
+  // ✅ Error state
+  if (error) {
+    return <ErrorMessage error={error} onRetry={loadCourses} />;
+  }
 
-  const CreateCourseCard: FC<{ onClick: () => void }> = ({ onClick }) => (
-    <div
-      onClick={onClick}
-      className='flex gap-4 text-neutral-600 hover:text-black cursor-pointer items-center pr-4'
-    >
-      Add a new course
-      <span className='text-xl'><FaPlus/></span>
-    </div>
-  );
-
+  // ✅ Main render logic
   const renderContent = () => {
-    if (error) {
-      return (
-        <div className="text-center py-12">
-          <p className="text-red-600 mb-4">Error: {error}</p>
-          <button
-            onClick={loadCourses}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Retry
-          </button>
-        </div>
-      );
-    }
-
     switch (view) {
-      case 'create':
+      case "create":
         return (
           <CourseCreator
             userId={userId}
@@ -247,160 +211,248 @@ function LibraryContent() {
           />
         );
 
-      case 'course':
-        return selectedCourse && (
-          <div className='flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw]'>
-            <div className='w-11/12 pt-34 px-6'>
-            <div className='flex justify-between'>
-              <button onClick={backToLibrary} className="flex items-center cursor-pointer font-semibold text-gray-600 hover:text-black mb-6 transition-colors duration-300">
-              <Icons.ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Library
-            </button>
-            <button className={`flex items-center cursor-pointer font-semibold text-right transition-colors duration-300 mb-6 ${
-                      loading ? 'text-gray-400 cursor-not-allowed' : 'text-red-600 hover:text-red-800'
-                    }`}
-                    onClick={() => selectedCourse && !loading && handleCourseDelete(selectedCourse.id)}
-                    disabled={loading}>
-              {loading ? 'Deleting...' : 'Delete'}
-            </button>
-
-            </div>
-            
-            <div className="flex items-start mb-8">
-              <img src={selectedCourse.imageUrl} alt={selectedCourse.title} className="w-40 h-auto object-cover rounded-4xl mr-6" />
-              <div>
-                <h1 className="text-4xl font-bold text-black">{selectedCourse.title.charAt(0).toUpperCase() + selectedCourse.title.slice(1)}</h1>
-                <p className="text-neutral-600 mt-2">{selectedCourse.description.charAt(0).toUpperCase() + selectedCourse.description.slice(1)}</p>
-                <div className="text-navy mt-3 font-medium italic">
-                  {generatingSummary ? (
-                    <span className="flex items-center">
-                      <div className="loader-sm mr-2"></div>
-                    </span>
-                  ) : (
-                    courseSummary || "This course will enhance your aeronautical engineering knowledge."
-                  )}
-                </div>
-              </div>
-            </div>
-            <h2 className="text-2xl font-bold text-black mb-4  pb-2">Topics</h2>
-            <div className="space-y-4 mb-14">
-              {selectedCourse.topics && selectedCourse.topics.length > 0 ? (
-                selectedCourse.topics.map((topic) => (
-                  <div 
-                    key={topic.id} 
-                    onClick={() => handleTopicSelect(topic)}
-                    className="bg-white p-5 rounded-4xl  cursor-pointer hover:shadow-xl shadow-sm transition-all duration-300 flex justify-between items-center"
-                  >
-                    <div className="flex items-center">
-                      <Icons.BookOpen className="w-6 h-6 mr-4 text-gray-600"/>
-                      <span className="font-semibold text-lg">{topic.title}</span>
-                    </div>
-                    <span className="text-sm text-gray-600">{topic.lessons?.length || 0} lessons</span>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <Icons.BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No topics available for this course yet.</p>
-                </div>
-              )}
-            </div>
-          </div>
-          </div>
+      case "course":
+        return (
+          selectedCourse && (
+            <CourseView
+              course={selectedCourse}
+              courseSummary={courseSummary}
+              loading={loading}
+              onBack={backToLibrary}
+              onDelete={() => handleCourseDelete(selectedCourse.id.toString())}
+              onTopicSelect={handleTopicSelect}
+            />
+          )
         );
 
-      case 'topic':
-        return selectedTopic && selectedCourse && (
-          <div className='flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw]'>
-            <div className='w-11/12 pt-34 px-6'>
-            <button onClick={backToCourse} className="flex items-center cursor-pointer font-semibold text-gray-600 hover:text-black mb-6 transition-colors duration-300">
-              <Icons.ArrowLeft className="w-4 h-4 mr-2" />
-              Back to {selectedCourse.title}
-            </button>
-            <h1 className="text-4xl font-bold mb-4 text-black">{selectedTopic.title.charAt(0).toUpperCase() + selectedTopic.title.slice(1)}</h1>
-            <p className="text-neutral-600 border-b-gray-600/50 border-b-[1px] mb-4 pb-4">All lessons for this topic.</p>
-            <div className="space-y-3 mb-14">
-              {selectedTopic.lessons && selectedTopic.lessons.length > 0 ? (
-                selectedTopic.lessons.map((lesson) => (
-                  <div key={lesson.id} className="bg-white p-4 px-6 cursor-pointer rounded-4xl shadow-sm hover:shadow-xl transition-all duration-300">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        {lesson.type === 'video' ? (
-                          <Icons.Video className="w-5 h-5 mr-4 text-blue-500"/> 
-                        ) : lesson.type === 'pptx' ? (
-                          <Icons.Presentation className="w-5 h-5 mr-4 text-orange-500"/>
-                        ) : (
-                          <Icons.FileText className="w-5 h-5 mr-4 text-red-500"/>
-                        )}
-                        <div className="flex flex-col">
-                          <span className="font-medium">{lesson.title.charAt(0).toUpperCase() + lesson.title.slice(1)}</span>
-                          <span className="text-xs text-gray-400 capitalize">{lesson.type} file</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        {lesson.type === 'video' && lesson.duration && (
-                          <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-md">{lesson.duration}</span>
-                        )}
-                        {lesson.fileUrl && (
-                          <a
-                            href={lesson.fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Icons.ExternalLink className="w-4 h-4 mr-1" />
-                            Open File
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <Icons.FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No lessons available for this topic yet.</p>
-                </div>
-              )}
-            </div>
-          </div>
-          </div>
+      case "topic":
+        return (
+          selectedTopic &&
+          selectedCourse && (
+            <TopicView
+              topic={selectedTopic}
+              courseName={selectedCourse.title}
+              onBack={backToCourse}
+            />
+          )
         );
 
-      case 'library':
+      case "library":
       default:
         return (
-          <div className='flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw]'>
-            <div className='w-11/12 px-6 pt-34 '>
-              <div className='flex justify-between items-center '>
-                <div><h1 className='text-left text-2xl font-semibold'>Library</h1>
-              <p className="text-gray-600- text-left mt-4 mb-6">Explore your courses or create a new one to get started.</p></div>
-              <CreateCourseCard onClick={handleCreateCourse} />
-              </div>
-              {loading ? (
-                <div className="flex justify-center text-xl h-[50vh] items-center">
-                  <div className="loader"></div>
-                </div>
-              ) : (
-                <div className='rounded-4xl w-full  py-8 mb-14'>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-8">
-                    {courses.map((course) => (
-                      <CourseCard key={course.id} course={course} onClick={() => handleCourseSelect(course)} />
-                    ))}
-                    
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          <LibraryView
+            courses={courses}
+            loading={loading}
+            onCourseSelect={handleCourseSelect}
+            onCreateCourse={() => setView("create")}
+          />
         );
     }
   };
 
+  return <div className="space-y-6">{renderContent()}</div>;
+}
+
+// ✅ Separate view components for better organization
+const LibraryView = ({
+  courses,
+  loading,
+  onCourseSelect,
+  onCreateCourse,
+}: {
+  courses: Course[];
+  loading: boolean;
+  onCourseSelect: (course: Course) => void;
+  onCreateCourse: () => void;
+}) => (
+  <div className="flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw]">
+    <div className="w-11/12 px-6 pt-34">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-left text-2xl font-semibold">Library</h1>
+          <p className="text-gray-600 text-left mt-4 mb-6">
+            Explore your courses or create a new one to get started.
+          </p>
+        </div>
+        <CreateCourseCard onClick={onCreateCourse} />
+      </div>
+
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <div className="rounded-4xl w-full py-8 mb-14">
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+            {courses.map((course) => (
+              <CourseCard
+                key={course.id}
+                course={course}
+                onClick={() => onCourseSelect(course)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+const CourseView = ({
+  course,
+  courseSummary,
+  loading,
+  onBack,
+  onDelete,
+  onTopicSelect,
+}: {
+  course: Course;
+  courseSummary: string;
+  loading: boolean;
+  onBack: () => void;
+  onDelete: () => void;
+  onTopicSelect: (topic: Topic) => void;
+}) => (
+  <div className="flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw]">
+    <div className="w-11/12 pt-34 px-6">
+      <div className="flex justify-between">
+        <BackButton onClick={onBack}>Back to Library</BackButton>
+        <button
+          className={`font-semibold transition-colors duration-300 mb-6 ${
+            loading
+              ? "text-gray-400 cursor-not-allowed"
+              : "text-red-600 hover:text-red-800"
+          }`}
+          onClick={onDelete}
+          disabled={loading}
+        >
+          {loading ? "Deleting..." : "Delete"}
+        </button>
+      </div>
+
+      <div className="flex items-start mb-8">
+        <img
+          src={course.imageUrl}
+          alt={course.title}
+          className="w-40 h-auto object-cover rounded-4xl mr-6"
+        />
+        <div>
+          <h1 className="text-4xl font-bold text-black capitalize">
+            {course.title}
+          </h1>
+          <p className="text-neutral-600 mt-2 capitalize">
+            {course.description}
+          </p>
+          <div className="text-navy mt-3 font-medium italic">
+            {courseSummary ||
+              "This course will enhance your aeronautical engineering knowledge."}
+          </div>
+        </div>
+      </div>
+
+      <h2 className="text-2xl font-bold text-black mb-4 pb-2">Topics</h2>
+      <div className="space-y-4 mb-14">
+        {course.topics && course.topics.length > 0 ? (
+          course.topics.map((topic) => (
+            <div
+              key={topic.id}
+              onClick={() => onTopicSelect(topic)}
+              className="bg-white p-5 rounded-4xl cursor-pointer hover:shadow-xl shadow-sm transition-all duration-300 flex justify-between items-center"
+            >
+              <div className="flex items-center">
+                <BookOpen className="w-6 h-6 mr-4 text-gray-600" />
+                <span className="font-semibold text-lg">{topic.title}</span>
+              </div>
+              <span className="text-sm text-gray-600">
+                {topic.lessons?.length || 0} lessons
+              </span>
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>No topics available for this course yet.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+);
+
+const TopicView = ({
+  topic,
+  courseName,
+  onBack,
+}: {
+  topic: Topic;
+  courseName: string;
+  onBack: () => void;
+}) => (
+  <div className="flex flex-col items-center bg-[#f5f5f5] min-h-screen w-[100vw]">
+    <div className="w-11/12 pt-34 px-6">
+      <BackButton onClick={onBack}>Back to {courseName}</BackButton>
+
+      <h1 className="text-4xl font-bold mb-4 text-black capitalize">
+        {topic.title}
+      </h1>
+      <p className="text-neutral-600 mb-4 pb-4">All lessons for this topic.</p>
+
+      <div className="space-y-3 mb-14">
+        {topic.lessons && topic.lessons.length > 0 ? (
+          topic.lessons.map((lesson) => (
+            <LessonCard key={lesson.id} lesson={lesson} />
+          ))
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>No lessons available for this topic yet.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+);
+
+// ✅ Lesson card component
+const LessonCard = ({ lesson }: { lesson: Lesson }) => {
+  const getIcon = () => {
+    switch (lesson.type) {
+      case "pdf":
+        return <FileText className="w-5 h-5 mr-4 text-red-500" />;
+      case "docx":
+        return <FileText className="w-5 h-5 mr-4 text-blue-600" />;
+      case "pptx":
+        return <Presentation className="w-5 h-5 mr-4 text-orange-500" />;
+      default:
+        return <FileText className="w-5 h-5 mr-4 text-gray-500" />;
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      {renderContent()}
+    <div className="bg-white p-4 px-6 cursor-pointer rounded-4xl shadow-sm hover:shadow-xl transition-all duration-300">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center">
+          {getIcon()}
+          <div className="flex flex-col">
+            <span className="font-medium capitalize">{lesson.title}</span>
+            <span className="text-xs text-gray-400 capitalize">
+              {lesson.type} file
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          {lesson.fileUrl && (
+            <a
+              href={lesson.fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink className="w-4 h-4 mr-1" />
+              Open File
+            </a>
+          )}
+        </div>
+      </div>
     </div>
   );
-}
+};

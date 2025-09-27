@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db/drizzle';
-import { lessons } from '@/lib/db/schema/courses';
-import { eq } from 'drizzle-orm';
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/services/db/drizzle";
+import { lessons } from "@/services/db/schema/courses";
+import { eq } from "drizzle-orm";
 
 // PUT /api/lessons/[id] - Update a lesson
 export async function PUT(
@@ -11,13 +11,13 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    
-    console.log('🔄 Updating lesson:', id, 'with data:', body);
+
+    console.log("🔄 Updating lesson:", id, "with data:", body);
 
     // Validate lesson ID
     if (!id) {
       return NextResponse.json(
-        { error: 'Lesson ID is required' },
+        { error: "Lesson ID is required" },
         { status: 400 }
       );
     }
@@ -30,10 +30,7 @@ export async function PUT(
       .limit(1);
 
     if (existingLesson.length === 0) {
-      return NextResponse.json(
-        { error: 'Lesson not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
     }
 
     // Update the lesson
@@ -46,18 +43,17 @@ export async function PUT(
       .where(eq(lessons.id, id))
       .returning();
 
-    console.log('✅ Lesson updated successfully:', updatedLesson);
+    console.log("✅ Lesson updated successfully:", updatedLesson);
 
     return NextResponse.json({
       success: true,
-      message: 'Lesson updated successfully',
+      message: "Lesson updated successfully",
       lesson: updatedLesson,
     });
-
   } catch (error) {
-    console.error('💥 Error updating lesson:', error);
+    console.error("💥 Error updating lesson:", error);
     return NextResponse.json(
-      { error: 'Failed to update lesson' },
+      { error: "Failed to update lesson" },
       { status: 500 }
     );
   }
@@ -74,7 +70,7 @@ export async function GET(
     // Validate lesson ID
     if (!id) {
       return NextResponse.json(
-        { error: 'Lesson ID is required' },
+        { error: "Lesson ID is required" },
         { status: 400 }
       );
     }
@@ -87,21 +83,17 @@ export async function GET(
       .limit(1);
 
     if (lesson.length === 0) {
-      return NextResponse.json(
-        { error: 'Lesson not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
     }
 
     return NextResponse.json({
       success: true,
       lesson: lesson[0],
     });
-
   } catch (error) {
-    console.error('Error fetching lesson:', error);
+    console.error("Error fetching lesson:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch lesson' },
+      { error: "Failed to fetch lesson" },
       { status: 500 }
     );
   }
@@ -118,7 +110,7 @@ export async function DELETE(
     // Validate lesson ID
     if (!id) {
       return NextResponse.json(
-        { error: 'Lesson ID is required' },
+        { error: "Lesson ID is required" },
         { status: 400 }
       );
     }
@@ -131,26 +123,20 @@ export async function DELETE(
       .limit(1);
 
     if (existingLesson.length === 0) {
-      return NextResponse.json(
-        { error: 'Lesson not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
     }
 
     // Delete the lesson
-    await db
-      .delete(lessons)
-      .where(eq(lessons.id, id));
+    await db.delete(lessons).where(eq(lessons.id, id));
 
     return NextResponse.json({
       success: true,
-      message: 'Lesson deleted successfully',
+      message: "Lesson deleted successfully",
     });
-
   } catch (error) {
-    console.error('Error deleting lesson:', error);
+    console.error("Error deleting lesson:", error);
     return NextResponse.json(
-      { error: 'Failed to delete lesson' },
+      { error: "Failed to delete lesson" },
       { status: 500 }
     );
   }

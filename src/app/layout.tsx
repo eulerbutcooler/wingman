@@ -3,8 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import Navbar from "@/components/ui/navbar";
-import { AuthProvider } from "@/components/AuthProvider";
-
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,8 +18,8 @@ export const metadata: Metadata = {
   title: "Wingman App",
   description: "AI-powered learning assistant",
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
   },
 };
 
@@ -33,18 +31,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-
         className={`${geistSans.variable} ${geistMono.variable} bg-[#f5f5f5] antialiased`}
-
       >
-
-        <AuthProvider>
-          <div className="flex flex-col justify-center items-center min-h-screen">
-            <Navbar />
-            <main className="flex-grow">{children}</main>
-          </div>
-        </AuthProvider>
-
+        <div className="flex flex-col justify-center items-center min-h-screen">
+          <Navbar />
+          <main className="flex-grow">{children}</main>
+        </div>
       </body>
     </html>
   );

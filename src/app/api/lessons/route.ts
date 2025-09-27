@@ -1,26 +1,26 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db/drizzle';
-import { lessons, files } from '@/lib/db/schema/courses';
-import { eq } from 'drizzle-orm';
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/services/db/drizzle";
+import { lessons, files } from "@/services/db/schema/courses";
+import { eq } from "drizzle-orm";
 
 // POST /api/lessons - Create a new lesson
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, type, topicId, fileId, duration } = body;
+    const { title, type, topicId, fileId } = body;
 
     // Validate required fields
     if (!title || !type || !topicId) {
       return NextResponse.json(
-        { error: 'Title, type, and topicId are required' },
+        { error: "Title, type, and topicId are required" },
         { status: 400 }
       );
     }
 
     // Validate type
-    if (!['video', 'pdf', 'pptx'].includes(type)) {
+    if (!["pdf", "docx", "pptx"].includes(type)) {
       return NextResponse.json(
-        { error: 'Type must be "video", "pdf", or "pptx"' },
+        { error: 'Type must be "pdf", "docx", or "pptx"' },
         { status: 400 }
       );
     }
@@ -35,28 +35,13 @@ export async function POST(request: NextRequest) {
 
     const nextOrder = lastLesson.length > 0 ? lastLesson[0].order + 1 : 1;
 
-    // If fileId is provided, get the file URL
-    let fileUrl = null;
-    if (fileId) {
-      const fileRecord = await db
-        .select({ url: files.url })
-        .from(files)
-        .where(eq(files.id, fileId))
-        .limit(1);
-
-      if (fileRecord.length > 0) {
-        fileUrl = fileRecord[0].url;
-      }
-    }
-
     // Create the lesson
     const [newLesson] = await db
       .insert(lessons)
       .values({
         title,
         type,
-        fileUrl,
-        duration: type === 'video' ? duration : null,
+        fileId: fileId || null, // Use fileId directly
         topicId,
         order: nextOrder,
         createdAt: new Date(),
@@ -64,24 +49,17 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
-    // Update the file record to link it to this lesson
-    if (fileId) {
-      await db
-        .update(files)
-        .set({ lessonId: newLesson.id })
-        .where(eq(files.id, fileId));
-    }
+    // No need to update files table - lessons reference files via fileId
 
     return NextResponse.json({
       success: true,
-      message: 'Lesson created successfully',
+      message: "Lesson created successfully",
       lesson: newLesson,
     });
-
   } catch (error) {
-    console.error('Error creating lesson:', error);
+    console.error("Error creating lesson:", error);
     return NextResponse.json(
-      { error: 'Failed to create lesson' },
+      { error: "Failed to create lesson" },
       { status: 500 }
     );
   }
@@ -91,11 +69,11 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const topicId = searchParams.get('topicId');
+    const topicId = searchParams.get("topicId");
 
     if (!topicId) {
       return NextResponse.json(
-        { error: 'Topic ID is required' },
+        { error: "Topic ID is required" },
         { status: 400 }
       );
     }
@@ -110,11 +88,10 @@ export async function GET(request: NextRequest) {
       success: true,
       lessons: topicLessons,
     });
-
   } catch (error) {
-    console.error('Error fetching lessons:', error);
+    console.error("Error fetching lessons:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch lessons' },
+      { error: "Failed to fetch lessons" },
       { status: 500 }
     );
   }
@@ -124,11 +101,11 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { lessonId, title, order, duration, fileUrl } = body;
+    const { lessonId, title, order, fileId } = body;
 
     if (!lessonId) {
       return NextResponse.json(
-        { error: 'Lesson ID is required' },
+        { error: "Lesson ID is required" },
         { status: 400 }
       );
     }
@@ -139,8 +116,7 @@ export async function PUT(request: NextRequest) {
 
     if (title) updateData.title = title;
     if (order !== undefined) updateData.order = order;
-    if (duration) updateData.duration = duration;
-    if (fileUrl) updateData.fileUrl = fileUrl;
+    if (fileId) updateData.fileId = fileId;
 
     const [updatedLesson] = await db
       .update(lessons)
@@ -150,14 +126,13 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Lesson updated successfully',
+      message: "Lesson updated successfully",
       lesson: updatedLesson,
     });
-
   } catch (error) {
-    console.error('Error updating lesson:', error);
+    console.error("Error updating lesson:", error);
     return NextResponse.json(
-      { error: 'Failed to update lesson' },
+      { error: "Failed to update lesson" },
       { status: 500 }
     );
   }
@@ -167,11 +142,11 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const lessonId = searchParams.get('lessonId');
+    const lessonId = searchParams.get("lessonId");
 
     if (!lessonId) {
       return NextResponse.json(
-        { error: 'Lesson ID is required' },
+        { error: "Lesson ID is required" },
         { status: 400 }
       );
     }
@@ -181,13 +156,12 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Lesson deleted successfully',
+      message: "Lesson deleted successfully",
     });
-
   } catch (error) {
-    console.error('Error deleting lesson:', error);
+    console.error("Error deleting lesson:", error);
     return NextResponse.json(
-      { error: 'Failed to delete lesson' },
+      { error: "Failed to delete lesson" },
       { status: 500 }
     );
   }

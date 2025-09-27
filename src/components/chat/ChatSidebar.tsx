@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Plus, MessageSquare, Trash2, Edit3 } from "lucide-react";
-import { getAllChats, deleteChat } from "@/lib/db/actions/chat-actions";
-import { Chat } from "@/lib/db/schema/chats";
+import { deleteChat, getUserChats } from "@/lib/actions/chat/chat-actions";
+import { Chat } from "@/services/db/schema/chats";
 
 interface ChatSidebarProps {
   currentChatId?: string;
@@ -25,7 +25,7 @@ export default function ChatSidebar({
 
   const loadChats = async () => {
     try {
-      const chatList = await getAllChats();
+      const chatList = await getUserChats();
       setChats(chatList);
     } catch (error) {
       console.error("Failed to load chats:", error);
@@ -60,85 +60,89 @@ export default function ChatSidebar({
           New Chat
         </button>
       </div>
-    <div className="w-80 bg-[#f5f5f5] pt-18 rounded-4xl flex flex-col h-full">
-      
-
-      <div className="flex-1 bg-white shadow-sm rounded-4xl overflow-y-auto px-6 p-4">
-        <div className=" font-medium text-gray-600 tracking-wide mb-4">
-          Recent Chats
-        </div>
-
-        {isLoading ? (
-          <div className="text-sm text-gray-600">Loading chats...</div>
-        ) : chats.length === 0 ? (
-          <div className="text-sm text-gray-600 italic">
-            No chats yet. Start a new conversation!
+      <div className="w-80 bg-[#f5f5f5] pt-18 rounded-4xl flex flex-col h-full">
+        <div className="flex-1 bg-white shadow-sm rounded-4xl overflow-y-auto px-6 p-4">
+          <div className=" font-medium text-gray-600 tracking-wide mb-4">
+            Recent Chats
           </div>
-        ) : (
-          <div className="space-y-6">
-            {chats.map((chat) => (
-              <div
-                key={chat.id}
-                onClick={() => onSelectChat(chat.id)}
-                className={`group flex items-center gap-3 transition-all duration-300 shadow-sm  text-white p-2 px-4 rounded-4xl cursor-pointer ${
-                  currentChatId === chat.id
-                    ? "bg-navy hover:shadow-xl text-white"
-                    : "  hover:shadow-xl  "
-                }`}
-              >
+
+          {isLoading ? (
+            <div className="text-sm text-gray-600">Loading chats...</div>
+          ) : chats.length === 0 ? (
+            <div className="text-sm text-gray-600 italic">
+              No chats yet. Start a new conversation!
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {chats.map((chat) => (
                 <div
-                  className={`w-6 h-6 rounded-full text-white flex items-center justify-center flex-shrink-0 ${
-                    currentChatId === chat.id ? "" : ""
-                  }`}
-                >
-                  <MessageSquare
-                    size={14}
-                    className={
-                      currentChatId === chat.id ? "text-white" : "text-gray-900"
-                    }
-                  />
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div
-                    className={`text-sm font-medium truncate ${
-                      currentChatId === chat.id ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    {chat.title}
-                  </div>
-                  <div
-                    className={`text-xs truncate ${
-                      currentChatId === chat.id
-                        ? "text-white/70"
-                        : "text-gray-900/70"
-                    }`}
-                  >
-                    {new Date(chat.updatedAt).toLocaleDateString()}
-                  </div>
-                </div>
-
-                <button
-                  onClick={(e) => handleDeleteChat(chat.id, e)}
-                  className={`opacity-0 group-hover:opacity-100 p-1 cursor-pointer rounded transition-opacity ${
+                  key={chat.id}
+                  onClick={() => onSelectChat(chat.id)}
+                  className={`group flex items-center gap-3 transition-all duration-300 shadow-sm  text-white p-2 px-4 rounded-4xl cursor-pointer ${
                     currentChatId === chat.id
-                      ? "hover:text-white"
-                      : "hover:text-gray-900"
+                      ? "bg-navy hover:shadow-xl text-white"
+                      : "  hover:shadow-xl  "
                   }`}
                 >
-                  <Trash2
-                    size={18}
-                    className={
-                      currentChatId === chat.id ? "text-white/70" : "text-gray-900/70"
-                    }
-                  />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+                  <div
+                    className={`w-6 h-6 rounded-full text-white flex items-center justify-center flex-shrink-0 ${
+                      currentChatId === chat.id ? "" : ""
+                    }`}
+                  >
+                    <MessageSquare
+                      size={14}
+                      className={
+                        currentChatId === chat.id
+                          ? "text-white"
+                          : "text-gray-900"
+                      }
+                    />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div
+                      className={`text-sm font-medium truncate ${
+                        currentChatId === chat.id
+                          ? "text-white"
+                          : "text-gray-900"
+                      }`}
+                    >
+                      {chat.title}
+                    </div>
+                    <div
+                      className={`text-xs truncate ${
+                        currentChatId === chat.id
+                          ? "text-white/70"
+                          : "text-gray-900/70"
+                      }`}
+                    >
+                      {new Date(chat.updatedAt).toLocaleDateString()}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={(e) => handleDeleteChat(chat.id, e)}
+                    className={`opacity-0 group-hover:opacity-100 p-1 cursor-pointer rounded transition-opacity ${
+                      currentChatId === chat.id
+                        ? "hover:text-white"
+                        : "hover:text-gray-900"
+                    }`}
+                  >
+                    <Trash2
+                      size={18}
+                      className={
+                        currentChatId === chat.id
+                          ? "text-white/70"
+                          : "text-gray-900/70"
+                      }
+                    />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
     </div>
   );
 }

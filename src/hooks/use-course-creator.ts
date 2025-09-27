@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
-import { courseService, type Course, type Topic, type Lesson, type UploadedFile } from '@/lib/services/course-service';
+import { useState, useCallback } from "react";
+import * as courseService from "@/services/course-service";
+import { Course, Topic, Lesson, UploadedFile } from "@/types";
 
 export interface UseCourseCreatorOptions {
   userId: string;
@@ -23,21 +24,27 @@ export interface TopicFormData {
 export interface LessonFormData {
   id: string;
   title: string;
-  type: 'video' | 'pdf' | 'pptx';
+  type: "pdf" | "docx" | "pptx";
   file?: UploadedFile;
   duration?: string;
 }
 
-export function useCourseCreator({ userId, onSuccess, onError }: UseCourseCreatorOptions) {
+export function useCourseCreator({
+  userId,
+  onSuccess,
+  onError,
+}: UseCourseCreatorOptions) {
   const [isLoading, setIsLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>(
+    {}
+  );
   const [errors, setErrors] = useState<string[]>([]);
 
   // Course form management
   const [courseData, setCourseData] = useState<CourseFormData>({
-    title: '',
-    description: '',
-    imageUrl: 'https://placehold.co/600x400/000000/FFFFFF?text=New+Course',
+    title: "",
+    description: "",
+    imageUrl: "https://placehold.co/600x400/000000/FFFFFF?text=New+Course",
     topics: [],
   });
 
@@ -48,35 +55,38 @@ export function useCourseCreator({ userId, onSuccess, onError }: UseCourseCreato
       title: `Module ${courseData.topics.length + 1}`,
       lessons: [],
     };
-    setCourseData(prev => ({
+    setCourseData((prev) => ({
       ...prev,
       topics: [...prev.topics, newTopic],
     }));
   }, [courseData.topics.length]);
 
   // Update topic
-  const updateTopic = useCallback((topicId: string, updates: Partial<TopicFormData>) => {
-    setCourseData(prev => ({
-      ...prev,
-      topics: prev.topics.map(topic =>
-        topic.id === topicId ? { ...topic, ...updates } : topic
-      ),
-    }));
-  }, []);
+  const updateTopic = useCallback(
+    (topicId: string, updates: Partial<TopicFormData>) => {
+      setCourseData((prev) => ({
+        ...prev,
+        topics: prev.topics.map((topic) =>
+          topic.id === topicId ? { ...topic, ...updates } : topic
+        ),
+      }));
+    },
+    []
+  );
 
   // Remove topic
   const removeTopic = useCallback((topicId: string) => {
-    setCourseData(prev => ({
+    setCourseData((prev) => ({
       ...prev,
-      topics: prev.topics.filter(topic => topic.id !== topicId),
+      topics: prev.topics.filter((topic) => topic.id !== topicId),
     }));
   }, []);
 
   // Add lesson to topic
   const addLesson = useCallback((topicId: string, lesson: LessonFormData) => {
-    setCourseData(prev => ({
+    setCourseData((prev) => ({
       ...prev,
-      topics: prev.topics.map(topic =>
+      topics: prev.topics.map((topic) =>
         topic.id === topicId
           ? { ...topic, lessons: [...topic.lessons, lesson] }
           : topic
@@ -85,96 +95,105 @@ export function useCourseCreator({ userId, onSuccess, onError }: UseCourseCreato
   }, []);
 
   // Update lesson
-  const updateLesson = useCallback((topicId: string, lessonId: string, updates: Partial<LessonFormData>) => {
-    setCourseData(prev => ({
+  const updateLesson = useCallback(
+    (topicId: string, lessonId: string, updates: Partial<LessonFormData>) => {
+      setCourseData((prev) => ({
+        ...prev,
+        topics: prev.topics.map((topic) =>
+          topic.id === topicId
+            ? {
+                ...topic,
+                lessons: topic.lessons.map((lesson) =>
+                  lesson.id === lessonId ? { ...lesson, ...updates } : lesson
+                ),
+              }
+            : topic
+        ),
+      }));
+    },
+    []
+  );
+
+  // Remove lesson
+  const removeLesson = useCallback((topicId: string, lessonId: string) => {
+    setCourseData((prev) => ({
       ...prev,
-      topics: prev.topics.map(topic =>
+      topics: prev.topics.map((topic) =>
         topic.id === topicId
           ? {
               ...topic,
-              lessons: topic.lessons.map(lesson =>
-                lesson.id === lessonId ? { ...lesson, ...updates } : lesson
-              ),
+              lessons: topic.lessons.filter((lesson) => lesson.id !== lessonId),
             }
           : topic
       ),
     }));
   }, []);
 
-  // Remove lesson
-  const removeLesson = useCallback((topicId: string, lessonId: string) => {
-    setCourseData(prev => ({
-      ...prev,
-      topics: prev.topics.map(topic =>
-        topic.id === topicId
-          ? { ...topic, lessons: topic.lessons.filter(lesson => lesson.id !== lessonId) }
-          : topic
-      ),
-    }));
-  }, []);
-
   // File upload
-  const uploadFile = useCallback(async (file: File, topicId: string): Promise<UploadedFile> => {
-    const fileId = `${file.name}-${Date.now()}`;
-    
-    try {
-      setUploadProgress(prev => ({ ...prev, [fileId]: 0 }));
+  const uploadFile = useCallback(
+    async (file: File, topicId: string): Promise<UploadedFile> => {
+      const fileId = `${file.name}-${Date.now()}`;
 
-      const uploadedFile = await courseService.uploadFile(
-        file,
-        userId,
-        undefined,
-        topicId,
-        (progress: number) => {
-          setUploadProgress(prev => ({ ...prev, [fileId]: progress }));
-        }
-      );
+      try {
+        setUploadProgress((prev) => ({ ...prev, [fileId]: 0 }));
 
-      // Process file to extract metadata
-      const metadata = await courseService.processFile(
-        uploadedFile.url,
-        uploadedFile.type,
-        uploadedFile.originalName
-      );
+        const uploadedFile = await courseService.uploadFile(
+          file,
+          userId,
+          undefined,
+          topicId,
+          (progress: number) => {
+            setUploadProgress((prev) => ({ ...prev, [fileId]: progress }));
+          }
+        );
 
-      const processedFile: UploadedFile = {
-        ...uploadedFile,
-        ...metadata,
-      };
+        // Process file to extract metadata
+        const metadata = await courseService.processFile(
+          uploadedFile.fileUrl || uploadedFile.url || "",
+          uploadedFile.type || "pdf",
+          uploadedFile.fileName || uploadedFile.originalName || ""
+        );
 
-      // Remove from progress tracking
-      setUploadProgress(prev => {
-        const updated = { ...prev };
-        delete updated[fileId];
-        return updated;
-      });
+        const processedFile: UploadedFile = {
+          ...uploadedFile,
+          ...metadata,
+        };
 
-      return processedFile;
-    } catch (error) {
-      // Remove from progress tracking on error
-      setUploadProgress(prev => {
-        const updated = { ...prev };
-        delete updated[fileId];
-        return updated;
-      });
-      throw error;
-    }
-  }, [userId]);
+        // Remove from progress tracking
+        setUploadProgress((prev) => {
+          const updated = { ...prev };
+          delete updated[fileId];
+          return updated;
+        });
+
+        return processedFile;
+      } catch (error) {
+        // Remove from progress tracking on error
+        setUploadProgress((prev) => {
+          const updated = { ...prev };
+          delete updated[fileId];
+          return updated;
+        });
+        throw error;
+      }
+    },
+    [userId]
+  );
 
   // Validate course data
   const validateCourse = useCallback((): boolean => {
     const newErrors: string[] = [];
 
     if (!courseData.title.trim()) {
-      newErrors.push('Course title is required');
+      newErrors.push("Course title is required");
     }
 
     if (!courseData.description.trim()) {
-      newErrors.push('Course description is required');
+      newErrors.push("Course description is required");
     }
 
     if (courseData.topics.length === 0) {
-      newErrors.push('At least one topic is required');
+      newErrors.push("At least one topic is required");
     }
 
     courseData.topics.forEach((topic, index) => {
@@ -188,7 +207,9 @@ export function useCourseCreator({ userId, onSuccess, onError }: UseCourseCreato
 
       topic.lessons.forEach((lesson, lessonIndex) => {
         if (!lesson.title.trim()) {
-          newErrors.push(`Topic ${index + 1}, Lesson ${lessonIndex + 1} title is required`);
+          newErrors.push(
+            `Topic ${index + 1}, Lesson ${lessonIndex + 1} title is required`
+          );
         }
       });
     });
@@ -213,9 +234,9 @@ export function useCourseCreator({ userId, onSuccess, onError }: UseCourseCreato
         description: courseData.description,
         imageUrl: courseData.imageUrl,
         userId,
-        topics: courseData.topics.map(topic => ({
+        topics: courseData.topics.map((topic) => ({
           title: topic.title,
-          lessons: topic.lessons.map(lesson => ({
+          lessons: topic.lessons.map((lesson) => ({
             title: lesson.title,
             type: lesson.type,
             fileUrl: lesson.file?.url,
@@ -225,10 +246,11 @@ export function useCourseCreator({ userId, onSuccess, onError }: UseCourseCreato
       };
 
       const createdCourse = await courseService.createCourse(coursePayload);
-      
+
       onSuccess?.(createdCourse);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create course';
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create course";
       setErrors([errorMessage]);
       onError?.(errorMessage);
     } finally {
@@ -239,9 +261,9 @@ export function useCourseCreator({ userId, onSuccess, onError }: UseCourseCreato
   // Reset form
   const resetForm = useCallback(() => {
     setCourseData({
-      title: '',
-      description: '',
-      imageUrl: 'https://placehold.co/600x400/000000/FFFFFF?text=New+Course',
+      title: "",
+      description: "",
+      imageUrl: "https://placehold.co/600x400/000000/FFFFFF?text=New+Course",
       topics: [],
     });
     setErrors([]);
@@ -254,23 +276,23 @@ export function useCourseCreator({ userId, onSuccess, onError }: UseCourseCreato
     isLoading,
     uploadProgress,
     errors,
-    
+
     // Course management
     setCourseData,
-    
+
     // Topic management
     addTopic,
     updateTopic,
     removeTopic,
-    
+
     // Lesson management
     addLesson,
     updateLesson,
     removeLesson,
-    
+
     // File management
     uploadFile,
-    
+
     // Form management
     validateCourse,
     saveCourse,
