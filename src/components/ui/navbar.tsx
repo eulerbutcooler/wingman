@@ -76,7 +76,7 @@ export default function Navbar() {
       >
         <div>
           <h1 className="text-xl md:text-2xl font-bold">
-            Wingman<span className="text-navy">AI</span>
+            AeroMentor<span className="text-blue-500">AI</span>
           </h1>
         </div>
 

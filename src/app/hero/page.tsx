@@ -5,7 +5,12 @@ import Image from "next/image";
 import { TypeAnimation } from "react-type-animation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { GradientText } from "@/components/ui/shadcn-io/gradient-text";
 
+<GradientText
+  text="Smooth flowing gradients"
+  gradient="linear-gradient(90deg, #3b82f6 0%, #a855f7 50%, #ec4899 100%)"
+/>;
 import { FiGithub } from "react-icons/fi";
 import { SiGmail } from "react-icons/si";
 import { FaXTwitter } from "react-icons/fa6";
@@ -108,23 +113,28 @@ export default function Hero() {
   return (
     <div className="min-h-screen w-full relative">
       {/* Background overlay for better readability */}
-      <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
+      {/* <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div> */}
       
       {/* Content container with higher z-index */}
       <div className="relative z-10 flex flex-col pt-24 md:pt-34 gap-8 items-center px-4 md:px-0">
-      <div className="bg-white w-full md:w-11/12 flex flex-col lg:flex-row cta justify-center lg:justify-evenly p-6 md:p-10 gap-8 lg:gap-12 modern-card animate-slide-in-up font-mono">
-        <div className="flex flex-col justify-center gap-6 lg:gap-10 text-center lg:text-left">
+      <div className="w-full text-left md:w-11/12 flex flex-col lg:flex-row cta pb-28  gap-8 lg:gap-12  font-sans">
+        <div className="flex flex-col justify-center gap-6 lg:gap-10  text-left">
           <motion.h1 
-            className="text-2xl md:text-4xl font-bold text-black"
+            className="text-7xl text-left font-bold text-white"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            Welcome to Wingman
+            Welcome to <span><GradientText
+  text="AeroMentor"
+  gradient="linear-gradient(90deg, #1e3a8a 0%, #2563eb 30%, #3b82f6 50%, #60a5fa 70%, #1e3a8a 100%)
+
+"
+/></span>
           </motion.h1>
 
           <motion.p 
-            className="text-black text-lg md:text-2xl"
+            className="text-white text-5xl "
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -144,22 +154,22 @@ export default function Hero() {
               wrapper="span"
               cursor={true}
               repeat={Infinity}
-              className="font-semibold bg-gradient-to-r from-navy to-blue-600 bg-clip-text text-transparent"
+              className=" text-white"
             />
           </motion.p>
 
           <motion.p 
-            className="text-black text-sm md:text-base opacity-80"
+            className="text-white text-4xl  opacity-80"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            Wingman is an AI-powered learning assistant that helps you learn and
+            AeroMentor is an AI-powered learning assistant that helps you learn and
             study more effectively.
           </motion.p>
         </div>
 
-        <motion.div 
+        {/* <motion.div 
           className="flex justify-center lg:justify-end animate-float"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -173,16 +183,16 @@ export default function Hero() {
             height={480}
             priority
           />
-        </motion.div>
+        </motion.div> */}
       </div>
 
       <div className="flex w-full md:w-11/12 flex-col md:flex-row cards gap-4 justify-center md:justify-evenly px-4 md:px-0">
         <motion.div 
-          className="flex p-6 md:p-8 modern-card transition-all duration-300 rounded-2xl md:rounded-4xl flex-col justify-evenly gap-4 group animate-slide-in-left"
-          whileHover={{ scale: 1.05 }}
+          className="flex p-2 py-4 px-4git modern-card transition-all duration-300 rounded-2xl md:rounded-4xl flex-col justify-evenly gap-4 group animate-slide-in-left"
+          // whileHover={{ scale: 1.01 }}
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
+          transition={{ duration: 0.0, delay: 0}}
         >
           <div className="flex items-center gap-3 mb-2">
             <div className="w-12 h-12 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
@@ -199,7 +209,7 @@ export default function Hero() {
         </motion.div>
 
         <motion.div 
-          className="flex p-6 md:p-8 modern-card transition-all duration-300 rounded-2xl md:rounded-4xl flex-col justify-evenly gap-4 group animate-slide-in-up"
+          className="flex p-2 py-4 px-4 modern-card transition-all duration-300 rounded-2xl md:rounded-4xl flex-col justify-evenly gap-4 group animate-slide-in-up"
           whileHover={{ scale: 1.05 }}
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -220,7 +230,7 @@ export default function Hero() {
         </motion.div>
 
         <motion.div 
-          className="flex p-6 md:p-8 modern-card transition-all duration-300 rounded-2xl md:rounded-4xl flex-col justify-evenly gap-4 group animate-slide-in-left"
+          className="flex p-2 py-4 px-4 modern-card transition-all duration-300 rounded-2xl md:rounded-4xl flex-col justify-evenly gap-4 group animate-slide-in-left"
           whileHover={{ scale: 1.05 }}
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
@@ -249,47 +259,47 @@ export default function Hero() {
 
       <div className="flex flex-col lg:flex-row w-full md:w-11/12 mt-12 md:mt-24 gap-8 md:gap-24 justify-between mb-12 md:mb-24 px-4 md:px-0">
         <div className="flex flex-col w-full lg:w-1/2 gap-4">
-          <h1 className="text-lg font-bold text-black">N.I.A.T</h1>
+          <h1 className="text-lg font-bold text-white">N.I.A.T</h1>
           <div className="flex gap-6 md:gap-10">
             <Image src="/crest.png" alt="Hero Image" width={60} height={60} className="md:w-20 md:h-20" />
             <Image src="/niat.png" alt="Hero Image" width={60} height={60} className="md:w-20 md:h-20" />
           </div>
 
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-white">
             Built by the Naval Institute of Aeronautical Technology, Kochi —
             empowering learners with practical engineering and innovation.
           </p>
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-white">
             Established in 1947 under Southern Naval Command, advancing
             aeronautical education and applied research.
           </p>
-          <p className="text-xs text-neutral-600">
+          <p className="text-xs text-white">
             © 2025 NIAT. All rights reserved.
           </p>
         </div>
         <div className="flex flex-col justify-between w-full lg:w-1/2 gap-6 md:gap-4">
           <div className="flex flex-col md:flex-row justify-between gap-6 md:gap-4">
             <div className="flex flex-col w-full md:w-1/3 gap-4">
-              <h1 className="text-lg font-bold text-black">Contact us</h1>
-              <p className="text-sm text-neutral-600">
+              <h1 className="text-lg font-bold text-white">Contact us</h1>
+              <p className="text-sm text-white">
                 Email: wingmanai.contact@gmail.com
               </p>
-              <p className="text-sm text-neutral-600">Phone: +91 9876543210</p>
-              <p className="text-sm text-neutral-600">
+              <p className="text-sm text-white">Phone: +91 9876543210</p>
+              <p className="text-sm text-white">
                 Address: 123 Main St, Kochi, Kerala
               </p>
             </div>
             <div className="flex flex-col gap-4">
-              <h1 className="text-lg font-bold text-black">Quick links</h1>
-              <p className="text-sm text-neutral-600 cursor-pointer hover:text-navy">Home</p>
-              <p className="text-sm text-neutral-600 cursor-pointer hover:text-navy">Chat</p>
-              <p className="text-sm text-neutral-600 cursor-pointer hover:text-navy">Library</p>
-              <p className="text-sm text-neutral-600 cursor-pointer hover:text-navy">Quiz</p>
+              <h1 className="text-lg font-bold text-white">Quick links</h1>
+              <p className="text-sm text-white cursor-pointer hover:text-navy">Home</p>
+              <p className="text-sm text-white cursor-pointer hover:text-navy">Chat</p>
+              <p className="text-sm text-white cursor-pointer hover:text-navy">Library</p>
+              <p className="text-sm text-white cursor-pointer hover:text-navy">Quiz</p>
             </div>
           </div>
           <div className="flex flex-col gap-4">
-            <h1 className="text-lg font-bold text-black">Socials</h1>
-            <div className="flex text-neutral-600 gap-6 text-xl">
+            <h1 className="text-lg font-bold text-white">Socials</h1>
+            <div className="flex text-white gap-6 text-xl">
               <SiGmail className="cursor-pointer hover:text-navy transition-colors" />
               <FiGithub className="cursor-pointer hover:text-navy transition-colors" />
               <FaXTwitter className="cursor-pointer hover:text-navy transition-colors" />
