@@ -242,17 +242,9 @@ export default function CourseCreator({
                 );
 
                 console.log("✅ File uploaded successfully:", uploadedFile);
-
-                // Update lesson with file ID (file should already be linked via upload process)
                 console.log(
-                  `🔄 Updating lesson ${createdLesson.id} with file ID`
+                  `✅ File ${uploadedFile.id} automatically linked to lesson ${createdLesson.id} during upload process`
                 );
-                await courseService.updateLesson(createdLesson.id.toString(), {
-                  fileId: uploadedFile.id.toString(),
-                  duration: uploadedFile.duration,
-                });
-
-                console.log("✅ Lesson updated with file ID");
                 updateLesson(topic.id, lesson.id, {
                   uploading: false,
                   uploadProgress: 100,

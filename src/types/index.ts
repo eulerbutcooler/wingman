@@ -168,7 +168,7 @@ export interface QuizResult {
 // ============================================================================
 
 export interface UploadedFile {
-  id: number;
+  id: string; // UUID from database
   userId?: number;
   lessonId?: number;
   fileName: string;

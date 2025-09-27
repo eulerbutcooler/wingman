@@ -22,6 +22,33 @@ export async function PUT(
       );
     }
 
+    // Sanitize fileId if present (only handle edge cases)
+    if (body.fileId !== undefined) {
+      // If fileId is "0", 0, empty string, or falsy, set it to null
+      if (
+        !body.fileId ||
+        body.fileId === "0" ||
+        body.fileId === 0 ||
+        body.fileId === ""
+      ) {
+        console.log(
+          "⚠️ Invalid fileId detected, setting to null:",
+          body.fileId
+        );
+        body.fileId = null;
+      }
+      // Convert number to null (shouldn't happen but just in case)
+      else if (typeof body.fileId === "number") {
+        console.log(
+          "⚠️ Numeric fileId detected, setting to null:",
+          body.fileId
+        );
+        body.fileId = null;
+      }
+      // If it's a string and not empty, trust it's a valid UUID from database
+      // No need to validate UUID format since all UUIDs come from PostgreSQL
+    }
+
     // Check if lesson exists
     const existingLesson = await db
       .select()

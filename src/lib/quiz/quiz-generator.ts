@@ -9,7 +9,7 @@ import { eq, and } from "drizzle-orm";
 // Schema for quiz question validation
 const QuestionSchema = z.object({
   id: z.string(),
-  type: z.enum(["multiple-choice", "true-false"]),
+  type: z.enum(["multiple-choice"]),
   question: z.string(),
   options: z.array(z.string()),
   correctAnswer: z.string(),
@@ -77,12 +77,12 @@ export async function generateQuizForCourse(
   }
 
   // Generate AI prompt
-  const prompt = `Generate a comprehensive 10-question quiz for the following course:
+  const prompt = `Generate a comprehensive 30-question quiz for the following course:
 Title: ${courseData.title}
 Description: ${courseData.description}
 
 Requirements:
-- Exactly 10 questions
+- Exactly 30 questions
 - Mix of multiple-choice (4 options) and true/false questions
 - Questions should test understanding of the course content
 - For ${difficulty} difficulty:
@@ -91,22 +91,22 @@ Requirements:
       ? "- Focus on basic concepts and definitions\\n  - Straightforward questions"
       : difficulty === "medium"
       ? "- Mix of concepts and application\\n  - Some analytical thinking required"
-      : "- Advanced concepts and critical thinking\\n  - Complex scenarios and deep understanding"
+      : "- Detailed advanced concepts and critical thinking including numerical question probelems\\n  - Complex scenarios and deep understanding including numerical questions"
   }
 - Each question should have:
   - A clear, well-formed question
-  - Appropriate options (4 for multiple-choice, 2 for true/false)
+  - Appropriate options (4 for multiple-choice)
   - The correct answer (must match exactly one of the options)
   - A brief explanation of why the answer is correct
 - All questions must be directly related to the course content
 - Ensure variety in question types and topics covered
-- Generated quiz is for students at Indian Naval Institute of Aeronautical Technology (INAT) who are doing their Masters degree in engineering.
+- Generated quiz is for students at Indian Naval Institute of Aeronautical Technology (NIAT) who are doing their Masters degree in engineering.
 - Fundamental Concepts: deep understanding of core aeronautical engineering and naval technology principles, including aerodynamics, propulsion, aircraft structures, and avionics.
-- INAT Context: familiar with the academic programs and common course topics at INAT. 
+- NIAT Context: familiar with the academic programs and common course topics at NIAT. 
 
 Format each question with:
 - id: unique identifier (q1, q2, etc.)
-- type: "multiple-choice" or "true-false"
+- type: "multiple-choice"
 - question: the question text
 - options: array of possible answers
 - correctAnswer: the correct answer (must exactly match one option)
@@ -125,8 +125,8 @@ Format each question with:
   console.log("AI generated quiz:", result.object);
 
   // Validate the generated quiz
-  if (!result.object.questions || result.object.questions.length !== 10) {
-    throw new Error("Generated quiz does not have exactly 10 questions");
+  if (!result.object.questions || result.object.questions.length !== 30) {
+    throw new Error("Generated quiz does not have exactly 30 questions");
   }
 
   // Create quiz record

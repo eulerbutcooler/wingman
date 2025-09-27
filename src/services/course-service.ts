@@ -183,6 +183,14 @@ export async function updateLesson(
     fileId?: string;
   }
 ): Promise<Lesson> {
+  console.log("🔄 [COURSE_SERVICE] updateLesson called with:", {
+    lessonId,
+    lessonIdType: typeof lessonId,
+    updates,
+    fileId: updates.fileId,
+    fileIdType: typeof updates.fileId,
+  });
+
   const response = await fetch(`${BASE_URL}/lessons/${lessonId}`, {
     method: "PUT",
     headers: {
@@ -244,7 +252,7 @@ export async function uploadFile(
 
   // Convert FileRecord to UploadedFile format
   return {
-    id: 0, // Legacy field
+    id: savedFile.id, // Use the actual file UUID from database
     userId: savedFile.userId,
     lessonId: savedFile.lessonId ? parseInt(savedFile.lessonId) : undefined,
     fileName: savedFile.fileName,
