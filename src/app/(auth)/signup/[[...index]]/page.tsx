@@ -34,14 +34,7 @@ export default function SignUpPage() {
       const confirmPassword = formData.get("confirmPassword") as string;
 
       // Client-side validation
-      if (
-        !name ||
-        !email ||
-        !serviceId ||
-        !course ||
-        !password ||
-        !confirmPassword
-      ) {
+      if (!name || !serviceId || !course || !password || !confirmPassword) {
         return { success: false, error: "All fields are required" };
       }
 
@@ -56,7 +49,7 @@ export default function SignUpPage() {
         };
       }
 
-      const result = await signUpWithSupabase(name, email, password, {
+      const result = await signUpWithSupabase(name, password, {
         serviceId: serviceId,
         course: course,
       });
@@ -167,7 +160,7 @@ export default function SignUpPage() {
             </div>
 
             {/* Email Input */}
-            <div>
+            {/* <div>
               <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-600 mb-2"
@@ -182,7 +175,7 @@ export default function SignUpPage() {
                 required
                 className="w-full px-4 py-3 bg-white border border-gray-300 rounded-4xl text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition duration-300"
               />
-            </div>
+            </div> */}
 
             {/* Password Input */}
             <div>

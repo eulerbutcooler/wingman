@@ -68,7 +68,7 @@ export default function Navbar() {
       <div
         ref={navRef}
         className={[
-          "flex w-11/12 z-10 items-center justify-between pl-5 pr-3 py-3 fixed top-2 left-1/2 -translate-x-1/2 rounded-4xl",
+          "flex w-11/12 z-10 items-center justify-between pl-5 pr-3 py-3 fixed top-2 left-1/2 -translate-x-1/2 rounded-2xl",
           // Smooth color fade
           "transition-colors duration-150 ease-in-out",
           // Top-of-page background
@@ -77,16 +77,24 @@ export default function Navbar() {
       >
         <div>
           <h1 className="text-xl md:text-2xl font-bold">
-            Wingman<span className="text-navy">AI</span>
+            AeroMentor<span className="text-navy">AI</span>
           </h1>
         </div>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex text-black space-x-6">
-          <Link href="/" className="hover:text-navy transition-colors">Home</Link>
-          <Link href="/chat" className="hover:text-navy transition-colors">Chat</Link>
-          <Link href="/library" className="hover:text-navy transition-colors">Library</Link>
-          <Link href="/quiz" className="hover:text-navy transition-colors">Quiz</Link>
+          <Link href="/" className="hover:text-navy transition-colors">
+            Home
+          </Link>
+          <Link href="/chat" className="hover:text-navy transition-colors">
+            Chat
+          </Link>
+          <Link href="/library" className="hover:text-navy transition-colors">
+            Library
+          </Link>
+          <Link href="/quiz" className="hover:text-navy transition-colors">
+            Quiz
+          </Link>
         </div>
 
         {/* Mobile Menu Button */}
@@ -123,51 +131,63 @@ export default function Navbar() {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
-          <div className="fixed top-16 right-4 left-4 bg-white rounded-2xl shadow-2xl p-6 z-30" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          <div
+            className="fixed top-16 right-4 left-4 bg-white rounded-2xl shadow-2xl p-6 z-30"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex flex-col space-y-6">
               {/* Mobile Navigation Links */}
-              <Link 
-                href="/" 
+              <Link
+                href="/"
                 className="text-lg font-medium text-black hover:text-navy transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Home
               </Link>
-              <Link 
-                href="/chat" 
+              <Link
+                href="/chat"
                 className="text-lg font-medium text-black hover:text-navy transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Chat
               </Link>
-              <Link 
-                href="/library" 
+              <Link
+                href="/library"
                 className="text-lg font-medium text-black hover:text-navy transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Library
               </Link>
-              <Link 
-                href="/quiz" 
+              <Link
+                href="/quiz"
                 className="text-lg font-medium text-black hover:text-navy transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Quiz
               </Link>
-              
+
               {/* Mobile Auth Button */}
               <div className="pt-4 border-t border-gray-200">
                 {loading ? (
                   <div className="py-3 px-6 bg-gray-200 rounded-full animate-pulse h-12" />
                 ) : !user ? (
-                  <Link href="/signin" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Link
+                    href="/signin"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
                     <button className="w-full py-3 px-6 bg-black text-white rounded-full hover:bg-gray-800 transition-colors">
                       Get started
                     </button>
                   </Link>
                 ) : (
-                  <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
                     <button className="w-full py-3 px-6 bg-black text-white rounded-full hover:bg-gray-800 transition-colors">
                       Go to Dashboard
                     </button>

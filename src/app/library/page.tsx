@@ -54,7 +54,9 @@ const CourseCard = ({
       <h3 className="text-lg md:text-xl font-semibold text-black mb-2 capitalize">
         {course.title}
       </h3>
-      <p className="text-navy text-sm md:text-base capitalize">{course.description}</p>
+      <p className="text-navy text-sm md:text-base capitalize">
+        {course.description}
+      </p>
     </div>
   </div>
 );
@@ -269,7 +271,9 @@ const LibraryView = ({
     <div className="w-full md:w-11/12 px-4 md:px-6 pt-24 md:pt-34">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
         <div>
-          <h1 className="text-left text-xl md:text-2xl font-semibold">Library</h1>
+          <h1 className="text-left text-xl md:text-2xl font-semibold">
+            Library
+          </h1>
           <p className="text-gray-600 text-left mt-2 md:mt-4 mb-4 md:mb-6 text-sm md:text-base">
             Explore your courses or create a new one to get started.
           </p>
@@ -347,14 +351,16 @@ const CourseView = ({
 
       {/* Course Summary - Now always below the main content */}
       <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-4xl shadow-sm mb-8">
-        <h3 className="text-lg md:text-xl font-semibold text-black mb-3">Course Summary</h3>
+        <h3 className="text-lg md:text-xl font-semibold text-black mb-3">
+          Course Summary
+        </h3>
         <div className="text-navy text-sm md:text-base leading-relaxed">
           {courseSummary ||
             "This course will enhance your aeronautical engineering knowledge."}
         </div>
       </div>
 
-      <h2 className="text-xl md:text-2xl font-bold text-black mb-4 pb-2">Topics</h2>
+      {/* <h2 className="text-xl md:text-2xl font-bold text-black mb-4 pb-2">Topics</h2> */}
       <div className="space-y-4 mb-14">
         {course.topics && course.topics.length > 0 ? (
           course.topics.map((topic) => (
@@ -365,7 +371,9 @@ const CourseView = ({
             >
               <div className="flex items-center">
                 <BookOpen className="w-5 h-5 md:w-6 md:h-6 mr-3 md:mr-4 text-gray-600" />
-                <span className="font-semibold text-base md:text-lg">{topic.title}</span>
+                <span className="font-semibold text-base md:text-lg">
+                  {topic.title}
+                </span>
               </div>
               <span className="text-sm text-gray-600 ml-8 sm:ml-0">
                 {topic.lessons?.length || 0} lessons
@@ -375,7 +383,9 @@ const CourseView = ({
         ) : (
           <div className="text-center py-8 text-gray-500">
             <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p className="text-sm md:text-base">No topics available for this course yet.</p>
+            <p className="text-sm md:text-base">
+              No topics available for this course yet.
+            </p>
           </div>
         )}
       </div>
@@ -399,7 +409,9 @@ const TopicView = ({
       <h1 className="text-2xl md:text-4xl font-bold mb-4 text-black capitalize">
         {topic.title}
       </h1>
-      <p className="text-neutral-600 mb-4 pb-4 text-sm md:text-base">All lessons for this topic.</p>
+      <p className="text-neutral-600 mb-4 pb-4 text-sm md:text-base">
+        All lessons for this topic.
+      </p>
 
       <div className="space-y-3 mb-14">
         {topic.lessons && topic.lessons.length > 0 ? (
@@ -409,7 +421,9 @@ const TopicView = ({
         ) : (
           <div className="text-center py-8 text-gray-500">
             <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p className="text-sm md:text-base">No lessons available for this topic yet.</p>
+            <p className="text-sm md:text-base">
+              No lessons available for this topic yet.
+            </p>
           </div>
         )}
       </div>
@@ -422,13 +436,21 @@ const LessonCard = ({ lesson }: { lesson: Lesson }) => {
   const getIcon = () => {
     switch (lesson.type) {
       case "pdf":
-        return <FileText className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-red-500" />;
+        return (
+          <FileText className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-red-500" />
+        );
       case "docx":
-        return <FileText className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-blue-600" />;
+        return (
+          <FileText className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-blue-600" />
+        );
       case "pptx":
-        return <Presentation className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-orange-500" />;
+        return (
+          <Presentation className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-orange-500" />
+        );
       default:
-        return <FileText className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-gray-500" />;
+        return (
+          <FileText className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-gray-500" />
+        );
     }
   };
 
@@ -438,7 +460,9 @@ const LessonCard = ({ lesson }: { lesson: Lesson }) => {
         <div className="flex items-center">
           {getIcon()}
           <div className="flex flex-col">
-            <span className="font-medium capitalize text-sm md:text-base">{lesson.title}</span>
+            <span className="font-medium capitalize text-sm md:text-base">
+              {lesson.title}
+            </span>
             <span className="text-xs text-gray-400 capitalize">
               {lesson.type} file
             </span>

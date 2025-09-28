@@ -57,22 +57,28 @@ export default function ChatSidebar({
         <button
           onClick={onNewChat}
           className={`flex items-center gap-2 cursor-pointer px-4 py-3 font-medium text-black bg-white shadow-sm hover:shadow-xl rounded-2xl md:rounded-4xl transition-colors text-sm md:text-base ${
-            isMobile ? 'w-full' : 'w-64 md:w-80 fixed'
+            isMobile ? "w-full" : "pr-44 fixed"
           }`}
         >
           <Plus size={16} className="md:w-5 md:h-5" />
           New Chat
         </button>
       </div>
-      
-      <div className={`bg-[#f5f5f5] ${isMobile ? 'pt-4 flex-1' : 'w-64 md:w-80 pt-16 md:pt-18'} rounded-2xl md:rounded-4xl flex flex-col h-full`}>
-        <div className="flex-1 bg-white shadow-sm rounded-2xl md:rounded-4xl overflow-y-auto px-4 md:px-6 p-3 md:p-4">
+
+      <div
+        className={`bg-[#f5f5f5] ${
+          isMobile ? "pt-4 flex-1" : "w-64 md:w-80 pt-16 md:pt-18"
+        } rounded-2xl md:rounded-4xl flex flex-col h-full`}
+      >
+        <div className="flex-1 bg-white shadow-sm rounded-2xl md:rounded-4xl overflow-y-auto hide-scrollbar px-4 md:px-6 p-3 md:p-4">
           <div className="font-medium text-gray-600 tracking-wide mb-3 md:mb-4 text-sm md:text-base">
             Recent Chats
           </div>
 
           {isLoading ? (
-            <div className="text-xs md:text-sm text-gray-600">Loading chats...</div>
+            <div className="text-xs md:text-sm text-gray-600">
+              Loading chats...
+            </div>
           ) : chats.length === 0 ? (
             <div className="text-xs md:text-sm text-gray-600 italic">
               No chats yet. Start a new conversation!
@@ -83,7 +89,7 @@ export default function ChatSidebar({
                 <div
                   key={chat.id}
                   onClick={() => onSelectChat(chat.id)}
-                  className={`group flex items-center gap-2 md:gap-3 transition-all duration-300 shadow-sm text-white p-2 px-3 md:px-4 rounded-2xl md:rounded-4xl cursor-pointer ${
+                  className={`group flex items-center gap-2 md:gap-3 transition-all duration-300  text-white p-2 px-3 md:px-4 rounded-2xl md:rounded-4xl cursor-pointer ${
                     currentChatId === chat.id
                       ? "bg-navy hover:shadow-xl text-white"
                       : "hover:shadow-xl"

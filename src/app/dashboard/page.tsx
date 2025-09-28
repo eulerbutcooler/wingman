@@ -88,7 +88,9 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               <div className="shadow-sm p-4 sm:p-6 hover:shadow-xl bg-white transition-all duration-300 rounded-4xl">
                 <h3 className="text-lg font-semibold text-black mb-2">Chat</h3>
-                <p className="text-navy mb-4 text-sm sm:text-base">Start a conversation with AI</p>
+                <p className="text-navy mb-4 text-sm sm:text-base">
+                  Start a conversation with AI
+                </p>
                 <button
                   onClick={() => router.push("/chat")}
                   className="bg-black text-white flex items-center gap-2 px-4 py-2 cursor-pointer rounded-4xl hover:bg-gray-800 transition-colors w-full sm:w-auto justify-center sm:justify-start"
@@ -102,7 +104,9 @@ export default function DashboardPage() {
                 <h3 className="text-lg font-semibold text-black mb-2">
                   Library
                 </h3>
-                <p className="text-navy mb-4 text-sm sm:text-base">Access your document library</p>
+                <p className="text-navy mb-4 text-sm sm:text-base">
+                  Access your document library
+                </p>
                 <button
                   onClick={() => router.push("/library")}
                   className="bg-black text-white px-4 flex items-center gap-2 py-2 cursor-pointer rounded-4xl hover:bg-gray-800 transition-colors w-full sm:w-auto justify-center sm:justify-start"
@@ -116,7 +120,9 @@ export default function DashboardPage() {
                 <h3 className="text-lg font-semibold text-black mb-2">
                   Quizzes
                 </h3>
-                <p className="text-navy mb-4 text-sm sm:text-base">Explore challenging quizzes</p>
+                <p className="text-navy mb-4 text-sm sm:text-base">
+                  Explore challenging quizzes
+                </p>
                 <button
                   onClick={() => router.push("/quiz")}
                   className="bg-black text-white flex gap-2 items-center px-4 py-2 cursor-pointer rounded-4xl hover:bg-gray-800 transition-colors w-full sm:w-auto justify-center sm:justify-start"
@@ -138,17 +144,21 @@ export default function DashboardPage() {
                     <span className="font-medium text-black">Name:</span>{" "}
                     {getDisplayName(user)}
                   </p>
-                  <p className="text-navy text-sm sm:text-xl">
+                  {/* <p className="text-navy text-sm sm:text-xl">
                     <span className="font-medium text-black">Email:</span>{" "}
                     {user.email}
+                  </p> */}
+                  <p className="text-navy text-xs sm:text-xl break-all">
+                    <span className="font-medium text-black">Course:</span>{" "}
+                    {user.user_metadata?.course || ""}
                   </p>
                   <p className="text-navy text-xs sm:text-xl break-all">
-                    <span className="font-medium text-black">User ID:</span>{" "}
-                    {user.id}
+                    <span className="font-medium text-black">Service No:</span>{" "}
+                    {user.user_metadata?.serviceId || ""}
                   </p>
                 </div>
               </div>
-              <div className="p-4 sm:p-6 rounded-4xl shadow-sm hover:shadow-xl bg-white gap-2 flex flex-col transition-all duration-300">
+              {/* <div className="p-4 sm:p-6 rounded-4xl shadow-sm hover:shadow-xl bg-white gap-2 flex flex-col transition-all duration-300">
                 <h3 className="text-lg font-semibold text-black">
                   Recent activity
                 </h3>
@@ -158,9 +168,9 @@ export default function DashboardPage() {
                 <p className="text-navy text-sm sm:text-base">This is sample activity 2 </p>
                 <p className="text-navy text-sm sm:text-base">This is sample activity 3 </p>
                 <p className="text-navy text-sm sm:text-base">This is sample activity 4 </p>
-              </div>
+              </div> */}
             </div>
-            
+
             {/* Mobile: Single column, Desktop: Multi-column layout */}
             <div className="flex flex-col lg:flex-row justify-between gap-4 sm:gap-8 mt-8">
               <div className="p-4 sm:p-6 rounded-4xl bg-white transition-all flex flex-col duration-300 shadow-sm">
@@ -171,21 +181,31 @@ export default function DashboardPage() {
                   <div className="flex items-center rounded-4xl shadow-sm hover:shadow-xl transition-all duration-300 p-3 sm:p-4 px-4 sm:px-8 gap-3">
                     <PiTimer className="text-2xl sm:text-3xl text-black mr-2" />
                     <div className="flex flex-col">
-                      <p className="text-base sm:text-lg font-semibold">7.2 Hours</p>
-                      <p className="text-navy text-sm sm:text-base">This week</p>
+                      <p className="text-base sm:text-lg font-semibold">
+                        7.2 Hours
+                      </p>
+                      <p className="text-navy text-sm sm:text-base">
+                        This week
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center rounded-4xl shadow-sm hover:shadow-xl transition-all duration-300 p-3 sm:p-4 px-4 sm:px-8 gap-3">
                     <IoBookOutline className="text-2xl sm:text-3xl text-black mr-2" />
                     <div className="flex flex-col">
-                      <p className="text-base sm:text-lg font-semibold">12 Lessons</p>
-                      <p className="text-navy text-sm sm:text-base">Completed</p>
+                      <p className="text-base sm:text-lg font-semibold">
+                        12 Lessons
+                      </p>
+                      <p className="text-navy text-sm sm:text-base">
+                        Completed
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center rounded-4xl shadow-sm hover:shadow-xl transition-all duration-300 p-3 sm:p-4 px-4 sm:px-8 gap-3">
                     <AiOutlineThunderbolt className="text-2xl sm:text-3xl text-black mr-2" />
                     <div className="flex flex-col">
-                      <p className="text-base sm:text-lg font-semibold">4 Days</p>
+                      <p className="text-base sm:text-lg font-semibold">
+                        4 Days
+                      </p>
                       <p className="text-navy text-sm sm:text-base">Streak</p>
                     </div>
                   </div>

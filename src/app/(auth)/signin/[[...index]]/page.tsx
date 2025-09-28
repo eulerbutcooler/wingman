@@ -39,14 +39,17 @@ export default function SignInPage() {
 
   const [state, formAction] = useActionState<AuthResult, FormData>(
     async (previousState, formData) => {
-      const email = formData.get("email") as string;
+      const serviceId = formData.get("service_id") as string;
       const password = formData.get("password") as string;
 
-      if (!email || !password) {
-        return { success: false, error: "Email and password are required" };
+      if (!serviceId || !password) {
+        return {
+          success: false,
+          error: "Service no. and password are required",
+        };
       }
 
-      const result = await signInWithSupabase(email, password);
+      const result = await signInWithSupabase(password, { serviceId });
 
       if (result.success) {
         toast.success("Welcome back!");
@@ -77,7 +80,7 @@ export default function SignInPage() {
         <form action={formAction}>
           <div className="space-y-6">
             {/* Email Input */}
-            <div>
+            {/* <div>
               <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-600 mb-2"
@@ -89,6 +92,22 @@ export default function SignInPage() {
                 id="email"
                 name="email"
                 placeholder="email@example.com"
+                required
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-4xl text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition duration-300"
+              />
+            </div> */}
+            <div>
+              <label
+                htmlFor="service_id"
+                className="block text-sm font-medium text-gray-600 mb-2"
+              >
+                Service No.
+              </label>
+              <input
+                type="text"
+                id="service_id"
+                name="service_id"
+                placeholder="Enter your service number"
                 required
                 className="w-full px-4 py-3 bg-white border border-gray-300 rounded-4xl text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition duration-300"
               />
