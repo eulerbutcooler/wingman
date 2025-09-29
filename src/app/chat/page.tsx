@@ -140,7 +140,9 @@ function ChatContent() {
                 <div className="absolute inset-0 bg-white/50 backdrop-blur-sm"></div>
                 {/* Mobile sidebar header */}
                 <div className="relative z-10 flex items-center justify-between p-4 bg-white shadow-sm">
-                  <h2 className="text-lg font-semibold text-black">Chat History</h2>
+                  <h2 className="text-lg font-semibold text-black">
+                    Chat History
+                  </h2>
                   <button
                     onClick={() => setIsMobileSidebarOpen(false)}
                     className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -148,7 +150,7 @@ function ChatContent() {
                     <X size={20} />
                   </button>
                 </div>
-                
+
                 {/* Sidebar content */}
                 <div className="relative z-10 pt-4 h-full">
                   <ChatSidebar
@@ -175,7 +177,7 @@ function ChatContent() {
                 <History size={18} />
                 <span className="text-sm font-medium">History</span>
               </button>
-              
+
               <div className="text-sm font-medium text-gray-600">
                 Wingman Chat
               </div>
@@ -272,7 +274,10 @@ function ChatContent() {
             </div>
 
             <div className="px-3 md:px-6 pb-3 md:pb-6 rounded-2xl md:rounded-4xl shadow-[0_-25px_15px_-4px] shadow-white flex-shrink-0">
-              <form onSubmit={handleSubmit} className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
+              <form
+                onSubmit={handleSubmit}
+                className="flex flex-col md:flex-row items-center gap-2 md:gap-4"
+              >
                 <div className="flex-1 relative w-full">
                   <textarea
                     ref={inputRef}
@@ -309,9 +314,13 @@ function ChatContent() {
                         : "bg-white shadow-sm text-neutral-800 hover:shadow-xl"
                     }`}
                     disabled={isLoading}
-                    title={videoMode ? "Video mode is ON - videos will be included in responses" : "Video mode is OFF - click to enable video search"}
+                    title={
+                      videoMode
+                        ? "Video mode is ON - videos will be included in responses"
+                        : "Video mode is OFF - click to enable video search"
+                    }
                   >
-                    🎥 Video {videoMode ? "ON" : "OFF"}
+                    Video
                   </button>
                   <button
                     type="submit"
