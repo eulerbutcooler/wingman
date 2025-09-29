@@ -156,10 +156,17 @@ When relevant to the student's question, reference the course materials above us
     }
 
     if (videoMode && userQuery) {
+      console.log("🎥 Video mode is enabled, starting video search...");
+      console.log("📝 User query:", userQuery);
       try {
         console.log(
           "🎥 Video mode enabled - generating YouTube search keywords..."
         );
+        
+        // Add a loading message for videos
+        const loadingMessage = "\n\n---\n\n🎥 **Searching for related educational videos...**\n";
+        stream.update(loadingMessage);
+        console.log("📤 Sent loading message to stream");
 
         const keywordResponse = streamText({
           model: google("gemini-2.5-flash-lite"),
@@ -169,6 +176,7 @@ When relevant to the student's question, reference the course materials above us
         });
 
         let keywords = "";
+        console.log("🤖 Generating keywords with AI...");
         for await (const text of keywordResponse.textStream) {
           keywords += text;
         }
@@ -177,19 +185,23 @@ When relevant to the student's question, reference the course materials above us
         console.log("🔍 Generated keywords:", keywords);
 
         if (keywords) {
+          console.log("📡 Making request to YouTube API...");
           const youtubeResponse = await fetch(
             `${
               process.env.NEXTAUTH_URL || "http://localhost:3000"
             }/api/youtube?q=${encodeURIComponent(keywords)}`
           );
 
+          console.log("📊 YouTube API response status:", youtubeResponse.status);
+
           if (youtubeResponse.ok) {
             const videoData = await youtubeResponse.json();
+            console.log("📹 Video data received:", videoData);
 
             if (videoData.success && videoData.videos?.length > 0) {
               console.log(`✅ Found ${videoData.videos.length} videos`);
 
-              const videoMessage = `\n\n---\n\n🎥 **Related Educational Videos:**\n\n${videoData.videos
+              const videoMessage = `\n\n🎥 **Related Educational Videos:**\n\n${videoData.videos
                 .map(
                   (
                     video: {
@@ -207,21 +219,78 @@ When relevant to the student's question, reference the course materials above us
                 )
                 .join("\n")}`;
 
+              console.log("📺 Generated video message:", videoMessage);
+              
+              // Clear the loading message and add the actual videos
               stream.update(videoMessage);
+              console.log("📤 Sent video message to stream");
 
+              // Save the complete message with videos
               if (currentChatId && shouldSave) {
+                console.log("💾 Saving complete message with videos to database");
                 await saveMessage(
                   currentChatId,
                   "assistant",
                   fullContent + videoMessage
                 );
+                console.log("✅ Message saved successfully");
+              }
+            } else {
+              console.log("❌ No videos found or API response failed:", videoData);
+              const noVideoMessage = "\n\n🎥 **No related videos found for this topic.**\n";
+              stream.update(noVideoMessage);
+              
+              if (currentChatId && shouldSave) {
+                await saveMessage(
+                  currentChatId,
+                  "assistant",
+                  fullContent + noVideoMessage
+                );
               }
             }
+          } else {
+            const errorData = await youtubeResponse.text();
+            console.error("❌ YouTube API request failed:", youtubeResponse.status, errorData);
+            const errorMessage = "\n\n🎥 **Unable to search for videos at the moment. Please try again later.**\n";
+            stream.update(errorMessage);
+            
+            if (currentChatId && shouldSave) {
+              await saveMessage(
+                currentChatId,
+                "assistant",
+                fullContent + errorMessage
+              );
+            }
+          }
+        } else {
+          console.log("❌ No keywords generated");
+          const noKeywordsMessage = "\n\n🎥 **Unable to generate search keywords for videos.**\n";
+          stream.update(noKeywordsMessage);
+          
+          if (currentChatId && shouldSave) {
+            await saveMessage(
+              currentChatId,
+              "assistant",
+              fullContent + noKeywordsMessage
+            );
           }
         }
       } catch (error) {
         console.error("❌ Video search failed:", error);
+        const errorMessage = "\n\n🎥 **Video search encountered an error. Please try again later.**\n";
+        stream.update(errorMessage);
+        
+        if (currentChatId && shouldSave) {
+          await saveMessage(
+            currentChatId,
+            "assistant",
+            fullContent + errorMessage
+          );
+        }
       }
+    } else {
+      console.log("🚫 Video mode disabled or no user query");
+      console.log("Video mode:", videoMode, "User query:", !!userQuery);
     }
 
     stream.done();

@@ -309,8 +309,9 @@ function ChatContent() {
                         : "bg-white shadow-sm text-neutral-800 hover:shadow-xl"
                     }`}
                     disabled={isLoading}
+                    title={videoMode ? "Video mode is ON - videos will be included in responses" : "Video mode is OFF - click to enable video search"}
                   >
-                    Video
+                    🎥 Video {videoMode ? "ON" : "OFF"}
                   </button>
                   <button
                     type="submit"
