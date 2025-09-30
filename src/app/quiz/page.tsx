@@ -47,8 +47,9 @@ const capitalizeText = (text: string) =>
 
 // ✅ Loading component
 const LoadingSpinner = ({ message = "Loading..." }: { message?: string }) => (
-  <div className="flex flex-col items-center min-h-screen bg-[#f5f5f5] w-full">
-    <div className="w-full md:w-11/12 px-4 md:px-6 pt-24 md:pt-34">
+  <div className="flex flex-col items-center min-h-screen w-full">
+    <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
+    <div className="relative z-10 w-full md:w-11/12 px-4 md:px-6 pt-24 md:pt-34">
       <h1 className="text-xl md:text-2xl font-semibold text-left mb-6 md:mb-8">{message}</h1>
       <div className="flex justify-center text-lg md:text-xl h-[50vh] items-center">
         <div className="loader"></div>
@@ -65,8 +66,9 @@ const ErrorDisplay = ({
   error: string;
   onRetry: () => void;
 }) => (
-  <div className="flex flex-col items-center min-h-screen bg-[#f5f5f5] w-full">
-    <div className="w-full md:w-11/12 px-4 md:px-6 pt-24 md:pt-34 text-center">
+  <div className="flex flex-col items-center min-h-screen w-full">
+    <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
+    <div className="relative z-10 w-full md:w-11/12 px-4 md:px-6 pt-24 md:pt-34 text-center">
       <div className="bg-white p-6 md:p-8 rounded-2xl md:rounded-4xl shadow-sm">
         <p className="text-red-600 mb-4 text-sm md:text-base">{error}</p>
         <button
@@ -178,23 +180,33 @@ const CourseList = ({
       Select a course for quiz
     </h1>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-      {courses.map((course) => (
+      {courses.map((course, index) => (
         <div
           key={course.id}
           onClick={() => onSelectCourse(course)}
-          className="bg-white p-4 md:p-6 flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl md:rounded-4xl cursor-pointer"
+          className="modern-card p-4 md:p-6 flex flex-col transition-all duration-300 rounded-2xl md:rounded-4xl cursor-pointer group animate-slide-in-up"
+          style={{animationDelay: `${index * 0.2}s`}}
         >
           <div className="flex items-center gap-4 mb-3 md:mb-4">
-            <h2 className="text-lg md:text-2xl font-semibold">
+            <div className="w-12 h-12 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
+              <span className="text-white text-xl">🧠</span>
+            </div>
+            <h2 className="text-lg md:text-2xl font-semibold group-hover:text-navy transition-colors">
               {capitalizeText(course.title)}
             </h2>
           </div>
-          <p className="text-navy text-sm md:text-lg mb-3 md:mb-4">
+          <p className="text-navy text-sm md:text-lg mb-3 md:mb-4 font-medium">
             {capitalizeText(course.description || "")}
           </p>
-          <div className="text-sm md:text-base text-neutral-800 font-semibold">
-            View Quizzes →
+          <div className="flex items-center justify-between mt-auto">
+            <div className="text-sm md:text-base text-neutral-800 font-semibold group-hover:text-navy transition-colors">
+              View Quizzes →
+            </div>
+            <div className="w-8 h-8 bg-navy/10 rounded-full flex items-center justify-center group-hover:bg-navy transition-all duration-300">
+              <span className="text-navy group-hover:text-white">→</span>
+            </div>
           </div>
+          <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-4 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
         </div>
       ))}
     </div>
@@ -700,8 +712,9 @@ function QuizContent({ userId }: { userId: string }) {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-[#f5f5f5] w-full">
-      <div className="w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">{renderContent()}</div>
+    <div className="flex flex-col items-center min-h-screen w-full">
+      <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
+      <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">{renderContent()}</div>
     </div>
   );
 }
@@ -714,8 +727,9 @@ export default function QuizPage() {
   // Loading state while auth is being checked
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-center">
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
+        <div className="relative z-10 text-center">
           <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
           <p className="text-gray-600">Loading...</p>
         </div>
@@ -723,16 +737,12 @@ export default function QuizPage() {
     );
   }
 
-  // ✅ Show loading while checking authentication
-  if (status === "loading") {
-    return <LoadingSpinner message="Loading..." />;
-  }
-
   // ✅ Ensure we have a valid user ID
   if (!user?.id) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5]">
-        <div className="text-center">
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
+        <div className="relative z-10 text-center">
           <p className="text-gray-600 mb-4">
             Unable to access user information.
           </p>

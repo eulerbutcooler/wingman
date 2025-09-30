@@ -39,17 +39,14 @@ export default function SignInPage() {
 
   const [state, formAction] = useActionState<AuthResult, FormData>(
     async (previousState, formData) => {
-      const serviceId = formData.get("service_id") as string;
+      const email = formData.get("email") as string;
       const password = formData.get("password") as string;
 
-      if (!serviceId || !password) {
-        return {
-          success: false,
-          error: "Service no. and password are required",
-        };
+      if (!email || !password) {
+        return { success: false, error: "Email and password are required" };
       }
 
-      const result = await signInWithSupabase(password, { serviceId });
+      const result = await signInWithSupabase(email, password);
 
       if (result.success) {
         toast.success("Welcome back!");
@@ -65,9 +62,10 @@ export default function SignInPage() {
   );
 
   return (
-    <div className="flex items-center w-[100vw] justify-center px-2  min-h-screen bg-[#f5f5f5]">
+    <div className="flex items-center w-[100vw] justify-center px-2  min-h-screen">
+      <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
       {/* Main container for the signin form */}
-      <div className="bg-white text-black w-lg  mx-4 p-10 rounded-4xl shadow-sm ">
+      <div className="relative z-10 bg-white text-black w-lg  mx-4 p-10 rounded-4xl shadow-sm ">
         {/* Header Section */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold tracking-tight text-black">
@@ -80,7 +78,7 @@ export default function SignInPage() {
         <form action={formAction}>
           <div className="space-y-6">
             {/* Email Input */}
-            {/* <div>
+            <div>
               <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-600 mb-2"
@@ -92,22 +90,6 @@ export default function SignInPage() {
                 id="email"
                 name="email"
                 placeholder="email@example.com"
-                required
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-4xl text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition duration-300"
-              />
-            </div> */}
-            <div>
-              <label
-                htmlFor="service_id"
-                className="block text-sm font-medium text-gray-600 mb-2"
-              >
-                Service No.
-              </label>
-              <input
-                type="text"
-                id="service_id"
-                name="service_id"
-                placeholder="Enter your service number"
                 required
                 className="w-full px-4 py-3 bg-white border border-gray-300 rounded-4xl text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition duration-300"
               />

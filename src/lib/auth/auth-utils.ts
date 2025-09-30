@@ -13,8 +13,6 @@ export interface AuthUser {
   email: string;
   name: string;
   raw: User;
-  course: string;
-  serviceId: string;
 }
 
 export interface AuthResult {
@@ -61,8 +59,6 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       id: dbUser.id, // Return the integer database ID
       supabaseId: user.id, // Keep the Supabase ID for reference
       email: user.email || "",
-      course: user.user_metadata?.course || "",
-      serviceId: user.user_metadata?.service_id || "",
       name:
         user.user_metadata?.name ||
         user.user_metadata?.full_name ||
@@ -195,15 +191,13 @@ export async function createSupabaseServiceClient() {
     }
   );
 }
-function serviceIdToEmail(serviceId: string) {
-  return `${serviceId.trim().toLowerCase()}@gmail.com`;
-}
+
 /**
  * Sign up a new user with Supabase
  */
 export async function signUpWithSupabase(
   name: string,
-
+  email: string,
   password: string,
   additionalData?: {
     serviceId?: string;
@@ -212,19 +206,14 @@ export async function signUpWithSupabase(
 ): Promise<AuthResult> {
   try {
     const supabase = await createClient();
-    if (!additionalData?.serviceId) {
-      return { success: false, error: "Service ID is required" };
-    } // or throw if missing
-    const fakeEmail = serviceIdToEmail(additionalData.serviceId);
 
     const { data, error } = await supabase.auth.signUp({
-      email: fakeEmail,
+      email,
       password,
       options: {
         data: {
           name: name,
           serviceId: additionalData?.serviceId,
-          service_id: additionalData.serviceId,
           course: additionalData?.course,
         },
       },
@@ -266,7 +255,7 @@ export async function signUpWithSupabase(
       user: {
         id: data.user.id,
         name: data.user.user_metadata?.name || name,
-        email: data.user.email || fakeEmail,
+        email: data.user.email || email,
         serviceId: dbUser.serviceId || "",
         course: dbUser.course || "",
       },
@@ -284,20 +273,14 @@ export async function signUpWithSupabase(
  * Sign in an existing user with Supabase
  */
 export async function signInWithSupabase(
-  password: string,
-  additionalData?: {
-    serviceId?: string;
-  }
+  email: string,
+  password: string
 ): Promise<AuthResult> {
   try {
     const supabase = await createClient();
-    if (!additionalData?.serviceId) {
-      return { success: false, error: "Service ID is required" };
-    }
 
-    const fakeEmail = serviceIdToEmail(additionalData.serviceId);
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: fakeEmail,
+      email,
       password,
     });
 
@@ -316,9 +299,7 @@ export async function signInWithSupabase(
     }
 
     // Sync user to database
-    await ensureUserInDatabase(data.user, {
-      serviceId: additionalData.serviceId,
-    });
+    await ensureUserInDatabase(data.user);
 
     const [dbUser] = await db
       .select()
@@ -332,8 +313,8 @@ export async function signInWithSupabase(
       user: {
         id: data.user.id,
         name: data.user.user_metadata?.name || data.user.email || "",
-        email: data.user.email || fakeEmail,
-        serviceId: dbUser?.serviceId || additionalData.serviceId,
+        email: data.user.email || "",
+        serviceId: dbUser?.serviceId,
         course: dbUser?.course,
       },
     };
