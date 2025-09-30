@@ -221,7 +221,6 @@ export default function Hero() {
               Get Started
             </button>
           </div>
-
           <Image
             src="/su-7.png"
             alt="Su-7 Aircraft"
@@ -283,9 +282,10 @@ export default function Hero() {
 
 
 
+
       <div className="flex flex-col lg:flex-row w-full md:w-11/12 mt-12 md:mt-24 gap-8 md:gap-24 justify-between mb-12 md:mb-24 px-4 md:px-0">
         <div className="flex flex-col w-full lg:w-1/2 gap-4">
-          <h1 className="text-lg font-bold text-black">N.I.A.T</h1>
+          <h1 className="text-lg font-bold text-white">N.I.A.T</h1>
           <div className="flex gap-6 md:gap-10">
             <Image
               src="/crest.png"
@@ -303,30 +303,32 @@ export default function Hero() {
             />
           </div>
 
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-white">
             Built by the Naval Institute of Aeronautical Technology, Kochi —
             empowering learners with practical engineering and innovation.
           </p>
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-white">
             Established in 1947 under Southern Naval Command, advancing
             aeronautical education and applied research.
           </p>
-          <p className="text-xs text-neutral-600">
+          <p className="text-xs text-white">
             © 2025 NIAT. All rights reserved.
           </p>
         </div>
         <div className="flex flex-col justify-between  w-full text-right gap-6 md:gap-4">
           <div className="flex flex-col md:flex-row justify-between gap-6 md:gap-4">
+
             <div className="flex flex-col w-full  gap-4">
               <h1 className="text-lg font-bold text-black">Contact us</h1>
               <p className="text-sm text-neutral-600">
                 Email: wingmanai.contact@gmail.com
               </p>
-              <p className="text-sm text-neutral-600">Phone: +91 9876543210</p>
-              <p className="text-sm text-neutral-600">
+              <p className="text-sm text-white">Phone: +91 9876543210</p>
+              <p className="text-sm text-white">
                 Address: 123 Main St, Kochi, Kerala
               </p>
             </div>
+
             
           </div>
           <div className="flex text-right  flex-col gap-4">
