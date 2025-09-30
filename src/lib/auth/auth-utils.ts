@@ -196,7 +196,7 @@ export async function createSupabaseServiceClient() {
   );
 }
 function serviceIdToEmail(serviceId: string) {
-  return `${serviceId.trim().toLowerCase()}@example.com`;
+  return `${serviceId.trim().toLowerCase()}@gmail.com`;
 }
 /**
  * Sign up a new user with Supabase

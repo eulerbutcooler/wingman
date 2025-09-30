@@ -48,16 +48,18 @@ const CourseCard = ({
     <img
       src={course.image || course.imageUrl}
       alt={course.title}
-      className="w-full h-24 md:h-32 object-cover"
+      className="w-full h-24 md:h-full object-cover"
     />
-    <div className="p-4 md:p-6">
-      <h3 className="text-lg md:text-xl font-semibold text-black mb-2 capitalize">
-        {course.title}
-      </h3>
-      <p className="text-navy text-sm md:text-base capitalize">
-        {course.description}
-      </p>
-    </div>
+    {/* 
+    
+    
+    
+    
+    
+    
+    
+    
+    */}
   </div>
 );
 

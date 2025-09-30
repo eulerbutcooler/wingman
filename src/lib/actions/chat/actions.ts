@@ -179,7 +179,7 @@ When relevant to the student's question, reference the course materials above us
         if (keywords) {
           const youtubeResponse = await fetch(
             `${
-              process.env.NEXTAUTH_URL || "http://localhost:3000"
+              process.env.NEXT_PUBLICa_URL || "http://localhost:3000"
             }/api/youtube?q=${encodeURIComponent(keywords)}`
           );
 

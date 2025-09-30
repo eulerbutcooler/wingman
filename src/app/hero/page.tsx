@@ -9,6 +9,8 @@ import { FiGithub } from "react-icons/fi";
 import { SiGmail } from "react-icons/si";
 import { FaXTwitter } from "react-icons/fa6";
 import { FiLinkedin } from "react-icons/fi";
+import { VideoText } from "@/components/ui/video-text"
+import { MultiStepLoader as Loader } from "../../components/ui/multi-step-loader";
 type FAQ = { id: number; q: string; a: string };
 
 const faqs: FAQ[] = [
@@ -98,7 +100,7 @@ function ImageCarousel() {
   }
 
   return (
-    <div className="relative w-full h-[700px] rounded-2xl overflow-hidden bg-black">
+    <div className="relative w-full h-[700px] rounded-2xl overflow-hidden ">
       <AnimatePresence>
         <motion.div
           key={currentIndex}
@@ -113,7 +115,7 @@ function ImageCarousel() {
             alt={images[currentIndex].alt}
             width={800}
             height={700}
-            className="w-full h-full object-cover object-center"
+            className="w-full blur-[5px] h-full object-cover object-center"
             priority={currentIndex < 3}
           />
         </motion.div>
@@ -187,99 +189,99 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function Hero() {
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  
   return (
     <div className="bg-[#f5f5f5] min-h-screen w-full flex flex-col pt-24 md:pt-34  items-center px-4 md:px-0">
       <div className=" w-full md:w-11/12 flex flex-col lg:flex-row cta text-left justify-between   md:p-10 gap-8 lg:gap-12  rounded-4xl font-mono">
-        <div className="flex flex-col justify-between gap-6 lg:gap-10 text-left">
-          <h1 className="text-8xl font-bold text-black">AeroMentorAI</h1>
-
-          {/* <p className="text-black text-lg md:text-2xl">
-            your personal AI{" "}
-            <TypeAnimation
-              sequence={[
-                "tutor.",
-                1000,
-                "study buddy.",
-                1000,
-                "coach.",
-                1000,
-                "guide.",
-                1000,
-              ]}
-              wrapper="span"
-              cursor={true}
-              repeat={Infinity}
-              className="text-navy"
+        <div className="flex w-full flex-col pt-30 pb-64 justify-between gap-2 lg:gap-2 text-center relative">
+          <h1 className="text-[150px] text-center z-10  font-bold text-black relative ">AeroMentor<span className="text-navy">AI</span></h1>
+          <h1 className="text-6xl z-10 text-center flex items-center justify-center gap-2">
+            <span>Get grounded answers anytime.</span>
+            <TextRotate
+              texts={["Cited.", "Clear.", "Ready."]}
+              mainClassName="text-black overflow-hidden text-6xl font-semibold"
+              staggerFrom={"last"}
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "-120%" }}
+              staggerDuration={0.025}
+              splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
+              transition={{ type: "spring", damping: 30, stiffness: 400 }}
+              rotationInterval={2000}
             />
-          </p>
+          </h1>
+          
+          <div className="flex gap-4 justify-center items-center mt-8">
 
-          <p className="text-black text-sm md:text-base">
-            Wingman is an AI-powered learning assistant that helps you learn and
-            study more effectively.
-          </p> */}
+            <button className="px-4 py-1  pt-2 z-30 bg-white text-black border-2 cursor-pointer border-black font-semibold rounded-2xl text-xl shadow-md h-12 flex items-center justify-center">
+              Learn More
+            </button>
+            <button className="px-4 py-1 pt-2 bg-black border-2 z-30 border-black cursor-pointer text-white font-semibold rounded-2xl text-xl shadow-md h-12 flex items-center justify-center">
+              Get Started
+            </button>
+          </div>
+
+          <Image
+            src="/su-7.png"
+            alt="Su-7 Aircraft"
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 rotate-180 -translate-y-1/2 scale-y-[-1] opacity-70"
+            width={1000}
+            height={1300}
+            priority
+          />
+
+          
+
         </div>
 
         <div className="flex justify-center lg:justify-end">
-          {/* <Image
-            src="/su-7.png"
-            alt="Hero Image"
-            className="text-navy max-w-full h-auto"
-            width={400}
-            height={480}
-            priority
-          /> */}
-          <TextRotate
-            texts={["Chat", "Library", "Quiz", "Dashboard"]}
-            mainClassName=" text-black overflow-hidden text-8xl font-bold"
-            staggerFrom={"last"}
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "-120%" }}
-            staggerDuration={0.025}
-            splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
-            transition={{ type: "spring", damping: 30, stiffness: 400 }}
-            rotationInterval={2000}
-          />
+          
         </div>
       </div>
 
-      {/* <div className="flex w-full md:w-11/12 flex-col md:flex-row cards gap-4 justify-center md:justify-evenly px-4 md:px-0">
-        <div className="flex p-6 md:p-8 bg-white shadow-sm hover:shadow-xl transition-all duration-300 rounded-4xl flex-col justify-evenly gap-4">
-          <h1 className="text-xl md:text-2xl font-bold text-black">Chat bot</h1>
-          <p className="text-lg md:text-xl text-navy">Talk to your PDFs</p>
-          <p className="text-sm md:text-base text-black">
-            Chat with documents, websites, and notes in natural language, and
-            get cited answers, summaries, and follow ups instantly.
-          </p>
-        </div>
-        <div className="flex p-6 md:p-8 bg-white hover:shadow-xl transition-all duration-300 shadow-sm rounded-4xl flex-col justify-evenly gap-4">
-          <h1 className="text-xl md:text-2xl font-bold text-black">Library</h1>
-          <p className="text-lg md:text-xl text-navy">
-            Build courses from your knowledge
-          </p>
-          <p className="text-sm md:text-base text-black">
-            Turn saved content into structured study plans and bite‑sized
-            courses, complete with milestones, reminders, and progress tracking.
-          </p>
-        </div>
-        <div className="flex p-6 md:p-8 bg-white hover:shadow-xl transition-all duration-300 shadow-sm rounded-4xl flex-col justify-evenly gap-4">
-          <h1 className="text-xl md:text-2xl font-bold text-black">Quiz</h1>
-          <p className="text-lg md:text-xl text-navy">Quiz me from your data</p>
-          <p className="text-sm md:text-base text-black">
-            Auto‑generate personalized quizzes from uploaded files, chats, and
-            bookmarks, with adaptive difficulty and instant feedback.
-          </p>
-        </div>
-      </div> */}
-      <div className="flex w-full md:w-11/12 flex-col md:flex-row cards gap-4 justify-center md:justify-evenly px-4 md:px-0">
+      
+      <div className="w-full md:w-11/12 relative flex justify-center items-center mt-12 mb-8">
         <ImageCarousel />
-      </div>
+        <div className="absolute inset-0 flex flex-col justify-between items-center">
+          <h1 className=" text-white font-bold w-full pl-10 pt-6 text-9xl"><TextRotate
+              texts={["Chat.", "Library.", "Quiz.","Dashboard."]}
+              mainClassName=" overflow-hidden "
+              staggerFrom={"last"}
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "-120%" }}
+              staggerDuration={0.025}
+              splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
+              transition={{ type: "spring", damping: 30, stiffness: 400 }}
+              rotationInterval={6050}
+            /></h1>
+            <h1 className="flex justify-end  border-black text-white font-bold w-full pr-10 pb-6 text-8xl"><TextRotate
+              texts={["History.", "Citations.", "Videos.","Material.","Plans.","Summary.","Progress.", "Assesment.","Tracking.", "Personalized.", "Adaptive.","Onboard."]}
+              mainClassName=" overflow-hidden "
+              staggerFrom={"last"}
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "-120%" }}
+              staggerDuration={0.025}
+              splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
+              transition={{ type: "spring", damping: 30, stiffness: 400 }}
+              rotationInterval={2000}
+            /></h1>
+        </div>
+          </div>
+          <div className="relative h-[500px] flex flex-col mt-62  w-10/12 overflow-hidden">
+            <VideoText src="/edit.mp4">Everything You Need</VideoText>
+            <VideoText src="/edit.mp4">To Ace Aeronautical</VideoText>
+            <VideoText src="/edit.mp4">Technology</VideoText>
+          </div>
 
-      {/* <div className="flex flex-col w-full md:w-11/12 faqs gap-4 items-center justify-center px-4 md:px-0">
-        {faqs.map((f) => (
-          <FAQItem key={f.id} q={f.q} a={f.a} />
-        ))}
-      </div> */}
+
+
+
+
+
+
 
       <div className="flex flex-col lg:flex-row w-full md:w-11/12 mt-12 md:mt-24 gap-8 md:gap-24 justify-between mb-12 md:mb-24 px-4 md:px-0">
         <div className="flex flex-col w-full lg:w-1/2 gap-4">
@@ -313,9 +315,9 @@ export default function Hero() {
             © 2025 NIAT. All rights reserved.
           </p>
         </div>
-        <div className="flex flex-col justify-between w-full lg:w-1/2 gap-6 md:gap-4">
+        <div className="flex flex-col justify-between  w-full text-right gap-6 md:gap-4">
           <div className="flex flex-col md:flex-row justify-between gap-6 md:gap-4">
-            <div className="flex flex-col w-full md:w-1/3 gap-4">
+            <div className="flex flex-col w-full  gap-4">
               <h1 className="text-lg font-bold text-black">Contact us</h1>
               <p className="text-sm text-neutral-600">
                 Email: wingmanai.contact@gmail.com
@@ -325,18 +327,12 @@ export default function Hero() {
                 Address: 123 Main St, Kochi, Kerala
               </p>
             </div>
-            {/* <div className="flex flex-col gap-4">
-              <h1 className="text-lg font-bold text-black">Quick links</h1>
-              <p className="text-sm text-neutral-600 cursor-pointer hover:text-navy">Home</p>
-              <p className="text-sm text-neutral-600 cursor-pointer hover:text-navy">Chat</p>
-              <p className="text-sm text-neutral-600 cursor-pointer hover:text-navy">Library</p>
-              <p className="text-sm text-neutral-600 cursor-pointer hover:text-navy">Quiz</p>
-            </div> */}
+            
           </div>
-          <div className="flex flex-col gap-4">
-            <h1 className="text-lg font-bold text-black">Socials</h1>
-            <div className="flex text-neutral-600 gap-6 text-xl">
-              <SiGmail className="cursor-pointer hover:text-navy transition-colors" />
+          <div className="flex text-right  flex-col gap-4">
+            <h1 className="text-lg  font-bold text-black">Socials</h1>
+            <div className="flex  text-neutral-600 gap-6 text-xl justify-end">
+              <SiGmail className="cursor-pointer  hover:text-navy transition-colors" />
               <FiGithub className="cursor-pointer hover:text-navy transition-colors" />
               <FaXTwitter className="cursor-pointer hover:text-navy transition-colors" />
               <FiLinkedin className="cursor-pointer hover:text-navy transition-colors" />

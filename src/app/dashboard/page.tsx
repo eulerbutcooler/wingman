@@ -137,7 +137,7 @@ export default function DashboardPage() {
             <div className="flex flex-col lg:flex-row mt-8 gap-4 sm:gap-8">
               <div className="bg-white p-4 sm:p-6 flex-col flex justify-between flex-1 rounded-4xl shadow-sm">
                 <div className="text-xl sm:text-2xl font-semibold text-black">
-                  Account Information
+                  User Information
                 </div>
                 <div className="space-y-2 pt-2">
                   <p className="text-navy text-sm sm:text-xl">
@@ -169,10 +169,6 @@ export default function DashboardPage() {
                 <p className="text-navy text-sm sm:text-base">This is sample activity 3 </p>
                 <p className="text-navy text-sm sm:text-base">This is sample activity 4 </p>
               </div> */}
-            </div>
-
-            {/* Mobile: Single column, Desktop: Multi-column layout */}
-            <div className="flex flex-col lg:flex-row justify-between gap-4 sm:gap-8 mt-8">
               <div className="p-4 sm:p-6 rounded-4xl bg-white transition-all flex flex-col duration-300 shadow-sm">
                 <h3 className="text-lg font-semibold text-black mb-4">
                   Your learning snapshot
@@ -211,6 +207,49 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
+
+            </div>
+
+            {/* Mobile: Single column, Desktop: Multi-column layout */}
+            <div className="flex flex-col lg:flex-row justify-between gap-4 sm:gap-8 mt-8">
+              {/* <div className="p-4 sm:p-6 rounded-4xl bg-white transition-all flex flex-col duration-300 shadow-sm">
+                <h3 className="text-lg font-semibold text-black mb-4">
+                  Your learning snapshot
+                </h3>
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                  <div className="flex items-center rounded-4xl shadow-sm hover:shadow-xl transition-all duration-300 p-3 sm:p-4 px-4 sm:px-8 gap-3">
+                    <PiTimer className="text-2xl sm:text-3xl text-black mr-2" />
+                    <div className="flex flex-col">
+                      <p className="text-base sm:text-lg font-semibold">
+                        7.2 Hours
+                      </p>
+                      <p className="text-navy text-sm sm:text-base">
+                        This week
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center rounded-4xl shadow-sm hover:shadow-xl transition-all duration-300 p-3 sm:p-4 px-4 sm:px-8 gap-3">
+                    <IoBookOutline className="text-2xl sm:text-3xl text-black mr-2" />
+                    <div className="flex flex-col">
+                      <p className="text-base sm:text-lg font-semibold">
+                        12 Lessons
+                      </p>
+                      <p className="text-navy text-sm sm:text-base">
+                        Completed
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center rounded-4xl shadow-sm hover:shadow-xl transition-all duration-300 p-3 sm:p-4 px-4 sm:px-8 gap-3">
+                    <AiOutlineThunderbolt className="text-2xl sm:text-3xl text-black mr-2" />
+                    <div className="flex flex-col">
+                      <p className="text-base sm:text-lg font-semibold">
+                        4 Days
+                      </p>
+                      <p className="text-navy text-sm sm:text-base">Streak</p>
+                    </div>
+                  </div>
+                </div>
+              </div> */}
 
               {/* Mobile: Full width, Desktop: Sidebar */}
               <div className="flex justify-between p-4 flex-col lg:max-w-sm w-full lg:w-auto">
