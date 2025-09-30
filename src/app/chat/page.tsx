@@ -120,9 +120,8 @@ function ChatContent() {
   };
 
   return (
-    <div className="w-full h-screen overflow-hidden pb-12 pt-24 md:pt-34">
-      <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
-      <div className="relative z-10 w-full px-2 md:px-6 md:w-11/12 mx-auto justify-between flex h-full">
+    <div className="w-full h-screen bg-[#f5f5f5] overflow-hidden pb-12 pt-24 md:pt-34">
+      <div className="w-full px-2 md:px-6 md:w-11/12 mx-auto justify-between flex h-full">
         <div className="flex h-full flex-1 gap-2 md:gap-8">
           {/* Desktop: Show sidebar normally */}
           <div className="hidden md:block">
@@ -136,10 +135,9 @@ function ChatContent() {
           {/* Mobile: Sidebar overlay */}
           {isMobileSidebarOpen && (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden">
-              <div className="fixed left-0 top-0 h-full w-80 z-50 transform transition-transform">
-                <div className="absolute inset-0 bg-white/50 backdrop-blur-sm"></div>
+              <div className="fixed left-0 top-0 h-full w-80 bg-[#f5f5f5] z-50 transform transition-transform">
                 {/* Mobile sidebar header */}
-                <div className="relative z-10 flex items-center justify-between p-4 bg-white shadow-sm">
+                <div className="flex items-center justify-between p-4 bg-white shadow-sm">
                   <h2 className="text-lg font-semibold text-black">
                     Chat History
                   </h2>
@@ -152,7 +150,7 @@ function ChatContent() {
                 </div>
 
                 {/* Sidebar content */}
-                <div className="relative z-10 pt-4 h-full">
+                <div className="pt-4 h-full">
                   <ChatSidebar
                     currentChatId={chatId}
                     onSelectChat={selectChat}
@@ -167,9 +165,18 @@ function ChatContent() {
             </div>
           )}
 
-          <div className="flex-1 flex flex-col bg-white rounded-2xl md:rounded-4xl shadow-sm h-full">
+          <div className="flex-1 flex flex-col bg-white rounded-2xl md:rounded-4xl shadow-sm h-full relative overflow-hidden">
+            {/* Background image */}
+            <div
+              className="absolute inset-0 bg-center bg-no-repeat opacity-80"
+              style={{
+                backgroundImage: "url(/su-7.png)",
+                backgroundSize: "900px 650px", // Custom size: width height
+              }}
+            ></div>
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-[1px]"></div>
             {/* Mobile: Add history button */}
-            <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-100">
+            <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-100 relative z-10">
               <button
                 onClick={() => setIsMobileSidebarOpen(true)}
                 className="flex items-center gap-2 px-3 py-2 bg-[#f5f5f5] rounded-lg hover:bg-gray-200 transition-colors"
@@ -183,7 +190,7 @@ function ChatContent() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-4 md:space-y-6 min-h-0">
+            <div className="flex-1 overflow-y-auto hide-scrollbar p-3 md:p-6 space-y-4 md:space-y-6 min-h-0 relative z-10">
               {conversation.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center max-w-2xl mx-auto px-4">
                   <div className="w-12 h-12 md:w-16 md:h-16 bg-navy rounded-full flex items-center justify-center mb-4 md:mb-6">
@@ -273,7 +280,7 @@ function ChatContent() {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="px-3 md:px-6 pb-3 md:pb-6 rounded-2xl md:rounded-4xl shadow-[0_-25px_15px_-4px] shadow-white flex-shrink-0">
+            <div className="px-3 md:px-6 pb-3 md:pb-6 rounded-2xl md:rounded-4xl shadow-[0_-25px_15px_-4px] shadow-white flex-shrink-0 relative z-10">
               <form
                 onSubmit={handleSubmit}
                 className="flex flex-col md:flex-row items-center gap-2 md:gap-4"
@@ -285,7 +292,7 @@ function ChatContent() {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Ask Wingman about your studies..."
-                    className="w-full px-3 md:px-4 py-3 md:py-4 border border-gray-600/40 rounded-2xl md:rounded-4xl shadow-lg focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-transparent resize-none min-h-[48px] max-h-32 text-sm md:text-base"
+                    className="w-full px-3 md:px-4 py-3 md:py-4 border border-gray-600/40 rounded-2xl md:rounded-4xl shadow-lg focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-transparent resize-none min-h-[48px] max-h-32 text-sm md:text-base hide-scrollbar"
                     rows={1}
                     disabled={isLoading}
                   />

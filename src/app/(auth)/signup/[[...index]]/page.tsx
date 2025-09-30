@@ -34,14 +34,7 @@ export default function SignUpPage() {
       const confirmPassword = formData.get("confirmPassword") as string;
 
       // Client-side validation
-      if (
-        !name ||
-        !email ||
-        !serviceId ||
-        !course ||
-        !password ||
-        !confirmPassword
-      ) {
+      if (!name || !serviceId || !course || !password || !confirmPassword) {
         return { success: false, error: "All fields are required" };
       }
 
@@ -56,7 +49,7 @@ export default function SignUpPage() {
         };
       }
 
-      const result = await signUpWithSupabase(name, email, password, {
+      const result = await signUpWithSupabase(name, password, {
         serviceId: serviceId,
         course: course,
       });
@@ -74,10 +67,9 @@ export default function SignUpPage() {
   );
 
   return (
-    <div className="flex items-center w-[100vw] justify-center pt-6 px-2 min-h-screen">
-      <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
+    <div className="flex items-center w-[100vw] justify-center pt-6 px-2 min-h-screen bg-[#f5f5f5]">
       {/* Main container for the signup form */}
-      <div className="relative z-10 bg-white text-black w-lg  mx-4 p-10 rounded-4xl shadow-sm ">
+      <div className="bg-white text-black w-xl  mx-4 p-10 rounded-4xl shadow-sm ">
         {/* Header Section */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold  text-black">Create Account</h1>
@@ -168,7 +160,7 @@ export default function SignUpPage() {
             </div>
 
             {/* Email Input */}
-            <div>
+            {/* <div>
               <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-600 mb-2"
@@ -183,10 +175,11 @@ export default function SignUpPage() {
                 required
                 className="w-full px-4 py-3 bg-white border border-gray-300 rounded-4xl text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition duration-300"
               />
-            </div>
+            </div> */}
 
             {/* Password Input */}
-            <div>
+            <div className="flex gap-2 justify-between">
+              <div>
               <label
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-600 mb-2"
@@ -221,6 +214,7 @@ export default function SignUpPage() {
               />
             </div>
           </div>
+            </div>
 
           {/* Error Message */}
           {state.error && (

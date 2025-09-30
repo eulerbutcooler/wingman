@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Ubuntu } from "next/font/google";
+
+import { Inter } from "next/font/google";
 import "./globals.css";
 
 import Navbar from "@/components/ui/navbar";
 
-const ubuntu = Ubuntu({
-  variable: "--font-ubuntu",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   weight: ["300", "400", "500", "700"],
 });
@@ -26,9 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${ubuntu.variable} antialiased`}
-      >
+      <body className={`${inter.variable} bg-[#f5f5f5] antialiased`}>
         <div className="flex flex-col justify-center items-center min-h-screen">
           <Navbar />
           <main className="flex-grow w-full">{children}</main>

@@ -43,23 +43,23 @@ const CourseCard = ({
 }) => (
   <div
     onClick={onClick}
-    className="modern-card rounded-2xl md:rounded-4xl overflow-hidden cursor-pointer group transition-all duration-300 animate-slide-in-up hover:scale-105"
+    className="bg-white rounded-2xl md:rounded-4xl shadow-sm overflow-hidden cursor-pointer group transition-all duration-300 hover:shadow-xl"
   >
-    <div className="relative overflow-hidden">
-      <img
-        src={course.image || course.imageUrl}
-        alt={course.title}
-        className="w-full h-24 md:h-32 object-cover transition-transform duration-300 group-hover:scale-110"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-    </div>
-    <div className="p-4 md:p-6">
-      <h3 className="text-lg md:text-xl font-semibold text-black mb-2 capitalize group-hover:text-navy transition-colors">
-        {course.title}
-      </h3>
-      <p className="text-navy text-sm md:text-base capitalize font-medium">{course.description}</p>
-      <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-3 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-    </div>
+    <img
+      src={course.image || course.imageUrl}
+      alt={course.title}
+      className="w-full h-24 md:h-full object-cover"
+    />
+    {/* 
+    
+    
+    
+    
+    
+    
+    
+    
+    */}
   </div>
 );
 
@@ -269,12 +269,13 @@ const LibraryView = ({
   onCourseSelect: (course: Course) => void;
   onCreateCourse: () => void;
 }) => (
-  <div className="flex flex-col items-center min-h-screen w-full">
-    <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
-    <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
+  <div className="flex flex-col items-center bg-[#f5f5f5] min-h-screen w-full">
+    <div className="w-full md:w-11/12 px-4 md:px-6 pt-24 md:pt-34">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
         <div>
-          <h1 className="text-left text-xl md:text-2xl font-semibold">Library</h1>
+          <h1 className="text-left text-xl md:text-2xl font-semibold">
+            Library
+          </h1>
           <p className="text-gray-600 text-left mt-2 md:mt-4 mb-4 md:mb-6 text-sm md:text-base">
             Explore your courses or create a new one to get started.
           </p>
@@ -316,9 +317,8 @@ const CourseView = ({
   onDelete: () => void;
   onTopicSelect: (topic: Topic) => void;
 }) => (
-  <div className="flex flex-col items-center min-h-screen w-full">
-    <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
-    <div className="relative z-10 w-full md:w-11/12 pt-24 md:pt-34 px-4 md:px-6">
+  <div className="flex flex-col items-center bg-[#f5f5f5] min-h-screen w-full">
+    <div className="w-full md:w-11/12 pt-24 md:pt-34 px-4 md:px-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <BackButton onClick={onBack}>Back to Library</BackButton>
         <button
@@ -352,50 +352,42 @@ const CourseView = ({
       </div>
 
       {/* Course Summary - Now always below the main content */}
-      <div className="modern-card p-4 md:p-6 rounded-2xl md:rounded-4xl mb-8 animate-fade-in-scale">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-white text-lg">📋</span>
-          </div>
-          <h3 className="text-lg md:text-xl font-semibold text-black">Course Summary</h3>
-        </div>
-        <div className="text-navy text-sm md:text-base leading-relaxed font-medium bg-gradient-to-r from-gray-50 to-blue-50 p-4 rounded-lg border-l-4 border-navy">
+      <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-4xl shadow-sm mb-8">
+        <h3 className="text-lg md:text-xl font-semibold text-black mb-3">
+          Course Summary
+        </h3>
+        <div className="text-navy text-sm md:text-base leading-relaxed">
           {courseSummary ||
             "This course will enhance your aeronautical engineering knowledge."}
         </div>
       </div>
 
-      <h2 className="text-xl md:text-2xl font-bold text-black mb-4 pb-2">Topics</h2>
+      {/* <h2 className="text-xl md:text-2xl font-bold text-black mb-4 pb-2">Topics</h2> */}
       <div className="space-y-4 mb-14">
         {course.topics && course.topics.length > 0 ? (
-          course.topics.map((topic, index) => (
+          course.topics.map((topic) => (
             <div
               key={topic.id}
               onClick={() => onTopicSelect(topic)}
-              className="modern-card p-4 md:p-5 rounded-2xl md:rounded-4xl cursor-pointer transition-all duration-300 flex flex-col sm:flex-row justify-between sm:items-center gap-3 sm:gap-0 group animate-slide-in-up"
-              style={{animationDelay: `${index * 0.1}s`}}
+              className="bg-white p-4 md:p-5 rounded-2xl md:rounded-4xl cursor-pointer hover:shadow-xl shadow-sm transition-all duration-300 flex flex-col sm:flex-row justify-between sm:items-center gap-3 sm:gap-0"
             >
               <div className="flex items-center">
-                <div className="w-10 h-10 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center mr-3 md:mr-4">
-                  <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                </div>
-                <span className="font-semibold text-base md:text-lg group-hover:text-navy transition-colors">{topic.title}</span>
-              </div>
-              <div className="flex items-center justify-between sm:justify-end gap-4 ml-13 sm:ml-0">
-                <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                  {topic.lessons?.length || 0} lessons
+                <BookOpen className="w-5 h-5 md:w-6 md:h-6 mr-3 md:mr-4 text-gray-600" />
+                <span className="font-semibold text-base md:text-lg">
+                  {topic.title}
                 </span>
-                <div className="w-8 h-8 bg-navy/10 rounded-full flex items-center justify-center group-hover:bg-navy group-hover:text-white transition-all duration-300">
-                  <span className="text-navy group-hover:text-white">→</span>
-                </div>
               </div>
-              <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-3 sm:mt-0 sm:absolute sm:bottom-0 sm:left-0 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+              <span className="text-sm text-gray-600 ml-8 sm:ml-0">
+                {topic.lessons?.length || 0} lessons
+              </span>
             </div>
           ))
         ) : (
           <div className="text-center py-8 text-gray-500">
             <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p className="text-sm md:text-base">No topics available for this course yet.</p>
+            <p className="text-sm md:text-base">
+              No topics available for this course yet.
+            </p>
           </div>
         )}
       </div>
@@ -412,15 +404,16 @@ const TopicView = ({
   courseName: string;
   onBack: () => void;
 }) => (
-  <div className="flex flex-col items-center min-h-screen w-full">
-    <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
-    <div className="relative z-10 w-full md:w-11/12 pt-24 md:pt-34 px-4 md:px-6">
+  <div className="flex flex-col items-center bg-[#f5f5f5] min-h-screen w-full">
+    <div className="w-full md:w-11/12 pt-24 md:pt-34 px-4 md:px-6">
       <BackButton onClick={onBack}>Back to {courseName}</BackButton>
 
       <h1 className="text-2xl md:text-4xl font-bold mb-4 text-black capitalize">
         {topic.title}
       </h1>
-      <p className="text-neutral-600 mb-4 pb-4 text-sm md:text-base">All lessons for this topic.</p>
+      <p className="text-neutral-600 mb-4 pb-4 text-sm md:text-base">
+        All lessons for this topic.
+      </p>
 
       <div className="space-y-3 mb-14">
         {topic.lessons && topic.lessons.length > 0 ? (
@@ -430,7 +423,9 @@ const TopicView = ({
         ) : (
           <div className="text-center py-8 text-gray-500">
             <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p className="text-sm md:text-base">No lessons available for this topic yet.</p>
+            <p className="text-sm md:text-base">
+              No lessons available for this topic yet.
+            </p>
           </div>
         )}
       </div>
@@ -443,13 +438,21 @@ const LessonCard = ({ lesson }: { lesson: Lesson }) => {
   const getIcon = () => {
     switch (lesson.type) {
       case "pdf":
-        return <FileText className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-red-500" />;
+        return (
+          <FileText className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-red-500" />
+        );
       case "docx":
-        return <FileText className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-blue-600" />;
+        return (
+          <FileText className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-blue-600" />
+        );
       case "pptx":
-        return <Presentation className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-orange-500" />;
+        return (
+          <Presentation className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-orange-500" />
+        );
       default:
-        return <FileText className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-gray-500" />;
+        return (
+          <FileText className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-gray-500" />
+        );
     }
   };
 
@@ -459,7 +462,9 @@ const LessonCard = ({ lesson }: { lesson: Lesson }) => {
         <div className="flex items-center">
           {getIcon()}
           <div className="flex flex-col">
-            <span className="font-medium capitalize text-sm md:text-base">{lesson.title}</span>
+            <span className="font-medium capitalize text-sm md:text-base">
+              {lesson.title}
+            </span>
             <span className="text-xs text-gray-400 capitalize">
               {lesson.type} file
             </span>
