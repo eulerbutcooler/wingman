@@ -2,11 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { saveFileRecord } from "@/lib/actions/files/file-actions";
 import { getCurrentUser } from "@/lib/auth/auth-utils";
+import { qstashClient } from "@/lib/qstash";
 import { processDocument } from "@/lib/rag/document-processor";
+
+// The endpoint for the ingestion worker that QStash will call.
+// It's critical to provide the full URL where your application is deployed.
+const INGESTION_WEBHOOK_URL =
+  process.env.NEXT_PUBLIC_APP_URL + "/api/ingest/webhook";
+
+if (!process.env.NEXT_PUBLIC_APP_URL) {
+  throw new Error("Missing NEXT_PUBLIC_APP_URL environment variable");
+}
+
+// Check if we're in localhost/development mode
+const isLocalhost = process.env.NEXT_PUBLIC_APP_URL?.includes('localhost') || 
+                   process.env.NEXT_PUBLIC_APP_URL?.includes('127.0.0.1') ||
+                   process.env.NEXT_PUBLIC_APP_URL?.includes('::1');
 
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json(
@@ -19,127 +33,135 @@ export async function POST(request: NextRequest) {
     const file = formData.get("file") as File;
     const lessonId = formData.get("lessonId") as string;
     const topicId = formData.get("topicId") as string;
+    const courseId = formData.get("courseId") as string;
+
+    console.log(`📋 Upload request details:`, {
+      fileName: file?.name,
+      lessonId: lessonId || "not provided",
+      topicId: topicId || "not provided", 
+      courseId: courseId || "not provided"
+    });
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // Validate file type
+    // --- File Validation (unchanged) ---
     const allowedTypes = [
       "application/pdf",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     ];
-
     if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        {
-          error:
-            "Invalid file type. Only PDF, DOCX, and PPTX files are allowed.",
-        },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid file type." }, { status: 400 });
     }
-
-    // Validate file size (100MB limit)
     if (file.size > 100 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: "File size must be less than 100MB" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "File size must be less than 100MB" }, { status: 400 });
     }
 
-    // Create Supabase client for server-side operations
+    // --- File Upload to Storage (unchanged) ---
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      }
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Generate unique filename
     const timestamp = Date.now();
-    const userId = user.id;
     const extension = file.name.split(".").pop();
-    const fileName = `${
-      file.name.split(".")[0]
-    }_${userId}_${timestamp}.${extension}`;
-
-    // Upload to Supabase Storage
+    const fileName = `${file.name.split(".")[0]}_${user.id}_${timestamp}.${extension}`;
     const filePath = `documents/${fileName}`;
 
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("course_material")
-      .upload(filePath, file, {
-        contentType: file.type,
-        upsert: false,
-      });
+      .upload(filePath, file);
 
     if (uploadError) {
       console.error("Supabase upload error:", uploadError);
-      return NextResponse.json(
-        { error: "Failed to upload file to storage" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Failed to upload file to storage" }, { status: 500 });
     }
 
-    // Get public URL
     const { data: publicUrlData } = supabase.storage
       .from("course_material")
       .getPublicUrl(filePath);
 
-    // Save file record to database
+    // --- Save Initial File Record with 'queued' status ---
     const savedFile = await saveFileRecord({
-      lessonId: lessonId || undefined,
       originalName: file.name,
       filename: fileName,
       mimeType: file.type,
       size: file.size,
-      publicUrl: publicUrlData.publicUrl, // Public URL for direct access
-    });
-
-    // Trigger RAG processing asynchronously (don't wait for it to complete)
-    console.log(`🚀 Triggering RAG processing for file: ${savedFile.id}`);
-    console.log(`📄 File details:`, {
-      fileId: savedFile.id,
-      originalName: file.name,
-      size: file.size,
-      type: file.type,
-      lessonId: lessonId || "none",
-      topicId: topicId || "none",
       publicUrl: publicUrlData.publicUrl,
+      processingStatus: "queued", // Set initial status to 'queued'
+      lessonId: lessonId || undefined, // Pass lessonId if provided
     });
 
-    // Process document in background
-    processDocument(savedFile.id)
-      .then((result) => {
-        console.log(
-          `✅ RAG processing completed for file ${savedFile.id}:`,
-          result
-        );
-      })
-      .catch((error: unknown) => {
-        console.error(
-          `❌ RAG processing failed for file ${savedFile.id}:`,
-          error
-        );
-        if (error instanceof Error) {
-          console.error(`❌ Error details:`, {
-            name: error.name,
-            message: error.message,
-            stack: error.stack,
+    // --- ARCHITECTURE CHANGE: Enqueue Job instead of Direct Processing ---
+    // Instead of processing the document synchronously, we publish a job to the queue.
+    // The worker will pick this up asynchronously.
+    
+    if (isLocalhost) {
+      // For localhost development, process directly since QStash can't reach localhost
+      console.log(`🏠 Localhost detected - processing file ${savedFile.id} directly`);
+      
+      // Process document in background for localhost
+      processDocument(savedFile.id)
+        .then((result) => {
+          console.log(
+            `✅ Direct processing completed for file ${savedFile.id}:`,
+            result
+          );
+        })
+        .catch((error: unknown) => {
+          console.error(
+            `❌ Direct processing failed for file ${savedFile.id}:`,
+            error
+          );
+        });
+        
+      console.log(`✅ File ${savedFile.id} is being processed directly (localhost mode).`);
+    } else {
+      // For production, use QStash queue
+      try {
+        await qstashClient.publishJSON({
+          url: INGESTION_WEBHOOK_URL,
+          // The body contains the necessary information for the worker.
+          body: {
+            fileId: savedFile.id,
+          },
+          // Optional: Add a delay or configure retries
+          // retries: 3,
+        });
+        
+        console.log(`✅ File ${savedFile.id} has been queued for processing.`);
+      } catch (qstashError) {
+        console.error('❌ QStash error, falling back to direct processing:', qstashError);
+        
+        // Fallback to direct processing if QStash fails
+        processDocument(savedFile.id)
+          .then((result) => {
+            console.log(
+              `✅ Fallback processing completed for file ${savedFile.id}:`,
+              result
+            );
+          })
+          .catch((error: unknown) => {
+            console.error(
+              `❌ Fallback processing failed for file ${savedFile.id}:`,
+              error
+            );
           });
-        }
-      });
+          
+        console.log(`✅ File ${savedFile.id} is being processed directly (fallback mode).`);
+      }
+    }
 
+    // --- Respond Immediately to the Client ---
+    // The API now returns a response instantly, without waiting for the RAG processing.
     return NextResponse.json({
       success: true,
       file: savedFile,
-      message: "File uploaded successfully, processing started",
+      message: isLocalhost 
+        ? "File uploaded successfully and is being processed directly (localhost mode)."
+        : "File uploaded successfully and is now queued for processing.",
     });
   } catch (error) {
     console.error("File upload error:", error);

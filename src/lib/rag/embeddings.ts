@@ -1,8 +1,12 @@
 import { google } from '@ai-sdk/google';
-import { embed } from 'ai';
+import { embed, embedMany } from 'ai';
+
+// A simple utility function to pause execution.
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * Generate embeddings using Gemini's text-embedding model
+ * Generate an embedding for a single text string.
+ * This is suitable for low-volume tasks like embedding a user's search query.
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
@@ -13,32 +17,78 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     
     return embedding;
   } catch (error) {
-    console.error('Error generating embedding:', error);
-    throw new Error(`Failed to generate embedding: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error('Error generating single embedding:', error);
+    throw new Error(`Failed to generate single embedding: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
 /**
- * Generate embeddings for multiple texts in batch
+ * OPTIMIZED: Generate embeddings for multiple texts using true batching,
+ * with a robust retry mechanism and exponential backoff to handle API rate limits.
+ *
+ * @param texts - An array of strings to be embedded.
+ * @returns A promise that resolves to an array of embedding vectors.
  */
-export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
-  try {
-    const embeddings: number[][] = [];
-    
-    // Process in batches to avoid rate limits
-    const batchSize = 10;
-    for (let i = 0; i < texts.length; i += batchSize) {
-      const batch = texts.slice(i, i + batchSize);
-      const batchPromises = batch.map(text => generateEmbedding(text));
-      const batchEmbeddings = await Promise.all(batchPromises);
-      embeddings.push(...batchEmbeddings);
+export async function generateEmbeddings(
+  texts: string[]
+): Promise<number[][]> {
+  const allEmbeddings: number[][] = [];
+  
+  // The Gemini API documentation specifies a limit of 100 texts per batch.
+  const batchSize = 100;
+  const maxRetries = 5;
+  let initialDelay = 1000; // 1 second
+
+  for (let i = 0; i < texts.length; i += batchSize) {
+    const batchTexts = texts.slice(i, i + batchSize);
+    let attempts = 0;
+    let delay = initialDelay;
+
+    while (attempts < maxRetries) {
+      try {
+        console.log(`Embedding batch starting at index ${i}. Size: ${batchTexts.length}. Attempt: ${attempts + 1}`);
+        
+        // --- STRATEGY 1: TRUE BATCHING ---
+        // We use `embedMany` to send the entire batch in a single API call.
+        const { embeddings } = await embedMany({
+          model: google.textEmbedding("text-embedding-004"),
+          values: batchTexts,
+        });
+
+        allEmbeddings.push(...embeddings);
+        console.log(`✅ Successfully embedded batch starting at index ${i}.`);
+        break; // Success, exit the retry loop for this batch
+      } catch (error) {
+        attempts++;
+        console.warn(`⚠️ Attempt ${attempts} failed for batch starting at index ${i}. Error:`, error);
+        
+        // --- STRATEGY 2: EXPONENTIAL BACKOFF & RETRY ---
+        if (attempts >= maxRetries) {
+          console.error(`❌ Failed to embed batch starting at index ${i} after ${maxRetries} attempts.`);
+          throw new Error(
+            `Failed to generate batch embeddings: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`
+          );
+        }
+        
+        // Check if the error indicates a rate limit (common status code is 429)
+        // This is a simplified check; a real implementation might inspect error codes.
+        const isRateLimitError = error instanceof Error && error.message.includes('429');
+
+        if (isRateLimitError) {
+            console.log(`Rate limit detected. Waiting for ${delay}ms before retrying...`);
+            await sleep(delay);
+            delay *= 2; // Double the delay for the next potential attempt
+        } else {
+            // For other errors, wait a standard delay before retrying
+            await sleep(delay);
+        }
+      }
     }
-    
-    return embeddings;
-  } catch (error) {
-    console.error('Error generating batch embeddings:', error);
-    throw new Error(`Failed to generate batch embeddings: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
+
+  return allEmbeddings;
 }
 
 /**

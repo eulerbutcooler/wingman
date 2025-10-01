@@ -56,7 +56,7 @@ export const files = pgTable("files", {
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   processingStatus: text("processing_status", {
-    enum: ["pending", "processing", "completed", "failed"],
+    enum: ["pending", "queued", "processing", "completed", "failed"],
   }).default("pending"),
   processingError: text("processing_error"),
   chunkCount: integer("chunk_count").default(0),
