@@ -1,10 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 import { db } from "@/services/db/drizzle";
 import { files, documentChunks } from "@/services/db/schema/courses";
-import { extractText } from "./text-extraction";
-import { chunkText } from "./text-chunking";
+import { extractText, PagedText } from "./text-extraction";
 import { generateEmbeddings } from "./embeddings";
 import { eq } from "drizzle-orm";
+import { chunkTextWithStrategy } from "./recursive-chunking"; // Import the new strategy
 
 export interface ProcessingResult {
   success: boolean;
@@ -14,7 +14,8 @@ export interface ProcessingResult {
 }
 
 /**
- * Process a document: extract text, chunk it, generate embeddings, and store in DB
+ * This function now uses the more advanced recursive chunking strategy
+ * to create more semantically coherent text chunks for embedding.
  */
 export async function processDocument(
   fileId: string
@@ -22,7 +23,6 @@ export async function processDocument(
   try {
     console.log(`🔄 Starting document processing for file ${fileId}`);
 
-    // Get file info from database
     const [fileRecord] = await db
       .select()
       .from(files)
@@ -33,139 +33,125 @@ export async function processDocument(
       throw new Error("File not found in database");
     }
 
-    // Update status to processing
     await db
       .update(files)
-      .set({
-        processingStatus: "processing",
-        processingError: null,
-      })
+      .set({ processingStatus: "processing", processingError: null })
       .where(eq(files.id, fileId));
 
     console.log(`📄 Processing file: ${fileRecord.originalName}`);
 
-    // Create Supabase service role client for downloading
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error(
-        "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables"
-      );
+      throw new Error("Missing Supabase environment variables");
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Download file from Supabase Storage
     const storagePath = getStoragePath(fileRecord.publicUrl);
-    console.log(`📥 Attempting to download from path: ${storagePath}`);
 
     const { data: fileData, error: downloadError } = await supabaseAdmin.storage
       .from("course_material")
       .download(storagePath);
 
     if (downloadError || !fileData) {
-      console.error("❌ Download error details:", downloadError);
-      const errorDetails = downloadError
-        ? JSON.stringify(downloadError, null, 2)
-        : "No error details";
-      throw new Error(`Failed to download file: ${errorDetails}`);
+      throw new Error(`Failed to download file: ${downloadError?.message}`);
     }
 
-    // Convert to buffer
     const buffer = Buffer.from(await fileData.arrayBuffer());
-    console.log(`📥 Downloaded file, size: ${buffer.length} bytes`);
 
-    // Extract text with page tracking for PDFs, fallback to regular extraction for other formats
-    let chunks;
+    // --- OPTIMIZATION: Use the new recursive chunking strategy ---
+    let chunks: Omit<import("./text-chunking").PagedTextChunk, "index">[] = [];
 
     if (fileRecord.mimeType === "application/pdf") {
-      // Use page-aware extraction for PDFs
-      const { extractPagedTextFromPdf } = await import(
-        "@/lib/rag/text-extraction"
-      );
-      const { chunkPagedText } = await import("@/lib/rag/text-chunking");
-
-      const pagedText = await extractPagedTextFromPdf(buffer);
-      console.log(
-        `📝 Extracted paged text: ${pagedText.pages.length} pages, ${pagedText.fullText.length} characters`
-      );
+      const { extractPagedTextFromPdf } = await import("./text-extraction");
+      const pagedText: PagedText = await extractPagedTextFromPdf(buffer);
 
       if (!pagedText.fullText || pagedText.fullText.trim().length === 0) {
         throw new Error("No text content found in the PDF document");
       }
 
-      // Chunk with page information preserved
-      chunks = chunkPagedText(pagedText.pages);
-      console.log(`🔪 Created ${chunks.length} chunks with page information`);
+      // Chunk each page's text individually to preserve page context
+      for (const page of pagedText.pages) {
+        const pageChunks = chunkTextWithStrategy(
+          page.text,
+          page.pageNumber,
+          page.startPosition
+        );
+        chunks.push(...pageChunks);
+      }
+      console.log(`🔪 Created ${chunks.length} chunks with new recursive strategy for PDF`);
     } else {
-      // Use regular extraction for non-PDF files
       const extractedText = await extractText(buffer, fileRecord.mimeType);
-      console.log(
-        `📝 Extracted text, length: ${extractedText.text.length} characters`
-      );
 
       if (!extractedText.text || extractedText.text.trim().length === 0) {
         throw new Error("No text content found in the document");
       }
 
-      // Chunk the text (without page information)
-      const regularChunks = chunkText(extractedText.text);
-
-      // Convert to PagedTextChunk format (without page info)
-      chunks = regularChunks.map((chunk) => ({
-        ...chunk,
-        pageNumber: 1, // Default to page 1 for non-PDF files
-        startPosition: 0,
-        endPosition: chunk.text.length,
-      }));
-
-      console.log(`🔪 Created ${chunks.length} text chunks`);
+      // Chunk the entire document's text
+      chunks = chunkTextWithStrategy(extractedText.text);
+      console.log(`🔪 Created ${chunks.length} chunks with new recursive strategy`);
     }
 
     if (chunks.length === 0) {
       throw new Error("No text chunks created from document");
     }
 
-    // Generate embeddings for all chunks
     const chunkTexts = chunks.map((chunk) => chunk.text);
     const embeddings = await generateEmbeddings(chunkTexts);
     console.log(`🧠 Generated ${embeddings.length} embeddings`);
 
-    // Get course ID from file record
+    // Get course ID from file record or create a test course
     let courseId = null;
-
-    // First check if a lesson references this file
-    const { lessons, topics } = await import("@/services/db/schema/courses");
-    const [lessonRecord] = await db
-      .select({ topicId: lessons.topicId })
-      .from(lessons)
-      .where(eq(lessons.fileId, fileRecord.id))
-      .limit(1);
-
+    const { lessons, topics, courses } = await import("@/services/db/schema/courses");
+    
+    // First, try to find course through lesson association
+    const [lessonRecord] = await db.select({ topicId: lessons.topicId }).from(lessons).where(eq(lessons.fileId, fileRecord.id)).limit(1);
     if (lessonRecord) {
-      // Get course ID from lesson's topic
-      const [topicRecord] = await db
-        .select({ courseId: topics.courseId })
-        .from(topics)
-        .where(eq(topics.id, lessonRecord.topicId))
+      const [topicRecord] = await db.select({ courseId: topics.courseId }).from(topics).where(eq(topics.id, lessonRecord.topicId)).limit(1);
+      if (topicRecord) courseId = topicRecord.courseId;
+    }
+    
+    // If no course association found, look for a default/test course for this user
+    if (!courseId) {
+      console.log(`⚠️ No direct course association found for file ${fileRecord.id}, looking for user's courses...`);
+      
+      // Try to find any course by this user
+      const [userCourse] = await db
+        .select({ id: courses.id })
+        .from(courses)
+        .where(eq(courses.userId, fileRecord.userId))
         .limit(1);
-
-      if (topicRecord) {
-        courseId = topicRecord.courseId;
+        
+      if (userCourse) {
+        courseId = userCourse.id;
+        console.log(`✅ Using user's existing course ${courseId} for file ${fileRecord.id}`);
+      } else {
+        // Create a default course for testing if none exists
+        const [newCourse] = await db
+          .insert(courses)
+          .values({
+            title: "Test Course for Document Processing",
+            description: "Automatically created course for standalone file uploads",
+            gendesc: "This course was created automatically for testing document processing",
+            userId: fileRecord.userId,
+          })
+          .returning();
+          
+        courseId = newCourse.id;
+        console.log(`✅ Created new test course ${courseId} for file ${fileRecord.id}`);
       }
     }
-
+    
     if (!courseId) {
-      throw new Error("Could not determine course ID for file");
+      throw new Error("Could not determine or create course ID for file");
     }
 
-    // Store chunks and embeddings in database
     const chunkRecords = chunks.map((chunk, index) => ({
       courseId: courseId!,
       fileId: fileRecord.id,
       chunkText: chunk.text,
-      chunkIndex: chunk.index,
+      chunkIndex: index, // Assign index sequentially now
       tokenCount: chunk.tokenCount,
       pageNumber: chunk.pageNumber || null,
       startPosition: chunk.startPosition || null,
@@ -176,7 +162,6 @@ export async function processDocument(
     await db.insert(documentChunks).values(chunkRecords);
     console.log(`💾 Stored ${chunkRecords.length} chunks in database`);
 
-    // Update file status to completed
     await db
       .update(files)
       .set({
@@ -188,69 +173,25 @@ export async function processDocument(
 
     console.log(`✅ Document processing completed for file ${fileId}`);
 
-    return {
-      success: true,
-      fileId,
-      chunkCount: chunks.length,
-    };
+    return { success: true, fileId, chunkCount: chunks.length };
   } catch (error) {
     console.error(`❌ Error processing document ${fileId}:`, error);
 
-    // Update file status to failed
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     await db
       .update(files)
-      .set({
-        processingStatus: "failed",
-        processingError: errorMessage,
-      })
+      .set({ processingStatus: "failed", processingError: errorMessage })
       .where(eq(files.id, fileId));
 
-    return {
-      success: false,
-      fileId,
-      chunkCount: 0,
-      error: errorMessage,
-    };
+    return { success: false, fileId, chunkCount: 0, error: errorMessage };
   }
 }
 
-/**
- * Extract storage path from Supabase URL
- */
 function getStoragePath(url: string): string {
-  console.log("🔍 Extracting storage path from URL:", url);
-
-  // Handle different URL formats:
-  // Public: https://project.supabase.co/storage/v1/object/public/course_material/path
-  // Private: https://project.supabase.co/storage/v1/object/course_material/path
-
-  // Try public format first
-  let urlParts = url.split("/storage/v1/object/public/course_material/");
+  const urlParts = url.split("/course_material/");
   if (urlParts.length >= 2) {
-    const path = urlParts[1];
-    console.log("✅ Extracted path from public URL:", path);
-    return path;
+    return urlParts[1];
   }
-
-  // Try private format
-  urlParts = url.split("/storage/v1/object/course_material/");
-  if (urlParts.length >= 2) {
-    const path = urlParts[1];
-    console.log("✅ Extracted path from private URL:", path);
-    return path;
-  }
-
-  // Try to extract from any course_material reference
-  const bucketIndex = url.indexOf("course_material/");
-  if (bucketIndex !== -1) {
-    const path = url.substring(bucketIndex + "course_material/".length);
-    console.log("✅ Extracted path from bucket reference:", path);
-    return path;
-  }
-
-  console.error("❌ Could not extract path from URL:", url);
   throw new Error(`Invalid Supabase storage URL format: ${url}`);
 }
 

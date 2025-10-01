@@ -34,6 +34,7 @@ export interface SaveFileRecordData {
   size: number;
   publicUrl: string; // Public URL for direct access
   lessonId?: string;
+  processingStatus?: "pending" | "queued" | "processing" | "completed" | "failed";
 }
 
 export interface FileRecord {
@@ -69,7 +70,7 @@ export async function saveFileRecord(
         mimeType: data.mimeType,
         size: data.size,
         publicUrl: data.publicUrl, // Public URL for direct access
-        processingStatus: "completed",
+        processingStatus: data.processingStatus || "pending",
         createdAt: new Date(),
       })
       .returning();
