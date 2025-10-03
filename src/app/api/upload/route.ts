@@ -8,16 +8,16 @@ import { processDocument } from "@/lib/rag/document-processor";
 // The endpoint for the ingestion worker that QStash will call.
 // It's critical to provide the full URL where your application is deployed.
 const INGESTION_WEBHOOK_URL =
-  process.env.NEXT_PUBLIC_APP_URL + "/api/ingest/webhook";
+  process.env.NEXT_PUBLIC_URL + "/api/ingest/webhook";
 
-if (!process.env.NEXT_PUBLIC_APP_URL) {
+if (!process.env.NEXT_PUBLIC_URL) {
   throw new Error("Missing NEXT_PUBLIC_APP_URL environment variable");
 }
 
 // Check if we're in localhost/development mode
-const isLocalhost = process.env.NEXT_PUBLIC_APP_URL?.includes('localhost') || 
-                   process.env.NEXT_PUBLIC_APP_URL?.includes('127.0.0.1') ||
-                   process.env.NEXT_PUBLIC_APP_URL?.includes('::1');
+const isLocalhost = process.env.NEXT_PUBLIC_URL?.includes('localhost') || 
+                   process.env.NEXT_PUBLIC_URL?.includes('127.0.0.1') ||
+                   process.env.NEXT_PUBLIC_URL?.includes('::1');
 
 export async function POST(request: NextRequest) {
   try {
