@@ -15,9 +15,10 @@ if (!process.env.NEXT_PUBLIC_URL) {
 }
 
 // Check if we're in localhost/development mode
-const isLocalhost = process.env.NEXT_PUBLIC_URL?.includes('localhost') || 
-                   process.env.NEXT_PUBLIC_URL?.includes('127.0.0.1') ||
-                   process.env.NEXT_PUBLIC_URL?.includes('::1');
+const isLocalhost =
+  process.env.NEXT_PUBLIC_URL?.includes("localhost") ||
+  process.env.NEXT_PUBLIC_URL?.includes("127.0.0.1") ||
+  process.env.NEXT_PUBLIC_URL?.includes("::1");
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,8 +39,8 @@ export async function POST(request: NextRequest) {
     console.log(`📋 Upload request details:`, {
       fileName: file?.name,
       lessonId: lessonId || "not provided",
-      topicId: topicId || "not provided", 
-      courseId: courseId || "not provided"
+      topicId: topicId || "not provided",
+      courseId: courseId || "not provided",
     });
 
     if (!file) {
@@ -53,10 +54,16 @@ export async function POST(request: NextRequest) {
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     ];
     if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json({ error: "Invalid file type." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid file type." },
+        { status: 400 }
+      );
     }
     if (file.size > 100 * 1024 * 1024) {
-      return NextResponse.json({ error: "File size must be less than 100MB" }, { status: 400 });
+      return NextResponse.json(
+        { error: "File size must be less than 100MB" },
+        { status: 400 }
+      );
     }
 
     // --- File Upload to Storage (unchanged) ---
@@ -67,7 +74,9 @@ export async function POST(request: NextRequest) {
 
     const timestamp = Date.now();
     const extension = file.name.split(".").pop();
-    const fileName = `${file.name.split(".")[0]}_${user.id}_${timestamp}.${extension}`;
+    const fileName = `${file.name.split(".")[0]}_${
+      user.id
+    }_${timestamp}.${extension}`;
     const filePath = `documents/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
@@ -76,7 +85,10 @@ export async function POST(request: NextRequest) {
 
     if (uploadError) {
       console.error("Supabase upload error:", uploadError);
-      return NextResponse.json({ error: "Failed to upload file to storage" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to upload file to storage" },
+        { status: 500 }
+      );
     }
 
     const { data: publicUrlData } = supabase.storage
@@ -97,11 +109,15 @@ export async function POST(request: NextRequest) {
     // --- ARCHITECTURE CHANGE: Enqueue Job instead of Direct Processing ---
     // Instead of processing the document synchronously, we publish a job to the queue.
     // The worker will pick this up asynchronously.
-    
+
     if (isLocalhost || !qstashClient) {
       // For localhost development or when QStash is not configured, process directly
-      console.log(`🏠 ${isLocalhost ? 'Localhost' : 'No QStash'} detected - processing file ${savedFile.id} directly`);
-      
+      console.log(
+        `🏠 ${
+          isLocalhost ? "Localhost" : "No QStash"
+        } detected - processing file ${savedFile.id} directly`
+      );
+
       // Process document in background for localhost
       processDocument(savedFile.id)
         .then((result) => {
@@ -116,7 +132,7 @@ export async function POST(request: NextRequest) {
             error
           );
         });
-        
+
       console.log(`✅ File ${savedFile.id} is being processed directly.`);
     } else {
       // For production with QStash configured, use QStash queue
@@ -130,11 +146,14 @@ export async function POST(request: NextRequest) {
           // Optional: Add a delay or configure retries
           // retries: 3,
         });
-        
+
         console.log(`✅ File ${savedFile.id} has been queued for processing.`);
       } catch (qstashError) {
-        console.error('❌ QStash error, falling back to direct processing:', qstashError);
-        
+        console.error(
+          "❌ QStash error, falling back to direct processing:",
+          qstashError
+        );
+
         // Fallback to direct processing if QStash fails
         processDocument(savedFile.id)
           .then((result) => {
@@ -149,8 +168,10 @@ export async function POST(request: NextRequest) {
               error
             );
           });
-          
-        console.log(`✅ File ${savedFile.id} is being processed directly (fallback mode).`);
+
+        console.log(
+          `✅ File ${savedFile.id} is being processed directly (fallback mode).`
+        );
       }
     }
 
@@ -159,7 +180,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       file: savedFile,
-      message: isLocalhost 
+      message: isLocalhost
         ? "File uploaded successfully and is being processed directly (localhost mode)."
         : "File uploaded successfully and is now queued for processing.",
     });

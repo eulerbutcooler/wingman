@@ -8,9 +8,11 @@ const QSTASH_TOKEN = process.env.QSTASH_TOKEN;
  *
  * This client is configured once and can be reused throughout the application
  * to send jobs to the ingestion queue.
- * 
+ *
  * Note: Will be null if QSTASH_TOKEN is not configured.
  */
-export const qstashClient = QSTASH_TOKEN ? new Client({
-  token: QSTASH_TOKEN,
-}) : null;
+export const qstashClient = QSTASH_TOKEN
+  ? new Client({
+      token: QSTASH_TOKEN,
+    })
+  : null;
