@@ -1,6 +1,6 @@
 import { db } from "@/services/db/drizzle";
 import { documentChunks, files, courses } from "@/services/db/schema/courses";
-import { eq, sql, desc } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { generateEmbedding, cosineSimilarity } from "./embeddings";
 
 export interface SearchResult {

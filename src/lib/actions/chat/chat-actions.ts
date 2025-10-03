@@ -7,8 +7,6 @@ import {
   messages,
   type Chat,
   type Message,
-  type NewChat,
-  type NewMessage,
 } from "@/services/db/schema/chats";
 import { eq, desc } from "drizzle-orm";
 

@@ -8,19 +8,8 @@ import { generateCourseSummary } from "@/lib/actions/course/course-summary";
 // GET /api/courses - Fetch all courses
 export async function GET() {
   try {
-    const user = await getCurrentUser();
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
-    const userId = user.id;
-
     // Fetch courses with their topics and lessons
-    const userCourses = await db
+    const allCourses = await db
       .select({
         id: courses.id,
         title: courses.title,
@@ -32,12 +21,11 @@ export async function GET() {
         userId: courses.userId,
       })
       .from(courses)
-      .where(eq(courses.userId, userId))
       .orderBy(desc(courses.createdAt));
 
     // For each course, fetch topics and lessons
     const coursesWithContent = await Promise.all(
-      userCourses.map(async (course) => {
+      allCourses.map(async (course) => {
         const courseTopics = await db
           .select({
             id: topics.id,
@@ -404,15 +392,9 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE /api/courses?courseId=xxx - Delete a course and all associated data
+// DELETE /api/courses - Delete a course
 export async function DELETE(request: NextRequest) {
   try {
-    // Get current user
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
     const courseId = searchParams.get("courseId");
 
@@ -423,45 +405,28 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // First verify the course exists and belongs to the user
-    const existingCourse = await db
+    // Find the course to be deleted
+    const course = await db
       .select()
       .from(courses)
       .where(eq(courses.id, courseId))
       .limit(1);
 
-    if (existingCourse.length === 0) {
-      return NextResponse.json({ error: "Course not found" }, { status: 404 });
-    }
-
-    if (existingCourse[0].userId !== user.id) {
+    if (course.length === 0) {
       return NextResponse.json(
-        { error: "Unauthorized to delete this course" },
-        { status: 403 }
+        { error: "Course not found" },
+        { status: 404 }
       );
     }
 
-    // Delete the course - cascade delete will handle quizzes, topics, and lessons automatically
-    const deletedCourse = await db
-      .delete(courses)
-      .where(eq(courses.id, courseId))
-      .returning();
+    // Perform the deletion
+    await db.delete(courses).where(eq(courses.id, courseId));
 
-    if (deletedCourse.length === 0) {
-      return NextResponse.json(
-        { error: "Failed to delete course" },
-        { status: 500 }
-      );
-    }
-
-    console.log(
-      `Successfully deleted course ${courseId} and all associated data`
-    );
+    console.log(`🗑️ Course with ID ${courseId} deleted successfully.`);
 
     return NextResponse.json({
       success: true,
-      message: "Course and all associated data deleted successfully",
-      deletedCourse: deletedCourse[0],
+      message: "Course deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting course:", error);

@@ -19,24 +19,6 @@ interface QuizCardProps {
   onReview: () => void;
 }
 
-const CheckCircle: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-  </svg>
-);
-
 const RefreshCw: React.FC<{ className?: string }> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -103,19 +85,6 @@ const QuizCard: React.FC<QuizCardProps> = ({
   const scorePercentage = isCompleted
     ? (quiz.latestResult!.score / quiz.totalQuestions) * 100
     : 0;
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case "easy":
-        return "text-green-600";
-      case "medium":
-        return "text-yellow-600";
-      case "hard":
-        return "text-red-600";
-      default:
-        return "text-gray-600";
-    }
-  };
 
   const getDifficultyBg = (difficulty: string) => {
     switch (difficulty) {
@@ -200,13 +169,14 @@ const CourseQuizzes: React.FC<CourseQuizzesProps> = ({
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeQuiz, setActiveQuiz] = useState<Quiz | null>(null);
-  const [currentView, setCurrentView] = useState<
+  const [_activeQuiz, setActiveQuiz] = useState<Quiz | null>(null);
+  const [_currentView, setCurrentView] = useState<
     "list" | "quiz" | "results" | "review"
   >("list");
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId, userId]);
 
   const loadData = async () => {

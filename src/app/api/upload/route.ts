@@ -98,9 +98,9 @@ export async function POST(request: NextRequest) {
     // Instead of processing the document synchronously, we publish a job to the queue.
     // The worker will pick this up asynchronously.
     
-    if (isLocalhost) {
-      // For localhost development, process directly since QStash can't reach localhost
-      console.log(`🏠 Localhost detected - processing file ${savedFile.id} directly`);
+    if (isLocalhost || !qstashClient) {
+      // For localhost development or when QStash is not configured, process directly
+      console.log(`🏠 ${isLocalhost ? 'Localhost' : 'No QStash'} detected - processing file ${savedFile.id} directly`);
       
       // Process document in background for localhost
       processDocument(savedFile.id)
@@ -117,9 +117,9 @@ export async function POST(request: NextRequest) {
           );
         });
         
-      console.log(`✅ File ${savedFile.id} is being processed directly (localhost mode).`);
+      console.log(`✅ File ${savedFile.id} is being processed directly.`);
     } else {
-      // For production, use QStash queue
+      // For production with QStash configured, use QStash queue
       try {
         await qstashClient.publishJSON({
           url: INGESTION_WEBHOOK_URL,

@@ -39,7 +39,7 @@ export async function createCourse(
   return result.course;
 }
 
-export async function getCourses(userId?: string): Promise<Course[]> {
+export async function getCourses(_userId?: string): Promise<Course[]> {
   const response = await fetch(`${BASE_URL}/courses`);
 
   if (!response.ok) {
@@ -53,7 +53,7 @@ export async function getCourses(userId?: string): Promise<Course[]> {
 
 export async function deleteCourse(
   courseId: string,
-  userId?: string
+  _userId?: string
 ): Promise<void> {
   const response = await fetch(`${BASE_URL}/courses?courseId=${courseId}`, {
     method: "DELETE",
@@ -225,10 +225,10 @@ export async function deleteLesson(lessonId: string): Promise<void> {
 
 export async function uploadFile(
   file: File,
-  userId?: string,
+  _userId?: string,
   lessonId?: string,
   topicId?: string,
-  onProgress?: (progress: number) => void
+  _onProgress?: (progress: number) => void
 ): Promise<UploadedFile> {
   // Create FormData for API request
   const formData = new FormData();
@@ -276,8 +276,8 @@ export async function uploadFile(
 
 export async function uploadImage(
   file: File,
-  userId?: string,
-  onProgress?: (progress: number) => void
+  _userId?: string,
+  _onProgress?: (progress: number) => void
 ): Promise<{ url: string; publicId: string }> {
   const supabase = createClient();
 
@@ -292,7 +292,7 @@ export async function uploadImage(
   // Upload to Supabase Storage
   const filePath = `images/${fileName}`;
 
-  const { data: uploadData, error: uploadError } = await supabase.storage
+  const { error: uploadError } = await supabase.storage
     .from("course_material")
     .upload(filePath, file, {
       contentType: file.type,

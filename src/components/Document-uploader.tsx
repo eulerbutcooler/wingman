@@ -46,7 +46,7 @@ export default function DocumentUploader({
 }: DocumentUploaderProps) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
 
-  const uploadToSupabase = async (file: File, fileId: string) => {
+  const uploadToSupabase = async (file: File, _fileId: string) => {
     try {
       // Use course-service upload function instead of API
       const { uploadFile } = await import("@/services/course-service");
@@ -85,6 +85,7 @@ export default function DocumentUploader({
         uploadFile(uploadedFile.id);
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [userId, lessonId, topicId]
   );
 
