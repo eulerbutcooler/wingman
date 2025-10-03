@@ -37,12 +37,12 @@ export async function generateEmbeddings(
   // The Gemini API documentation specifies a limit of 100 texts per batch.
   const batchSize = 100;
   const maxRetries = 5;
-  let initialDelay = 1000; // 1 second
+  const initialDelay = 1000; // 1 second
 
   for (let i = 0; i < texts.length; i += batchSize) {
     const batchTexts = texts.slice(i, i + batchSize);
-    let attempts = 0;
-    let delay = initialDelay;
+    const attempts = 0;
+    const delay = initialDelay;
 
     while (attempts < maxRetries) {
       try {
