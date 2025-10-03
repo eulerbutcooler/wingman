@@ -64,6 +64,20 @@
       "when": 1758942185069,
       "tag": "0008_chilly_shen",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1759492873333,
+      "tag": "0009_add_fulltext_search",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1759493295641,
+      "tag": "0010_add_content_hash",
+      "breakpoints": true
     }
   ]
 }

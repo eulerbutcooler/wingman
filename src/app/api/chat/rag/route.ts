@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
-import { searchSimilarChunks, getCourseIndexStats } from "@/lib/rag/search";
+import { hybridSearchChunks, getCourseIndexStats } from "@/lib/rag/search";
 import { getCurrentUser } from "@/lib/auth/auth-utils";
 
 export async function POST(request: NextRequest) {
@@ -30,9 +30,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Search for relevant chunks
-    console.log("🔍 Searching for relevant content...");
-    const relevantChunks = await searchSimilarChunks(
+    // Search for relevant chunks using HYBRID SEARCH (vector + full-text)
+    console.log("🔍 Searching for relevant content with hybrid search...");
+    const relevantChunks = await hybridSearchChunks(
       message,
       courseId,
       maxSources
@@ -78,7 +78,9 @@ Please provide a detailed answer based on the course materials provided in the c
         chunk.chunkText.substring(0, 200) +
         (chunk.chunkText.length > 200 ? "..." : ""),
       chunkIndex: chunk.chunkIndex,
-      fileId: chunk.fileId,
+      fileId: chunk.source.fileId,
+      fileName: chunk.source.fileName,
+      pageNumber: chunk.source.pageNumber,
     }));
 
     // Get course stats for additional context

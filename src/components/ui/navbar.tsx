@@ -72,12 +72,12 @@ export default function Navbar() {
           // Smooth color fade
           "transition-colors duration-150 ease-in-out",
           // Top-of-page background
-          "bg-[#f5f5f5]",
+          "bg-transparent",
         ].join(" ")}
       >
         <div>
           <h1 className="text-xl md:text-2xl font-bold">
-            AeroMentor<span className="text-navy">AI</span>
+            AeroMentor
           </h1>
         </div>
 

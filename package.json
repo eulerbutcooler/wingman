@@ -25,6 +25,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.44.5",
+    "inngest": "^3.44.0",
     "jsonwebtoken": "^9.0.2",
     "jszip": "^3.10.1",
     "lucide-react": "^0.542.0",
@@ -45,6 +46,7 @@
     "react-type-animation": "^3.2.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
+    "tiktoken": "^1.0.22",
     "zod": "^4.1.5"
   },
   "devDependencies": {

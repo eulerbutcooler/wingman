@@ -78,5 +78,7 @@ export const documentChunks = pgTable("document_chunks", {
   endPosition: integer("end_position"), // Character position where chunk ends
   tokenCount: integer("token_count"),
   embedding: vector("embedding", { dimensions: 768 }),
+  searchVector: text("search_vector").$type<string>(), // Full-text search vector (tsvector)
+  contentHash: text("content_hash"), // SHA-256 hash for duplicate detection
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });

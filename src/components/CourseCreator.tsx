@@ -192,79 +192,119 @@ export default function CourseCreator({
 
       // Create the course
       const createdCourse = await courseService.createCourse(courseData);
-      console.log("Course created:", createdCourse);
+      console.log("✅ Course created:", createdCourse);
 
-      // Upload files for lessons that have them
-      console.log("🔍 Checking for files to upload...");
+      // ✅ NEW: Collect all files for parallel upload
+      console.log("🔍 Collecting files for parallel upload...");
+      const uploadTasks: Array<{
+        promise: Promise<unknown>;
+        topicId: string;
+        lessonId: string;
+        lessonTitle: string;
+      }> = [];
+
       for (const topic of topics) {
-        console.log(`📁 Topic: ${topic.title}, lessons:`, topic.lessons.length);
+        const createdTopic = createdCourse.topics?.find(
+          (t) => t.title === topic.title
+        );
+
+        if (!createdTopic) {
+          console.warn(`⚠️ Could not find created topic for: ${topic.title}`);
+          continue;
+        }
+
         for (const lesson of topic.lessons) {
-          console.log(
-            `📝 Lesson: ${lesson.title}, has file:`,
-            !!lesson.file,
-            "file:",
-            lesson.file
-          );
           if (lesson.file) {
-            try {
-              console.log(`🚀 Starting upload for lesson: ${lesson.title}`);
+            const createdLesson = createdTopic.lessons?.find(
+              (l) => l.title === lesson.title
+            );
+
+            if (createdLesson) {
+              console.log(`📋 Queuing upload for: ${lesson.title}`);
+              
+              // Mark as uploading
               updateLesson(topic.id, lesson.id, {
                 uploading: true,
                 uploadProgress: 0,
               });
 
-              // Find the corresponding lesson in the created course
-              const createdTopic = createdCourse.topics?.find(
-                (t) => t.title === topic.title
-              );
-              const createdLesson = createdTopic?.lessons?.find(
-                (l) => l.title === lesson.title
-              );
-
-              console.log("🔍 Found created topic:", createdTopic?.id);
-              console.log("🔍 Found created lesson:", createdLesson?.id);
-
-              if (createdLesson && createdTopic) {
-                console.log(`📤 Uploading file for lesson ${createdLesson.id}`);
-                const uploadedFile = await courseService.uploadFile(
+              // Add to upload batch
+              uploadTasks.push({
+                promise: courseService.uploadFile(
                   lesson.file,
                   userId,
                   createdLesson.id.toString(),
                   createdTopic.id.toString(),
                   (progress) => {
-                    console.log(
-                      `📊 Upload progress for ${lesson.title}: ${progress}%`
-                    );
                     updateLesson(topic.id, lesson.id, {
                       uploadProgress: progress,
                     });
                   }
-                );
-
-                console.log("✅ File uploaded successfully:", uploadedFile);
-                console.log(
-                  `✅ File ${uploadedFile.id} automatically linked to lesson ${createdLesson.id} during upload process`
-                );
-                updateLesson(topic.id, lesson.id, {
-                  uploading: false,
-                  uploadProgress: 100,
-                });
-              } else {
-                console.error("❌ Could not find created lesson or topic");
-              }
-            } catch (error) {
-              console.error(
-                "💥 File upload failed for lesson:",
-                lesson.title,
-                error
-              );
-              updateLesson(topic.id, lesson.id, {
-                uploading: false,
-                uploadProgress: 0,
+                ),
+                topicId: topic.id,
+                lessonId: lesson.id,
+                lessonTitle: lesson.title,
               });
+            } else {
+              console.warn(`⚠️ Could not find created lesson for: ${lesson.title}`);
             }
           }
         }
+      }
+
+      if (uploadTasks.length === 0) {
+        console.log("ℹ️ No files to upload");
+        onSuccess(createdCourse);
+        return;
+      }
+
+      // ✅ NEW: Upload all files in parallel
+      console.log(`📤 Uploading ${uploadTasks.length} files in parallel...`);
+      const startTime = Date.now();
+
+      const results = await Promise.allSettled(
+        uploadTasks.map((task) => task.promise)
+      );
+
+      const uploadTime = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.log(`⏱️ All uploads completed in ${uploadTime}s`);
+
+      // ✅ Handle results
+      let successCount = 0;
+      let failedCount = 0;
+
+      results.forEach((result, index) => {
+        const task = uploadTasks[index];
+
+        if (result.status === "fulfilled") {
+          successCount++;
+          console.log(`✅ Upload successful: ${task.lessonTitle}`);
+          updateLesson(task.topicId, task.lessonId, {
+            uploading: false,
+            uploadProgress: 100,
+          });
+        } else {
+          failedCount++;
+          console.error(
+            `❌ Upload failed: ${task.lessonTitle}`,
+            result.reason
+          );
+          updateLesson(task.topicId, task.lessonId, {
+            uploading: false,
+            uploadProgress: 0,
+          });
+        }
+      });
+
+      console.log(`📊 Upload summary: ${successCount} succeeded, ${failedCount} failed`);
+
+      // Show summary to user
+      if (failedCount > 0) {
+        alert(
+          `Course created! ${successCount} files uploaded successfully, ${failedCount} failed. Failed files can be re-uploaded later.`
+        );
+      } else {
+        console.log("🎉 All files uploaded successfully!");
       }
 
       onSuccess(createdCourse);

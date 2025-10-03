@@ -4,6 +4,7 @@ import { files, documentChunks } from "@/services/db/schema/courses";
 import { extractText } from "./text-extraction";
 import { chunkText } from "./text-chunking";
 import { generateEmbeddings } from "./embeddings";
+import { generateContentHash } from "./hash-utils";
 import { eq } from "drizzle-orm";
 
 export interface ProcessingResult {
@@ -160,7 +161,7 @@ export async function processDocument(
       throw new Error("Could not determine course ID for file");
     }
 
-    // Store chunks and embeddings in database
+    // Store chunks and embeddings in database with deduplication
     const chunkRecords = chunks.map((chunk, index) => ({
       courseId: courseId!,
       fileId: fileRecord.id,
@@ -171,17 +172,39 @@ export async function processDocument(
       startPosition: chunk.startPosition || null,
       endPosition: chunk.endPosition || null,
       embedding: embeddings[index],
+      contentHash: generateContentHash(chunk.text), // Generate hash for deduplication
     }));
 
-    await db.insert(documentChunks).values(chunkRecords);
-    console.log(`💾 Stored ${chunkRecords.length} chunks in database`);
+    // Insert with ON CONFLICT handling for duplicates
+    let insertedCount = 0;
+    let skippedDuplicates = 0;
+
+    for (const record of chunkRecords) {
+      try {
+        await db.insert(documentChunks).values(record);
+        insertedCount++;
+      } catch (error: unknown) {
+        // Check if it's a duplicate key error (PostgreSQL error code 23505)
+        if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
+          skippedDuplicates++;
+          console.log(`⏭️  Skipped duplicate chunk: "${record.chunkText.substring(0, 50)}..."`);
+        } else {
+          throw error; // Re-throw if it's not a duplicate error
+        }
+      }
+    }
+
+    console.log(`💾 Stored ${insertedCount} new chunks in database`);
+    if (skippedDuplicates > 0) {
+      console.log(`🔄 Skipped ${skippedDuplicates} duplicate chunks`);
+    }
 
     // Update file status to completed
     await db
       .update(files)
       .set({
         processingStatus: "completed",
-        chunkCount: chunks.length,
+        chunkCount: insertedCount, // Use actual inserted count
         processingError: null,
       })
       .where(eq(files.id, fileId));
@@ -191,7 +214,7 @@ export async function processDocument(
     return {
       success: true,
       fileId,
-      chunkCount: chunks.length,
+      chunkCount: insertedCount,
     };
   } catch (error) {
     console.error(`❌ Error processing document ${fileId}:`, error);

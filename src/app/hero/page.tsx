@@ -192,15 +192,27 @@ export default function Hero() {
   const [isInputFocused, setIsInputFocused] = useState(false);
   
   return (
-    <div className="bg-[#f5f5f5] min-h-screen w-full flex flex-col pt-24 md:pt-34  items-center px-4 md:px-0">
-      <div className=" w-full md:w-11/12 flex flex-col lg:flex-row cta text-left justify-between   md:p-10 gap-8 lg:gap-12  rounded-4xl font-mono">
+    <div className="relative min-h-screen w-full flex flex-col pt-24 md:pt-34 items-center px-4 md:px-0">
+      {/* Background Image - Fixed viewport covering */}
+      <div className="fixed inset-0 z-0 h-screen w-screen">
+        <Image
+          src="/su9.jpg"
+          alt="Background"
+          fill
+          className="object-cover opacity-98 blur-[2px] object-top"
+          priority
+        />
+      </div>
+      
+      {/* Content with overlay - scrolls over background */}
+      <div className="relative z-10 w-full md:w-11/12 flex flex-col lg:flex-row cta text-left justify-between md:p-10 gap-8 lg:gap-12 rounded-4xl font-mono">
         <div className="flex w-full flex-col pt-30 pb-64 justify-between gap-2 lg:gap-2 text-center relative">
-          <h1 className="text-[150px] text-center z-10  font-bold text-black relative ">AeroMentor<span className="text-navy">AI</span></h1>
-          <h1 className="text-6xl z-10 text-center flex items-center justify-center gap-2">
+          <h1 className="text-[150px] text-center z-10  font-bold text-white relative ">AeroMentor</h1>
+          <h1 className="text-6xl z-10 text-center flex text-white items-center justify-center gap-2">
             <span>Get grounded answers anytime.</span>
             <TextRotate
               texts={["Cited.", "Clear.", "Ready."]}
-              mainClassName="text-black overflow-hidden text-6xl font-semibold"
+              mainClassName="text-white overflow-hidden text-6xl font-semibold"
               staggerFrom={"last"}
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
@@ -214,7 +226,7 @@ export default function Hero() {
           
           <div className="flex gap-4 justify-center items-center mt-8">
 
-            <button className="px-4 py-1  pt-2 z-30 bg-white text-black border-2 cursor-pointer border-black font-semibold rounded-2xl text-xl shadow-md h-12 flex items-center justify-center">
+            <button className="px-4 py-1  pt-2 z-30 bg-white text-black cursor-pointer font-semibold rounded-2xl text-xl shadow-md h-12 flex items-center justify-center">
               Learn More
             </button>
             <button className="px-4 py-1 pt-2 bg-black border-2 z-30 border-black cursor-pointer text-white font-semibold rounded-2xl text-xl shadow-md h-12 flex items-center justify-center">
@@ -222,14 +234,14 @@ export default function Hero() {
             </button>
           </div>
 
-          <Image
+          {/* <Image
             src="/su-7.png"
             alt="Su-7 Aircraft"
             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 rotate-180 -translate-y-1/2 scale-y-[-1] opacity-70"
             width={1000}
             height={1300}
             priority
-          />
+          /> */}
 
           
 
@@ -241,40 +253,114 @@ export default function Hero() {
       </div>
 
       
-      <div className="w-full md:w-11/12 relative flex justify-center items-center mt-12 mb-8">
-        <ImageCarousel />
-        <div className="absolute inset-0 flex flex-col justify-between items-center">
-          <h1 className=" text-white font-bold w-full pl-10 pt-6 text-9xl"><TextRotate
-              texts={["Chat.", "Library.", "Quiz.","Dashboard."]}
-              mainClassName=" overflow-hidden "
-              staggerFrom={"last"}
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "-120%" }}
-              staggerDuration={0.025}
-              splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
-              transition={{ type: "spring", damping: 30, stiffness: 400 }}
-              rotationInterval={6050}
-            /></h1>
-            <h1 className="flex justify-end  border-black text-white font-bold w-full pr-10 pb-6 text-8xl"><TextRotate
-              texts={["History.", "Citations.", "Videos.","Material.","Plans.","Summary.","Progress.", "Assesment.","Tracking.", "Personalized.", "Adaptive.","Onboard."]}
-              mainClassName=" overflow-hidden "
-              staggerFrom={"last"}
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "-120%" }}
-              staggerDuration={0.025}
-              splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
-              transition={{ type: "spring", damping: 30, stiffness: 400 }}
-              rotationInterval={2000}
-            /></h1>
+      <div className="z-10 w-full md:w-11/12 flex justify-between  items-center mt-12 mb-8  relative overflow-hidden">
+        {/* Texture overlay */}
+        {/* backdrop-blur-md bg-white/10 border border-white/20 rounded-3xl p-8 shadow-xl */}
+        {/* <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
+          backgroundImage: `repeating-linear-gradient(
+            0deg,
+            rgba(255, 255, 255, 0.03) 0px,
+            rgba(255, 255, 255, 0.03) 1px,
+            transparent 1px,
+            transparent 2px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.03) 0px,
+            rgba(255, 255, 255, 0.03) 1px,
+            transparent 1px,
+            transparent 2px
+          )`
+        }}></div> */}
+        
+        <div className="relative z-10 flex flex-col gap-4">
+          <h1 className="text-8xl font-bold text-white">Chat</h1>
+          <p className="text-2xl text-white/90 leading-relaxed max-w-2xl">
+            Upload course materials and get instant answers with precise citations. Our RAG-powered chatbot provides intelligent responses backed by page numbers and source references.
+          </p>
         </div>
-          </div>
-          <div className="relative h-[500px] flex flex-col mt-62  w-10/12 overflow-hidden">
-            <VideoText src="/edit.mp4">Everything You Need</VideoText>
-            <VideoText src="/edit.mp4">To Ace Aeronautical</VideoText>
-            <VideoText src="/edit.mp4">Technology</VideoText>
-          </div>
+        <div className="relative z-10"><Image
+          src="/chat.png"
+          alt="Chat"
+          width={1000}
+          height={800}
+          className="object-contain"
+        /></div>
+      </div>
+      <div className="z-10 w-full md:w-11/12 flex justify-between  items-center mt-12 mb-8  relative overflow-hidden">
+        {/* Texture overlay */}
+        {/* backdrop-blur-md bg-white/10 border border-white/20 rounded-3xl p-8 shadow-xl */}
+        {/* <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
+          backgroundImage: `repeating-linear-gradient(
+            0deg,
+            rgba(255, 255, 255, 0.03) 0px,
+            rgba(255, 255, 255, 0.03) 1px,
+            transparent 1px,
+            transparent 2px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.03) 0px,
+            rgba(255, 255, 255, 0.03) 1px,
+            transparent 1px,
+            transparent 2px
+          )`
+        }}></div> */}
+        
+        
+        <div className="relative z-10"><Image
+          src="/library.png"
+          alt="Chat"
+          width={1000}
+          height={800}
+          className="object-contain scale-x-[-1]"
+        /></div>
+        <div className="relative z-10 flex flex-col gap-4">
+          <h1 className="text-8xl font-bold text-white">Library</h1>
+          <p className="text-2xl text-white/90 leading-relaxed max-w-2xl">
+            Access comprehensive aeronautical engineering courses with structured topics and lessons. Browse through PDFs, documents, and presentations organized into complete learning paths for your curriculum.
+          </p>
+        </div>
+      </div>
+      <div className="z-10 w-full md:w-11/12 flex justify-between  items-center mt-12 mb-8  relative overflow-hidden">
+        {/* Texture overlay */}
+        {/* backdrop-blur-md bg-white/10 border border-white/20 rounded-3xl p-8 shadow-xl */}
+        {/* <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
+          backgroundImage: `repeating-linear-gradient(
+            0deg,
+            rgba(255, 255, 255, 0.03) 0px,
+            rgba(255, 255, 255, 0.03) 1px,
+            transparent 1px,
+            transparent 2px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.03) 0px,
+            rgba(255, 255, 255, 0.03) 1px,
+            transparent 1px,
+            transparent 2px
+          )`
+        }}></div> */}
+        
+        <div className="relative z-10 flex flex-col gap-4">
+          <h1 className="text-8xl font-bold text-white">Quiz</h1>
+          <p className="text-2xl text-white/90 leading-relaxed max-w-2xl">
+            Test your knowledge with AI-generated quizzes across multiple difficulty levels. Each quiz features 30 comprehensive questions with instant feedback, detailed explanations, and performance tracking to enhance your learning.
+          </p>
+        </div>
+        <div className="relative z-10"><Image
+          src="/quiz.png"
+          alt="Chat"
+          width={1000}
+          height={800}
+          className="object-contain"
+        /></div>
+      </div>
+      <div className="relative z-10 h-[500px] flex flex-col mt-62  w-10/12 overflow-hidden">
+        <VideoText src="/edit.mp4">Everything You Need</VideoText>
+        <VideoText src="/edit.mp4">To Ace Aeronautical</VideoText>
+        <VideoText src="/edit.mp4">Technology</VideoText>
+      </div>
 
 
 
@@ -283,9 +369,9 @@ export default function Hero() {
 
 
 
-      <div className="flex flex-col lg:flex-row w-full md:w-11/12 mt-12 md:mt-24 gap-8 md:gap-24 justify-between mb-12 md:mb-24 px-4 md:px-0">
+      <div className="relative z-10 flex flex-col lg:flex-row w-full md:w-11/12 mt-12 md:mt-24 gap-8 md:gap-24 justify-between mb-12 md:mb-24 px-4 md:px-0">
         <div className="flex flex-col w-full lg:w-1/2 gap-4">
-          <h1 className="text-lg font-bold text-black">N.I.A.T</h1>
+          <h1 className="text-lg font-bold text-white">NIAT</h1>
           <div className="flex gap-6 md:gap-10">
             <Image
               src="/crest.png"
@@ -303,35 +389,35 @@ export default function Hero() {
             />
           </div>
 
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-neutral-300">
             Built by the Naval Institute of Aeronautical Technology, Kochi —
             empowering learners with practical engineering and innovation.
           </p>
-          <p className="text-sm text-neutral-600">
-            Established in 1947 under Southern Naval Command, advancing
+          <p className="text-sm text-neutral-300">
+            Established in 1956 under Southern Naval Command, advancing
             aeronautical education and applied research.
           </p>
-          <p className="text-xs text-neutral-600">
+          <p className="text-xs text-neutral-300">
             © 2025 NIAT. All rights reserved.
           </p>
         </div>
         <div className="flex flex-col justify-between  w-full text-right gap-6 md:gap-4">
           <div className="flex flex-col md:flex-row justify-between gap-6 md:gap-4">
             <div className="flex flex-col w-full  gap-4">
-              <h1 className="text-lg font-bold text-black">Contact us</h1>
-              <p className="text-sm text-neutral-600">
+              <h1 className="text-lg font-bold text-white">Contact us</h1>
+              <p className="text-sm text-neutral-300">
                 Email: wingmanai.contact@gmail.com
               </p>
-              <p className="text-sm text-neutral-600">Phone: +91 9876543210</p>
-              <p className="text-sm text-neutral-600">
-                Address: 123 Main St, Kochi, Kerala
+              <p className="text-sm text-neutral-300">Phone: +91 9876543210</p>
+              <p className="text-sm text-neutral-300">
+                Address: INS Garuda, Naval Base, Kochi 682004, Kerala
               </p>
             </div>
             
           </div>
           <div className="flex text-right  flex-col gap-4">
-            <h1 className="text-lg  font-bold text-black">Socials</h1>
-            <div className="flex  text-neutral-600 gap-6 text-xl justify-end">
+            <h1 className="text-lg  font-bold text-white">Socials</h1>
+            <div className="flex  text-neutral-300 gap-6 text-xl justify-end">
               <SiGmail className="cursor-pointer  hover:text-navy transition-colors" />
               <FiGithub className="cursor-pointer hover:text-navy transition-colors" />
               <FaXTwitter className="cursor-pointer hover:text-navy transition-colors" />

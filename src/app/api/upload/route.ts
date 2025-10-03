@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { saveFileRecord } from "@/lib/actions/files/file-actions";
 import { getCurrentUser } from "@/lib/auth/auth-utils";
-import { processDocument } from "@/lib/rag/document-processor";
+import { inngest } from "@/inngest/client";
+import { db } from "@/services/db/drizzle";
+import { lessons, topics } from "@/services/db/schema/courses";
+import { eq } from "drizzle-orm";
 
 export async function POST(request: NextRequest) {
   try {
@@ -72,7 +75,7 @@ export async function POST(request: NextRequest) {
     // Upload to Supabase Storage
     const filePath = `documents/${fileName}`;
 
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("course_material")
       .upload(filePath, file, {
         contentType: file.type,
@@ -102,8 +105,34 @@ export async function POST(request: NextRequest) {
       publicUrl: publicUrlData.publicUrl, // Public URL for direct access
     });
 
-    // Trigger RAG processing asynchronously (don't wait for it to complete)
-    console.log(`🚀 Triggering RAG processing for file: ${savedFile.id}`);
+    // Get courseId from lesson (if lessonId is provided)
+    let courseId: string | null = null;
+    if (lessonId) {
+      try {
+        const [lessonRecord] = await db
+          .select({ topicId: lessons.topicId })
+          .from(lessons)
+          .where(eq(lessons.id, lessonId))
+          .limit(1);
+
+        if (lessonRecord) {
+          const [topicRecord] = await db
+            .select({ courseId: topics.courseId })
+            .from(topics)
+            .where(eq(topics.id, lessonRecord.topicId))
+            .limit(1);
+
+          if (topicRecord) {
+            courseId = topicRecord.courseId.toString();
+          }
+        }
+      } catch (error) {
+        console.warn(`⚠️ Could not determine courseId for file ${savedFile.id}`, error);
+      }
+    }
+
+    // ✅ NEW: Send event to Inngest for background processing
+    console.log(`📤 Sending file to Inngest queue: ${savedFile.id}`);
     console.log(`📄 File details:`, {
       fileId: savedFile.id,
       originalName: file.name,
@@ -111,35 +140,28 @@ export async function POST(request: NextRequest) {
       type: file.type,
       lessonId: lessonId || "none",
       topicId: topicId || "none",
+      courseId: courseId || "unknown",
       publicUrl: publicUrlData.publicUrl,
     });
 
-    // Process document in background
-    processDocument(savedFile.id)
-      .then((result) => {
-        console.log(
-          `✅ RAG processing completed for file ${savedFile.id}:`,
-          result
-        );
-      })
-      .catch((error: unknown) => {
-        console.error(
-          `❌ RAG processing failed for file ${savedFile.id}:`,
-          error
-        );
-        if (error instanceof Error) {
-          console.error(`❌ Error details:`, {
-            name: error.name,
-            message: error.message,
-            stack: error.stack,
-          });
-        }
-      });
+    await inngest.send({
+      name: "file/uploaded",
+      data: {
+        fileId: savedFile.id,
+        courseId: courseId || "unknown",
+        userId: user.id.toString(),
+        originalName: file.name,
+        fileSize: file.size,
+        mimeType: file.type,
+      },
+    });
+
+    console.log(`✅ File queued for processing: ${savedFile.id}`);
 
     return NextResponse.json({
       success: true,
       file: savedFile,
-      message: "File uploaded successfully, processing started",
+      message: "File uploaded successfully, processing queued",
     });
   } catch (error) {
     console.error("File upload error:", error);

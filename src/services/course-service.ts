@@ -314,28 +314,6 @@ export async function uploadImage(
   };
 }
 
-export async function processFile(
-  filePath: string,
-  fileType: "pdf" | "docx" | "pptx",
-  originalName: string
-) {
-  const response = await fetch(`${BASE_URL}/process-document`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ filePath, fileType, originalName }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to process file");
-  }
-
-  const result = await response.json();
-  return result.metadata;
-}
-
 export async function getFileInfo(fileId: string) {
   const { getFileInfo: getFileInfoAction } = await import(
     "@/lib/actions/files/file-actions"
@@ -415,4 +393,117 @@ export function validateImage(file: File): ImageValidationResult {
   }
 
   return { isValid: true };
+}
+
+// ============================================================================
+// FILE STATUS CHECKING
+// ============================================================================
+
+export interface FileStatus {
+  fileId: string;
+  fileName: string;
+  status: "pending" | "processing" | "completed" | "failed";
+  error: string | null;
+  chunkCount: number;
+  isComplete: boolean;
+  isFailed: boolean;
+  isProcessing: boolean;
+}
+
+export interface BatchFileStatus {
+  files: FileStatus[];
+  summary: {
+    total: number;
+    pending: number;
+    processing: number;
+    completed: number;
+    failed: number;
+    allComplete: boolean;
+    anyFailed: boolean;
+  };
+}
+
+/**
+ * Check the processing status of a single file
+ */
+export async function getFileStatus(fileId: string): Promise<FileStatus> {
+  const response = await fetch(`${BASE_URL}/files/status?fileId=${fileId}`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to fetch file status");
+  }
+
+  const result = await response.json();
+  return {
+    fileId: result.fileId,
+    fileName: result.fileName,
+    status: result.status,
+    error: result.error,
+    chunkCount: result.chunkCount,
+    isComplete: result.isComplete,
+    isFailed: result.isFailed,
+    isProcessing: result.isProcessing,
+  };
+}
+
+/**
+ * Check the processing status of multiple files
+ */
+export async function getBatchFileStatus(
+  fileIds: string[]
+): Promise<BatchFileStatus> {
+  const fileIdsParam = fileIds.join(",");
+  const response = await fetch(
+    `${BASE_URL}/files/status?fileIds=${fileIdsParam}`
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to fetch batch file status");
+  }
+
+  const result = await response.json();
+  return {
+    files: result.files,
+    summary: result.summary,
+  };
+}
+
+/**
+ * Poll file status until all files are complete or timeout
+ */
+export async function pollFileStatus(
+  fileIds: string[],
+  options: {
+    maxAttempts?: number;
+    intervalMs?: number;
+    onProgress?: (status: BatchFileStatus) => void;
+  } = {}
+): Promise<BatchFileStatus> {
+  const { maxAttempts = 60, intervalMs = 5000, onProgress } = options;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const status = await getBatchFileStatus(fileIds);
+
+    // Call progress callback
+    if (onProgress) {
+      onProgress(status);
+    }
+
+    // Check if all files are done (completed or failed)
+    const allDone = status.files.every(
+      (f) => f.status === "completed" || f.status === "failed"
+    );
+
+    if (allDone) {
+      return status;
+    }
+
+    // Wait before next poll
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+
+  // Timeout - return last status
+  return await getBatchFileStatus(fileIds);
 }

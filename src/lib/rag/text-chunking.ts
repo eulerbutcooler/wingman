@@ -1,3 +1,5 @@
+import { encoding_for_model } from 'tiktoken';
+
 export interface TextChunk {
   text: string;
   index: number;
@@ -13,34 +15,72 @@ export interface PagedTextChunk {
   endPosition: number;
 }
 
+// Cache the encoder to avoid recreating it
+let cachedEncoder: ReturnType<typeof encoding_for_model> | null = null;
+
 /**
- * Simple token counting (approximation: 1 token ≈ 4 characters)
+ * Get the tiktoken encoder (cached)
  */
-export function estimateTokenCount(text: string): number {
-  return Math.ceil(text.length / 4);
+function getEncoder() {
+  if (!cachedEncoder) {
+    // Using cl100k_base which is compatible with GPT-4, GPT-3.5-turbo, and text-embedding models
+    cachedEncoder = encoding_for_model('gpt-4');
+  }
+  return cachedEncoder;
 }
 
 /**
- * Split text into chunks with overlap
+ * Accurate token counting using tiktoken
+ * Compatible with OpenAI and Google embedding models
+ */
+export function estimateTokenCount(text: string): number {
+  try {
+    const encoder = getEncoder();
+    const tokens = encoder.encode(text);
+    return tokens.length;
+  } catch (error) {
+    // Fallback to approximation if tiktoken fails
+    console.warn('Token counting error, using approximation:', error);
+    return Math.ceil(text.length / 4);
+  }
+}
+
+/**
+ * Free the encoder when done (call this when shutting down)
+ */
+export function freeEncoder() {
+  if (cachedEncoder) {
+    cachedEncoder.free();
+    cachedEncoder = null;
+  }
+}
+
+/**
+ * Split text into chunks with overlap using semantic boundaries
+ * Improved version that respects paragraphs and better handles overlap
  */
 export function chunkText(
   text: string,
-  maxTokens: number = 700,
-  overlapTokens: number = 100
+  maxTokens: number = 512,
+  overlapTokens: number = 50
 ): TextChunk[] {
   if (!text || text.trim().length === 0) {
     return [];
   }
 
   const chunks: TextChunk[] = [];
-  const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+  
+  // Split by paragraphs first (better semantic boundaries)
+  const paragraphs = text
+    .split(/\n\n+/)
+    .filter((p) => p.trim().length > 0);
 
   let currentChunk = "";
   let chunkIndex = 0;
 
-  for (let i = 0; i < sentences.length; i++) {
-    const sentence = sentences[i].trim() + ".";
-    const potentialChunk = currentChunk + (currentChunk ? " " : "") + sentence;
+  for (let i = 0; i < paragraphs.length; i++) {
+    const paragraph = paragraphs[i].trim();
+    const potentialChunk = currentChunk + (currentChunk ? "\n\n" : "") + paragraph;
     const tokenCount = estimateTokenCount(potentialChunk);
 
     if (tokenCount > maxTokens && currentChunk) {
@@ -51,14 +91,28 @@ export function chunkText(
         tokenCount: estimateTokenCount(currentChunk),
       });
 
-      // Start new chunk with overlap
-      const words = currentChunk.split(" ");
-      const overlapWords = Math.floor(
-        words.length * (overlapTokens / estimateTokenCount(currentChunk))
-      );
-      const overlap = words.slice(-overlapWords).join(" ");
-
-      currentChunk = overlap + (overlap ? " " : "") + sentence;
+      // Create overlap: take last N tokens from current chunk
+      const currentTokens = estimateTokenCount(currentChunk);
+      if (currentTokens > overlapTokens) {
+        const words = currentChunk.split(/\s+/);
+        let overlapText = "";
+        
+        // Build overlap from end backwards
+        for (let j = words.length - 1; j >= 0; j--) {
+          const testOverlap = words.slice(j).join(" ");
+          const testTokens = estimateTokenCount(testOverlap);
+          
+          if (testTokens <= overlapTokens) {
+            overlapText = testOverlap;
+          } else {
+            break;
+          }
+        }
+        
+        currentChunk = overlapText + (overlapText ? "\n\n" : "") + paragraph;
+      } else {
+        currentChunk = paragraph;
+      }
     } else {
       currentChunk = potentialChunk;
     }
@@ -108,6 +162,7 @@ export function chunkTextByWords(
 
 /**
  * Chunk paged text while preserving page information
+ * Improved with better overlap handling
  */
 export function chunkPagedText(
   pagedText: Array<{
@@ -116,8 +171,8 @@ export function chunkPagedText(
     startPosition: number;
     endPosition: number;
   }>,
-  maxTokens: number = 700,
-  overlapTokens: number = 100
+  maxTokens: number = 512,
+  overlapTokens: number = 50
 ): PagedTextChunk[] {
   const chunks: PagedTextChunk[] = [];
   let globalChunkIndex = 0;
@@ -127,18 +182,18 @@ export function chunkPagedText(
       continue;
     }
 
-    // Split page text into sentences
-    const sentences = page.text
-      .split(/[.!?]+/)
-      .filter((s) => s.trim().length > 0);
+    // Split page text by paragraphs for better semantic boundaries
+    const paragraphs = page.text
+      .split(/\n\n+/)
+      .filter((p) => p.trim().length > 0);
 
     let currentChunk = "";
     let chunkStartPosition = page.startPosition;
 
-    for (let i = 0; i < sentences.length; i++) {
-      const sentence = sentences[i].trim() + ".";
+    for (let i = 0; i < paragraphs.length; i++) {
+      const paragraph = paragraphs[i].trim();
       const potentialChunk =
-        currentChunk + (currentChunk ? " " : "") + sentence;
+        currentChunk + (currentChunk ? "\n\n" : "") + paragraph;
       const tokenCount = estimateTokenCount(potentialChunk);
 
       if (tokenCount > maxTokens && currentChunk) {
@@ -156,15 +211,24 @@ export function chunkPagedText(
           endPosition: chunkEndPosition,
         });
 
-        // Start new chunk with overlap
-        const words = currentChunk.split(" ");
-        const overlapWords = Math.floor(
-          words.length * (overlapTokens / estimateTokenCount(currentChunk))
-        );
-        const overlap = words.slice(-overlapWords).join(" ");
+        // Create overlap: take last N tokens
+        const words = currentChunk.split(/\s+/);
+        let overlapText = "";
+        
+        // Build overlap from end backwards
+        for (let j = words.length - 1; j >= 0; j--) {
+          const testOverlap = words.slice(j).join(" ");
+          const testTokens = estimateTokenCount(testOverlap);
+          
+          if (testTokens <= overlapTokens) {
+            overlapText = testOverlap;
+          } else {
+            break;
+          }
+        }
 
-        currentChunk = overlap + (overlap ? " " : "") + sentence;
-        chunkStartPosition = chunkEndPosition - overlap.length;
+        currentChunk = overlapText + (overlapText ? "\n\n" : "") + paragraph;
+        chunkStartPosition = chunkEndPosition - overlapText.length;
       } else {
         currentChunk = potentialChunk;
       }

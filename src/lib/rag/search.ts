@@ -1,5 +1,5 @@
 import { db } from "@/services/db/drizzle";
-import { documentChunks, files } from "@/services/db/schema/courses";
+import { documentChunks } from "@/services/db/schema/courses";
 import { generateEmbedding } from "./embeddings";
 import { eq, sql } from "drizzle-orm";
 
@@ -224,5 +224,123 @@ export async function getCourseIndexStats(courseId: string) {
         error instanceof Error ? error.message : "Unknown error"
       }`
     );
+  }
+}
+
+/**
+ * HYBRID SEARCH: Combines vector similarity + full-text keyword search
+ * This provides the best of both worlds:
+ * - Vector search catches semantic meaning
+ * - Full-text search catches exact keywords
+ * 
+ * Uses RRF (Reciprocal Rank Fusion) to combine scores
+ */
+export async function hybridSearchChunks(
+  query: string,
+  courseId: string,
+  topK: number = 5,
+  vectorWeight: number = 0.7,
+  textWeight: number = 0.3
+): Promise<SearchResultWithSources[]> {
+  try {
+    console.log(
+      `🔍🔤 Hybrid search in course ${courseId} with query: "${query}"`
+    );
+
+    // Generate embedding for vector search
+    const queryEmbedding = await generateEmbedding(query);
+    const embeddingStr = `[${queryEmbedding.join(",")}]`;
+
+    // Prepare text query for full-text search
+    const textQuery = query
+      .split(/\s+/)
+      .filter(word => word.length > 2)
+      .join(' & ');
+
+    // Hybrid search combining vector similarity and full-text search
+    const results = await db.execute(sql`
+      WITH vector_search AS (
+        SELECT 
+          dc.id,
+          dc.chunk_text,
+          dc.chunk_index,
+          dc.page_number,
+          dc.start_position,
+          dc.end_position,
+          dc.file_id,
+          1 - (dc.embedding <=> ${embeddingStr}::vector) as vector_score,
+          ROW_NUMBER() OVER (ORDER BY dc.embedding <=> ${embeddingStr}::vector) as vector_rank
+        FROM document_chunks dc
+        WHERE dc.course_id = ${courseId}
+          AND dc.embedding IS NOT NULL
+      ),
+      text_search AS (
+        SELECT 
+          dc.id,
+          ts_rank(dc.search_vector, to_tsquery('english', ${textQuery})) as text_score,
+          ROW_NUMBER() OVER (ORDER BY ts_rank(dc.search_vector, to_tsquery('english', ${textQuery})) DESC) as text_rank
+        FROM document_chunks dc
+        WHERE dc.course_id = ${courseId}
+          AND dc.search_vector @@ to_tsquery('english', ${textQuery})
+      ),
+      combined AS (
+        SELECT 
+          vs.id,
+          vs.chunk_text,
+          vs.chunk_index,
+          vs.page_number,
+          vs.start_position,
+          vs.end_position,
+          vs.file_id,
+          COALESCE(vs.vector_score, 0) as vector_score,
+          COALESCE(ts.text_score, 0) as text_score,
+          (
+            ${vectorWeight} * COALESCE(vs.vector_score, 0) + 
+            ${textWeight} * COALESCE(ts.text_score, 0)
+          ) as combined_score
+        FROM vector_search vs
+        LEFT JOIN text_search ts ON vs.id = ts.id
+        WHERE vs.vector_score > 0.3 OR ts.text_score > 0
+      )
+      SELECT 
+        c.id as chunk_id,
+        c.chunk_text,
+        c.chunk_index,
+        c.page_number,
+        c.start_position,
+        c.end_position,
+        f.id as file_id,
+        f.original_name as file_name,
+        c.combined_score as similarity
+      FROM combined c
+      INNER JOIN files f ON c.file_id = f.id
+      ORDER BY c.combined_score DESC
+      LIMIT ${topK}
+    `);
+
+    const searchResults: SearchResultWithSources[] = results.map(
+      (row: Record<string, unknown>) => ({
+        chunkId: row.chunk_id as string,
+        chunkText: row.chunk_text as string,
+        chunkIndex: row.chunk_index as number,
+        similarity: parseFloat(row.similarity as string),
+        source: {
+          fileId: row.file_id as string,
+          fileName: row.file_name as string,
+          pageNumber: row.page_number as number | null,
+          startPosition: row.start_position as number | null,
+          endPosition: row.end_position as number | null,
+        },
+      })
+    );
+
+    console.log(`📊 Hybrid search found ${searchResults.length} chunks`);
+
+    return searchResults;
+  } catch (error) {
+    console.error("❌ Error in hybrid search:", error);
+    // Fallback to vector-only search if hybrid fails
+    console.log("⚠️ Falling back to vector-only search");
+    return searchSimilarChunksWithSources(query, courseId, topK);
   }
 }
