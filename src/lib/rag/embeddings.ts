@@ -41,7 +41,7 @@ export async function generateEmbeddings(
 
   for (let i = 0; i < texts.length; i += batchSize) {
     const batchTexts = texts.slice(i, i + batchSize);
-    const attempts = 0;
+    let attempts = 0;
     const delay = initialDelay;
 
     while (attempts < maxRetries) {
