@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, MessageSquare, Trash2, Edit3 } from "lucide-react";
+import { Plus, MessageSquare, Trash2 } from "lucide-react";
 import { deleteChat, getUserChats } from "@/lib/actions/chat/chat-actions";
 import { Chat } from "@/services/db/schema/chats";
 

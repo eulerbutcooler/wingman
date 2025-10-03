@@ -25,7 +25,7 @@ const defaultOptions: ChunkingOptions = {
  * @returns An array of text chunks.
  */
 function recursiveSplit(text: string, options: ChunkingOptions): string[] {
-  const { separators, maxTokens, minTokens } = options;
+  const { separators, maxTokens } = options;
   const finalChunks: string[] = [];
 
   // Use the first separator in the hierarchy

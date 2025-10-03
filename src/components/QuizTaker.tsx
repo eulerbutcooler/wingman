@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Quiz, Question } from "@/types";
+import { useState, useEffect } from "react";
+import type { Quiz } from "@/types";
 import * as quizService from "@/services/quiz-service";
 
 interface QuizTakerProps {

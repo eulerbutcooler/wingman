@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import * as courseService from "@/services/course-service";
-import { Course, Topic, Lesson, UploadedFile } from "@/types";
+import { Course, UploadedFile } from "@/types";
 
 export interface UseCourseCreatorOptions {
   userId: string;

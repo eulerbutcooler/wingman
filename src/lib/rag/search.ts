@@ -1,5 +1,5 @@
 import { db } from "@/services/db/drizzle";
-import { documentChunks, files } from "@/services/db/schema/courses";
+import { documentChunks } from "@/services/db/schema/courses";
 import { generateEmbedding } from "./embeddings";
 import { eq, sql } from "drizzle-orm";
 
