@@ -317,7 +317,7 @@ export default function Hero() {
 
         <div className="flex flex-col lg:flex-row w-full md:w-11/12 mt-12 md:mt-24 gap-8 md:gap-24 justify-between mb-12 md:mb-24 px-4 md:px-0">
           <div className="flex flex-col w-full lg:w-1/2 gap-4">
-            <h1 className="text-lg font-bold text-white">N.I.A.T</h1>
+            <h1 className="text-lg font-bold text-white">NIAT</h1>
             <div className="flex gap-6 md:gap-10">
               <Image
                 src="/crest.png"
