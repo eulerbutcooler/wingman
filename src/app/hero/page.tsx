@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { TypeAnimation } from "react-type-animation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -225,79 +226,87 @@ export default function Hero() {
         </div>
 
         <div className="flex w-full md:w-11/12 flex-col md:flex-row cards gap-4 justify-center md:justify-evenly px-4 md:px-0">
-          <motion.div
-            className="flex p-2 py-4 px-4 modern-card transition-all duration-300 rounded-2xl md:rounded-4xl flex-col justify-evenly gap-4 group animate-slide-in-up"
-            whileHover={{ scale: 1.05 }}
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0 }}
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-xl">💬</span>
+          <Link href="/chat" className="flex-1">
+            <motion.div
+              className="flex p-2 py-4 px-4 modern-card transition-all duration-300 rounded-2xl md:rounded-4xl flex-col justify-evenly gap-4 group animate-slide-in-up cursor-pointer h-full"
+              whileHover={{ scale: 1.05 }}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0 }}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xl">💬</span>
+                </div>
+                <h1 className="text-xl md:text-2xl font-bold text-black">
+                  Chat bot
+                </h1>
               </div>
-              <h1 className="text-xl md:text-2xl font-bold text-black">
-                Chat bot
-              </h1>
-            </div>
-            <p className="text-lg md:text-xl text-navy font-semibold">
-              Talk to your PDFs
-            </p>
-            <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-              Chat with documents, websites, and notes in natural language, and
-              get cited answers, summaries, and follow ups instantly.
-            </p>
-            <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-2 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-          </motion.div>
+              <p className="text-lg md:text-xl text-navy font-semibold">
+                Talk to your PDFs
+              </p>
+              <p className="text-sm md:text-base text-gray-600 leading-relaxed">
+                Chat with documents, websites, and notes in natural language,
+                and get cited answers, summaries, and follow ups instantly.
+              </p>
+              <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-2 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+            </motion.div>
+          </Link>
 
-          <motion.div
-            className="flex p-2 py-4 px-4 modern-card transition-all duration-300 rounded-2xl md:rounded-4xl flex-col justify-evenly gap-4 group animate-slide-in-up"
-            whileHover={{ scale: 1.05 }}
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0 }}
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-xl">📚</span>
+          <Link href="/library" className="flex-1">
+            <motion.div
+              className="flex p-2 py-4 px-4 modern-card transition-all duration-300 rounded-2xl md:rounded-4xl flex-col justify-evenly gap-4 group animate-slide-in-up cursor-pointer h-full"
+              whileHover={{ scale: 1.05 }}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0 }}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xl">📚</span>
+                </div>
+                <h1 className="text-xl md:text-2xl font-bold text-black">
+                  Library
+                </h1>
               </div>
-              <h1 className="text-xl md:text-2xl font-bold text-black">
-                Library
-              </h1>
-            </div>
-            <p className="text-lg md:text-xl text-navy font-semibold">
-              Build courses from your knowledge
-            </p>
-            <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-              Turn saved content into structured study plans and bite‑sized
-              courses, complete with milestones, reminders, and progress
-              tracking.
-            </p>
-            <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-2 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-          </motion.div>
+              <p className="text-lg md:text-xl text-navy font-semibold">
+                Build courses from your knowledge
+              </p>
+              <p className="text-sm md:text-base text-gray-600 leading-relaxed">
+                Turn saved content into structured study plans and bite‑sized
+                courses, complete with milestones, reminders, and progress
+                tracking.
+              </p>
+              <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-2 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+            </motion.div>
+          </Link>
 
-          <motion.div
-            className="flex p-2 py-4 px-4 modern-card transition-all duration-300 rounded-2xl md:rounded-4xl flex-col justify-evenly gap-4 group animate-slide-in-left"
-            whileHover={{ scale: 1.05 }}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0 }}
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-xl">🧠</span>
+          <Link href="/quiz" className="flex-1">
+            <motion.div
+              className="flex p-2 py-4 px-4 modern-card transition-all duration-300 rounded-2xl md:rounded-4xl flex-col justify-evenly gap-4 group animate-slide-in-left cursor-pointer h-full"
+              whileHover={{ scale: 1.05 }}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0 }}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xl">🧠</span>
+                </div>
+                <h1 className="text-xl md:text-2xl font-bold text-black">
+                  Quiz
+                </h1>
               </div>
-              <h1 className="text-xl md:text-2xl font-bold text-black">Quiz</h1>
-            </div>
-            <p className="text-lg md:text-xl text-navy font-semibold">
-              Quiz me from your data
-            </p>
-            <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-              Auto‑generate personalized quizzes from uploaded files, chats, and
-              bookmarks, with adaptive difficulty and instant feedback.
-            </p>
-            <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-2 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-          </motion.div>
+              <p className="text-lg md:text-xl text-navy font-semibold">
+                Quiz me from your data
+              </p>
+              <p className="text-sm md:text-base text-gray-600 leading-relaxed">
+                Auto‑generate personalized quizzes from uploaded files, chats,
+                and bookmarks, with adaptive difficulty and instant feedback.
+              </p>
+              <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-2 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+            </motion.div>
+          </Link>
         </div>
 
         <div className="flex flex-col w-full md:w-11/12 faqs gap-4 items-center justify-center px-4 md:px-0">
@@ -351,18 +360,26 @@ export default function Hero() {
               </div>
               <div className="flex flex-col gap-4">
                 <h1 className="text-lg font-bold text-white">Quick links</h1>
-                <p className="text-sm text-white cursor-pointer hover:text-navy">
-                  HOME
-                </p>
-                <p className="text-sm text-white cursor-pointer hover:text-navy">
-                  CHAT
-                </p>
-                <p className="text-sm text-white cursor-pointer hover:text-navy">
-                  LIBRARY
-                </p>
-                <p className="text-sm text-white cursor-pointer hover:text-navy">
-                  QUIZ
-                </p>
+                <Link href="/">
+                  <p className="text-sm text-white cursor-pointer hover:text-navy transition-colors">
+                    Home
+                  </p>
+                </Link>
+                <Link href="/chat">
+                  <p className="text-sm text-white cursor-pointer hover:text-navy transition-colors">
+                    Chat
+                  </p>
+                </Link>
+                <Link href="/library">
+                  <p className="text-sm text-white cursor-pointer hover:text-navy transition-colors">
+                    Library
+                  </p>
+                </Link>
+                <Link href="/quiz">
+                  <p className="text-sm text-white cursor-pointer hover:text-navy transition-colors">
+                    Quiz
+                  </p>
+                </Link>
               </div>
             </div>
             <div className="flex flex-col gap-4">
