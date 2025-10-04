@@ -269,9 +269,9 @@ function ChatContent() {
                     <Bot size={20} className="text-white md:w-6 md:h-6" />
                   </div>
                   <p className="text-gray-600 mb-6 md:mb-8 leading-relaxed text-sm md:text-base">
-                    I&apos;m your virtual teaching assistant for the Naval
-                    Institute of Aeronautical Technology (NIAT). Ask me about
-                    aeronautical engineering, naval technology, or any
+                    I&apos;m AeroMentor, your virtual teaching assistant for the
+                    Naval Institute of Aeronautical Technology (NIAT). Ask me
+                    about aeronautical engineering, naval technology, or any
                     course-related questions. I&apos;m here to help you learn
                     and understand complex concepts!
                   </p>

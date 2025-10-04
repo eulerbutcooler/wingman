@@ -45,18 +45,14 @@ const CourseCard = ({
     onClick={onClick}
     className="modern-card rounded-2xl md:rounded-4xl overflow-hidden cursor-pointer group transition-all duration-300 animate-slide-in-up hover:scale-105"
   >
-    <div className="relative overflow-hidden">
-      <img
-        src={course.image || course.imageUrl}
-        alt={course.title}
-        className="w-full h-24 md:h-32 object-cover transition-transform duration-300 group-hover:scale-110"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-    </div>
-    <div className="p-2 md:p-2">
-      {/* <h3 className="text-lg md:text-xl font-semibold text-black mb-2 capitalize group-hover:text-navy transition-colors">
+    {/* Black card with course name */}
+    <div className="relative bg-black h-32 md:h-40 flex items-center justify-center p-4">
+      <h3 className="text-xl md:text-2xl font-bold text-white text-center capitalize leading-tight">
         {course.title}
-      </h3> */}
+      </h3>
+    </div>
+
+    <div className="p-4 md:p-6">
       <p className="text-navy text-sm md:text-base capitalize font-medium">
         {course.description}
       </p>
