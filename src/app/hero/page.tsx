@@ -232,10 +232,10 @@ export default function Hero() {
               whileHover={{ scale: 1.05 }}
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0 }}
+              transition={{ duration: 0.1, delay: 0 }}
             >
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-r  from-navy to-blue-600 rounded-full flex items-center justify-center">
                   <span className="text-white text-xl">💬</span>
                 </div>
                 <h1 className="text-xl md:text-2xl font-bold text-black">
@@ -249,7 +249,7 @@ export default function Hero() {
                 Chat with documents, websites, and notes in natural language,
                 and get cited answers, summaries, and follow ups instantly.
               </p>
-              <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-2 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+              <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-2 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 "></div>
             </motion.div>
           </Link>
 
@@ -259,7 +259,7 @@ export default function Hero() {
               whileHover={{ scale: 1.05 }}
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0 }}
+              transition={{ duration: 0.1, delay: 0 }}
             >
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-12 h-12 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
@@ -287,7 +287,7 @@ export default function Hero() {
               whileHover={{ scale: 1.05 }}
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: 0 }}
+              transition={{ duration: 0.1, delay: 0 }}
             >
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-12 h-12 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">

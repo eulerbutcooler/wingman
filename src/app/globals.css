@@ -5,45 +5,55 @@
 
 /* Modern Card Animations and Effects */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
 }
 
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(28, 28, 132, 0.2); }
-  50% { box-shadow: 0 0 20px rgba(28, 28, 132, 0.4), 0 0 30px rgba(28, 28, 132, 0.2); }
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(28, 28, 132, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(28, 28, 132, 0.4), 0 0 30px rgba(28, 28, 132, 0.2);
+  }
 }
 
 @keyframes slideInUp {
-  from { 
-    opacity: 0; 
-    transform: translateY(30px); 
+  from {
+    opacity: 0;
+    transform: translateY(30px);
   }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 @keyframes slideInLeft {
-  from { 
-    opacity: 0; 
-    transform: translateX(-30px); 
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
   }
-  to { 
-    opacity: 1; 
-    transform: translateX(0); 
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
 @keyframes fadeInScale {
-  from { 
-    opacity: 0; 
-    transform: scale(0.95); 
+  from {
+    opacity: 0;
+    transform: scale(0.95);
   }
-  to { 
-    opacity: 1; 
-    transform: scale(1); 
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
@@ -51,35 +61,27 @@
 .modern-card {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid rgba(148, 163, 184, 0.1);
-  box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.24);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: slideInUp 0.6s ease-out;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  transition: all 0.1s cubic-bezier(0.3, 0, 0.2, 1);
+  animation: slideInUp 0.1s ease-out;
 }
 
 .modern-card:hover {
   transform: translateY(-8px);
-  box-shadow: 
-    0 10px 25px rgba(0, 0, 0, 0.15),
-    0 8px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 8px 10px rgba(0, 0, 0, 0.1);
   border-color: rgba(28, 28, 132, 0.2);
 }
 
 .modern-card-dark {
   background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   border: 1px solid rgba(148, 163, 184, 0.2);
-  box-shadow: 
-    0 4px 6px rgba(0, 0, 0, 0.3),
-    0 1px 3px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.4);
   color: white;
 }
 
 .modern-card-dark:hover {
   transform: translateY(-8px);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.4),
-    0 8px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 8px 16px rgba(0, 0, 0, 0.3);
   border-color: rgba(59, 130, 246, 0.5);
 }
 
@@ -90,7 +92,7 @@
 }
 
 .gradient-border::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -116,7 +118,7 @@
 }
 
 .shimmer::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   right: 0;
@@ -133,28 +135,32 @@
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .animate-float {
-  animation: float 6s ease-in-out infinite;
+  animation: float 0.2s ease-in-out infinite;
 }
 
 .animate-glow {
-  animation: glow 2s ease-in-out infinite alternate;
+  animation: glow 0.2s ease-in-out infinite alternate;
 }
 
 .animate-slide-in-up {
-  animation: slideInUp 0.6s ease-out;
+  animation: slideInUp 0.2s ease-out;
 }
 
 .animate-slide-in-left {
-  animation: slideInLeft 0.6s ease-out;
+  animation: slideInLeft 0.2s ease-out;
 }
 
 .animate-fade-in-scale {
-  animation: fadeInScale 0.6s ease-out;
+  animation: fadeInScale 0.2s ease-out;
 }
 
 /* Mobile responsive improvements */
@@ -221,7 +227,7 @@
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px)
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
 @keyframes blink {
@@ -281,7 +287,7 @@
   animation: l4 1s steps(4) infinite;
 }
 .loader:before {
-  content:"Loading..."
+  content: "Loading...";
 }
 
 /* Small loader for inline use */
@@ -292,10 +298,14 @@
   animation: l4 1s steps(4) infinite;
 }
 .loader-sm:before {
-  content:"Loading..."
+  content: "Loading...";
 }
 
-@keyframes l4 {to{clip-path: inset(0 -1ch 0 0)}}
+@keyframes l4 {
+  to {
+    clip-path: inset(0 -1ch 0 0);
+  }
+}
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -308,7 +318,7 @@
 /* Mobile and desktop optimized styles */
 body {
   font-family: var(--font-ubuntu);
-  background-image: url('/scketch.jpeg');
+  background-image: url("/scketch.jpeg");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -317,7 +327,7 @@ body {
 
 /* Default page background for non-hero pages */
 .page-background {
-  background-image: url('/scketch.jpeg');
+  background-image: url("/scketch.jpeg");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -326,7 +336,7 @@ body {
 
 /* Override background for hero page specifically */
 .hero-background {
-  background-image: url('/su9.png');
+  background-image: url("/su9.png");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -346,7 +356,38 @@ body {
   }
 }
 
-.dark { --background: oklch(0.141 0.005 285.823); --foreground: oklch(0.985 0 0); --card: oklch(0.21 0.006 285.885); --card-foreground: oklch(0.985 0 0); --popover: oklch(0.21 0.006 285.885); --popover-foreground: oklch(0.985 0 0); --primary: oklch(0.92 0.004 286.32); --primary-foreground: oklch(0.21 0.006 285.885); --secondary: oklch(0.274 0.006 286.033); --secondary-foreground: oklch(0.985 0 0); --muted: oklch(0.274 0.006 286.033); --muted-foreground: oklch(0.705 0.015 286.067); --accent: oklch(0.274 0.006 286.033); --accent-foreground: oklch(0.985 0 0); --destructive: oklch(0.704 0.191 22.216); --border: oklch(1 0 0 / 10%); --input: oklch(1 0 0 / 15%); --ring: oklch(0.552 0.016 285.938); --chart-1: oklch(0.488 0.243 264.376); --chart-2: oklch(0.696 0.17 162.48); --chart-3: oklch(0.769 0.188 70.08); --chart-4: oklch(0.627 0.265 303.9); --chart-5: oklch(0.645 0.246 16.439); --sidebar: oklch(0.21 0.006 285.885); --sidebar-foreground: oklch(0.985 0 0); --sidebar-primary: oklch(0.488 0.243 264.376); --sidebar-primary-foreground: oklch(0.985 0 0); --sidebar-accent: oklch(0.274 0.006 286.033); --sidebar-accent-foreground: oklch(0.985 0 0); --sidebar-border: oklch(1 0 0 / 10%); --sidebar-ring: oklch(0.552 0.016 285.938);
+.dark {
+  --background: oklch(0.141 0.005 285.823);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.21 0.006 285.885);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.21 0.006 285.885);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.92 0.004 286.32);
+  --primary-foreground: oklch(0.21 0.006 285.885);
+  --secondary: oklch(0.274 0.006 286.033);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.274 0.006 286.033);
+  --muted-foreground: oklch(0.705 0.015 286.067);
+  --accent: oklch(0.274 0.006 286.033);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.552 0.016 285.938);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.21 0.006 285.885);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.274 0.006 286.033);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.552 0.016 285.938);
 }
 
 @layer base {
