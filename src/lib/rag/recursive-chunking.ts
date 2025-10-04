@@ -125,10 +125,7 @@ function mergeSmallChunks(
 /**
  * Creates overlapping chunks from a list of text segments.
  */
-function createOverlaps(
-  chunks: string[],
-  options: ChunkingOptions
-): string[] {
+function createOverlaps(chunks: string[], options: ChunkingOptions): string[] {
   if (chunks.length <= 1) return chunks;
 
   const overlappingChunks: string[] = [chunks[0]];
@@ -139,8 +136,7 @@ function createOverlaps(
 
     const prevWords = prevChunk.split(/\s+/);
     const overlapWordCount = Math.floor(
-      prevWords.length *
-        (options.overlapTokens / estimateTokenCount(prevChunk))
+      prevWords.length * (options.overlapTokens / estimateTokenCount(prevChunk))
     );
 
     if (overlapWordCount > 0) {

@@ -7,7 +7,7 @@ import {
   loadChatHistory,
 } from "../../lib/actions/chat/actions";
 import { readStreamableValue } from "@ai-sdk/rsc";
-import { Bot, User, History, X } from "lucide-react";
+import { Bot, User, History, X, Volume2, VolumeX } from "lucide-react";
 import { FaArrowUp } from "react-icons/fa6";
 import { useSearchParams, useRouter } from "next/navigation";
 import ChatSidebar from "@/components/chat/ChatSidebar";
@@ -23,8 +23,11 @@ function ChatContent() {
   const [mode, setMode] = useState<"normal" | "deep">("normal");
   const [videoMode, setVideoMode] = useState<boolean>(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading } = useRequireAuth();
@@ -112,12 +115,88 @@ function ChatContent() {
     setChatId(undefined);
     setInput("");
     router.replace("/chat");
+    stopSpeaking(); // Stop any ongoing speech
   };
 
   const selectChat = (id: string) => {
     router.push(`/chat?id=${id}`);
     setIsMobileSidebarOpen(false); // Close mobile sidebar when selecting a chat
+    stopSpeaking(); // Stop any ongoing speech when switching chats
   };
+
+  // Text-to-Speech functions using Google Cloud TTS
+  const speakText = async (text: string, messageIndex: number) => {
+    // Stop any ongoing speech
+    stopSpeaking();
+
+    try {
+      setIsLoadingAudio(true);
+      setSpeakingIndex(messageIndex);
+
+      const response = await fetch("/api/tts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate speech");
+      }
+
+      const data = await response.json();
+
+      // Create audio from base64
+      const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
+      audioRef.current = audio;
+
+      audio.onended = () => {
+        setSpeakingIndex(null);
+        audioRef.current = null;
+        setIsLoadingAudio(false);
+      };
+
+      audio.onerror = () => {
+        setSpeakingIndex(null);
+        audioRef.current = null;
+        setIsLoadingAudio(false);
+        console.error("Audio playback error");
+      };
+
+      await audio.play();
+      setIsLoadingAudio(false);
+    } catch (error) {
+      console.error("TTS error:", error);
+      setSpeakingIndex(null);
+      setIsLoadingAudio(false);
+    }
+  };
+
+  const stopSpeaking = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    setSpeakingIndex(null);
+    setIsLoadingAudio(false);
+  };
+
+  const toggleSpeak = (text: string, messageIndex: number) => {
+    if (speakingIndex === messageIndex) {
+      stopSpeaking();
+    } else {
+      speakText(text, messageIndex);
+    }
+  };
+
+  // Cleanup speech on unmount
+  useEffect(() => {
+    return () => {
+      stopSpeaking();
+    };
+  }, []);
 
   return (
     <div className="w-full h-screen overflow-hidden pb-12 pt-24 md:pt-34">
@@ -179,7 +258,7 @@ function ChatContent() {
               </button>
 
               <div className="text-sm font-medium text-gray-600">
-                Wingman Chat
+                Aeromentor Chat
               </div>
             </div>
 
@@ -229,7 +308,7 @@ function ChatContent() {
                       </div>
                     )}
                     <div
-                      className={`max-w-3xl rounded-4xl px-4 py-3 ${
+                      className={`max-w-3xl rounded-4xl px-4 py-3 relative ${
                         message.role === "user"
                           ? "bg-navy text-white ml-12"
                           : "bg-white border border-gray-200 text-gray-900 shadow-sm"
@@ -238,6 +317,38 @@ function ChatContent() {
                       <div className="text-sm leading-relaxed prose whitespace-pre-wrap">
                         <CustomMarkdown content={message.content} />
                       </div>
+
+                      {/* TTS Speaker Icon - Only for bot messages */}
+                      {message.role === "assistant" && (
+                        <button
+                          onClick={() => toggleSpeak(message.content, index)}
+                          disabled={isLoadingAudio && speakingIndex === index}
+                          className={`absolute bottom-2 right-2 p-1.5 rounded-full transition-all duration-200 ${
+                            speakingIndex === index
+                              ? "bg-navy text-white shadow-md"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          } ${
+                            isLoadingAudio && speakingIndex === index
+                              ? "opacity-50 cursor-wait"
+                              : ""
+                          }`}
+                          title={
+                            speakingIndex === index
+                              ? "Stop speaking"
+                              : isLoadingAudio && speakingIndex === index
+                              ? "Loading audio..."
+                              : "Read aloud"
+                          }
+                        >
+                          {isLoadingAudio && speakingIndex === index ? (
+                            <div className="w-3.5 h-3.5 border-2 border-t-transparent border-current rounded-full animate-spin" />
+                          ) : speakingIndex === index ? (
+                            <VolumeX size={14} />
+                          ) : (
+                            <Volume2 size={14} />
+                          )}
+                        </button>
+                      )}
                     </div>
                     {message.role === "user" && (
                       <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
@@ -284,7 +395,7 @@ function ChatContent() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Ask Wingman about your studies..."
+                    placeholder="Ask Aeromentor about your studies..."
                     className="w-full px-3 md:px-4 py-3 md:py-4 border border-gray-600/40 rounded-2xl md:rounded-4xl shadow-lg focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-transparent resize-none min-h-[48px] max-h-32 text-sm md:text-base"
                     rows={1}
                     disabled={isLoading}

@@ -413,10 +413,7 @@ export async function DELETE(request: NextRequest) {
       .limit(1);
 
     if (course.length === 0) {
-      return NextResponse.json(
-        { error: "Course not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
 
     // Perform the deletion
