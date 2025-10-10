@@ -3,6 +3,8 @@ import { Ubuntu } from "next/font/google";
 import "./globals.css";
 
 import Navbar from "@/components/ui/navbar";
+import { AuthProvider } from "@/components/providers/AuthProvider";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const ubuntu = Ubuntu({
   variable: "--font-ubuntu",
@@ -26,13 +28,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${ubuntu.variable} antialiased`}
-      >
-        <div className="flex flex-col justify-center items-center min-h-screen">
-          <Navbar />
-          <main className="flex-grow w-full">{children}</main>
-        </div>
+      <body className={`${ubuntu.variable} antialiased`}>
+        <AuthProvider>
+          <ErrorBoundary>
+            <div className="flex flex-col justify-center items-center min-h-screen">
+              <Navbar />
+              <main className="flex-grow w-full">{children}</main>
+            </div>
+          </ErrorBoundary>
+        </AuthProvider>
       </body>
     </html>
   );

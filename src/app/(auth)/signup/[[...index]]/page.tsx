@@ -27,21 +27,16 @@ export default function SignUpPage() {
   const [state, formAction] = useActionState<AuthResult, FormData>(
     async (previousState, formData) => {
       const name = formData.get("name") as string;
-      const email = formData.get("email") as string;
       const serviceId = formData.get("service_id") as string;
       const course = formData.get("course") as string;
       const password = formData.get("password") as string;
       const confirmPassword = formData.get("confirmPassword") as string;
 
+      // Generate email from service number
+      const email = `${serviceId}@gmail.com`;
+
       // Client-side validation
-      if (
-        !name ||
-        !email ||
-        !serviceId ||
-        !course ||
-        !password ||
-        !confirmPassword
-      ) {
+      if (!name || !serviceId || !course || !password || !confirmPassword) {
         return { success: false, error: "All fields are required" };
       }
 
@@ -62,8 +57,13 @@ export default function SignUpPage() {
       });
 
       if (result.success) {
-        toast.success("Account created and signed in successfully!");
-        setTimeout(() => router.push("/dashboard"), 2000);
+        toast.success(
+          "Account created successfully! Redirecting to dashboard..."
+        );
+        // Use window.location for hard navigation to ensure auth state is updated
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 1500);
         return { success: true, error: undefined };
       } else {
         toast.error(result.error);
@@ -167,8 +167,8 @@ export default function SignUpPage() {
               </div>
             </div>
 
-            {/* Email Input */}
-            <div>
+            {/* Email Input - Commented out, auto-generated from service number */}
+            {/* <div>
               <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-600 mb-2"
@@ -183,7 +183,7 @@ export default function SignUpPage() {
                 required
                 className="w-full px-4 py-3 bg-white border border-gray-300 rounded-4xl text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition duration-300"
               />
-            </div>
+            </div> */}
 
             {/* Password Input */}
             <div>

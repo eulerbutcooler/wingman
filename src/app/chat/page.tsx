@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useEffect, useRef, Suspense } from "react";
 import {
   Message,
   continueConversation,
@@ -13,24 +13,37 @@ import { useSearchParams, useRouter } from "next/navigation";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import CustomMarkdown from "@/components/CustomMarkdown";
 import { useRequireAuth } from "@/hooks/use-auth";
+import { useChatStore } from "@/stores";
+import { useTextToSpeech } from "@/hooks/use-tts";
 export const maxDuration = 30;
 
 function ChatContent() {
-  const [conversation, setConversation] = useState<Message[]>([]);
-  const [input, setInput] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [chatId, setChatId] = useState<string | undefined>();
-  const [mode, setMode] = useState<"normal" | "deep">("normal");
-  const [videoMode, setVideoMode] = useState<boolean>(false);
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
-  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  const {
+    conversation,
+    input,
+    isLoading,
+    chatId,
+    mode,
+    videoMode,
+    isMobileSidebarOpen,
+    speakingIndex,
+    isLoadingAudio,
+    setConversation,
+    setInput,
+    setIsLoading,
+    setChatId,
+    setMode,
+    setVideoMode,
+    setIsMobileSidebarOpen,
+    resetChat,
+  } = useChatStore();
+
+  const { toggleSpeak, stopSpeaking } = useTextToSpeech();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, loading } = useRequireAuth();
+  const { user, loading: authLoading } = useRequireAuth(); // Get auth status
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -42,11 +55,30 @@ function ChatContent() {
 
   useEffect(() => {
     const chatIdFromUrl = searchParams.get("id");
-    if (chatIdFromUrl) {
+    if (chatIdFromUrl && chatIdFromUrl !== chatId) {
       setChatId(chatIdFromUrl);
       loadChat(chatIdFromUrl);
     }
-  }, [searchParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, chatId, setChatId]);
+
+  useEffect(() => {
+    return () => {
+      stopSpeaking();
+    };
+  }, [stopSpeaking]);
+
+  // Show loading while auth is initializing
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const loadChat = async (id: string) => {
     try {
@@ -111,92 +143,16 @@ function ChatContent() {
   };
 
   const startNewChat = () => {
-    setConversation([]);
-    setChatId(undefined);
-    setInput("");
+    resetChat();
     router.replace("/chat");
-    stopSpeaking(); // Stop any ongoing speech
+    stopSpeaking();
   };
 
   const selectChat = (id: string) => {
     router.push(`/chat?id=${id}`);
-    setIsMobileSidebarOpen(false); // Close mobile sidebar when selecting a chat
-    stopSpeaking(); // Stop any ongoing speech when switching chats
-  };
-
-  // Text-to-Speech functions using Google Cloud TTS
-  const speakText = async (text: string, messageIndex: number) => {
-    // Stop any ongoing speech
+    setIsMobileSidebarOpen(false);
     stopSpeaking();
-
-    try {
-      setIsLoadingAudio(true);
-      setSpeakingIndex(messageIndex);
-
-      const response = await fetch("/api/tts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to generate speech");
-      }
-
-      const data = await response.json();
-
-      // Create audio from base64
-      const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
-      audioRef.current = audio;
-
-      audio.onended = () => {
-        setSpeakingIndex(null);
-        audioRef.current = null;
-        setIsLoadingAudio(false);
-      };
-
-      audio.onerror = () => {
-        setSpeakingIndex(null);
-        audioRef.current = null;
-        setIsLoadingAudio(false);
-        console.error("Audio playback error");
-      };
-
-      await audio.play();
-      setIsLoadingAudio(false);
-    } catch (error) {
-      console.error("TTS error:", error);
-      setSpeakingIndex(null);
-      setIsLoadingAudio(false);
-    }
   };
-
-  const stopSpeaking = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
-    }
-    setSpeakingIndex(null);
-    setIsLoadingAudio(false);
-  };
-
-  const toggleSpeak = (text: string, messageIndex: number) => {
-    if (speakingIndex === messageIndex) {
-      stopSpeaking();
-    } else {
-      speakText(text, messageIndex);
-    }
-  };
-
-  // Cleanup speech on unmount
-  useEffect(() => {
-    return () => {
-      stopSpeaking();
-    };
-  }, []);
 
   return (
     <div className="w-full h-screen overflow-hidden pb-12 pt-24 md:pt-34">

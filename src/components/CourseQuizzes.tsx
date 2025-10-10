@@ -176,6 +176,7 @@ const CourseQuizzes: React.FC<CourseQuizzesProps> = ({
 
   useEffect(() => {
     loadData();
+    // Note: loadData is defined below and uses courseId and userId
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId, userId]);
 
