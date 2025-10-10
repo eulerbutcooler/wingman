@@ -1,4 +1,5 @@
-import { estimateTokenCount, PagedTextChunk } from "./text-chunking";
+import { PagedTextChunk } from "./text-chunking";
+import { countTokens } from "./tokenizer";
 
 interface ChunkingOptions {
   maxTokens: number;
@@ -8,9 +9,9 @@ interface ChunkingOptions {
 }
 
 const defaultOptions: ChunkingOptions = {
-  maxTokens: 700,
-  overlapTokens: 100,
-  minTokens: 50, // Chunks smaller than this will be merged
+  maxTokens: 350, // Reduced from 700 for better precision (Issue 4)
+  overlapTokens: 50, // Reduced from 100 to maintain proportion (14% overlap)
+  minTokens: 25, // Reduced from 50 to maintain proportion
   // Hierarchical separators, from largest to smallest semantic unit
   separators: ["\n\n\n", "\n\n", "\n", ". ", " "],
 };
@@ -42,7 +43,7 @@ function recursiveSplit(text: string, options: ChunkingOptions): string[] {
     const potentialChunk = currentChunk
       ? currentChunk + separator + split
       : split;
-    const tokenCount = estimateTokenCount(potentialChunk);
+    const tokenCount = countTokens(potentialChunk);
 
     if (tokenCount > maxTokens) {
       // If the current chunk is not empty, process it first
@@ -70,7 +71,7 @@ function recursiveSplit(text: string, options: ChunkingOptions): string[] {
   // Add the last remaining chunk
   if (currentChunk) {
     if (
-      estimateTokenCount(currentChunk) > maxTokens &&
+      countTokens(currentChunk) > maxTokens &&
       remainingSeparators.length > 0
     ) {
       finalChunks.push(
@@ -110,7 +111,7 @@ function mergeSmallChunks(
 
   for (let i = 1; i < chunks.length; i++) {
     const currentChunk = chunks[i];
-    if (estimateTokenCount(buffer) < options.minTokens) {
+    if (countTokens(buffer) < options.minTokens) {
       buffer += " " + currentChunk; // A space is a reasonable default joiner
     } else {
       mergedChunks.push(buffer);
@@ -136,7 +137,7 @@ function createOverlaps(chunks: string[], options: ChunkingOptions): string[] {
 
     const prevWords = prevChunk.split(/\s+/);
     const overlapWordCount = Math.floor(
-      prevWords.length * (options.overlapTokens / estimateTokenCount(prevChunk))
+      prevWords.length * (options.overlapTokens / countTokens(prevChunk))
     );
 
     if (overlapWordCount > 0) {
@@ -172,7 +173,7 @@ export function chunkTextWithStrategy(
   let currentPosition = startPosition;
 
   return overlappedChunks.map((chunkText) => {
-    const tokenCount = estimateTokenCount(chunkText);
+    const tokenCount = countTokens(chunkText);
     const chunkLength = chunkText.length;
     const endPosition = currentPosition + chunkLength;
 

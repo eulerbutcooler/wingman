@@ -9,9 +9,11 @@ import {
   createChat,
 } from "@/lib/actions/chat/chat-actions";
 import {
-  searchAllCourses,
+  searchAllCoursesHybrid,
   formatContextForWingman,
+  getCourseSummary,
 } from "@/lib/rag/user-search";
+import { classifyQuery, getQuerySpecificPrompt } from "@/lib/rag/query-classifier";
 
 export interface Message {
   role: "user" | "assistant";
@@ -105,35 +107,67 @@ Your Response: I cannot provide a direct solution to homework problems. However,
 
 Remember to follow these instructions to maintain a consistent, helpful, and ethical persona.`;
 
-    // Add RAG context for Deep Mode
+    // Add RAG context for Deep Mode with IMPROVED hybrid search and query classification
     if (mode === "deep" && userQuery) {
       try {
         console.log("🔍 Deep Mode: Searching ALL course materials globally...");
+        
+        // Step 1: Classify the query to optimize retrieval
+        const classification = classifyQuery(userQuery);
+        console.log(`📋 Query classified as: ${classification.type} (confidence: ${classification.confidence})`);
+        console.log(`💡 Reasoning: ${classification.reasoning}`);
 
-        const relevantChunks = await searchAllCourses(
+        // Step 2: Use adaptive parameters based on query type
+        const searchParams = {
+          maxResults: classification.suggestedTopK,
+          similarityThreshold: classification.suggestedThreshold,
+          // Adjust weights for "list all" queries
+          vectorWeight: classification.type === 'list_all' ? 0.5 : 0.7,
+          keywordWeight: classification.type === 'list_all' ? 0.5 : 0.3,
+        };
+
+        console.log(`⚙️  Search params: topK=${searchParams.maxResults}, threshold=${searchParams.similarityThreshold}`);
+
+        // Step 3: Use hybrid search for better results
+        const relevantChunks = await searchAllCoursesHybrid(
           userQuery,
-          5, // maxResults
-          0.3 // similarityThreshold
+          searchParams
         );
 
         if (relevantChunks.length > 0) {
           const context = formatContextForWingman(relevantChunks);
+          const courseSummary = getCourseSummary(relevantChunks);
+          
+          // Step 4: Get query-specific prompt guidance
+          const promptEnhancements = getQuerySpecificPrompt(classification);
+          
           systemPrompt += `
 
 ADDITIONAL CONTEXT FROM COURSE MATERIALS:
+
+📚 COURSES IN RESULTS:
+${courseSummary}
+
+---
+
+SOURCES:
 ${context}
 
 IMPORTANT CITATION REQUIREMENTS FOR DEEP MODE:
-- When using information from the provided context, you MUST cite your sources using the format: [Source X: filename, Page Y] (if page number is available) or [Source X: filename] (if no page number)
-- For direct quotes, use: "quoted text" [Source X: filename, Page Y]
-- For paraphrased information, use: [Source X: filename, Page Y]
+- When using information from the provided context, you MUST cite your sources using the format: [Source X: filename from Course: "CourseName", Page Y] (if page number is available) or [Source X: filename from Course: "CourseName"] (if no page number)
+- For direct quotes, use: "quoted text" [Source X]
+- For paraphrased information, use: [Source X]
 - Always reference the specific source number that corresponds to the context you're using
 - Maintain your teaching style while incorporating these citations naturally into your explanations
+- IMPORTANT: If the student asks about a specific course by name, ONLY use sources from that course. The course name is clearly marked in each source citation.
 
-When relevant to the student's question, reference the course materials above using proper citations while maintaining your supportive teaching approach. Blend your general knowledge with the specific course content provided.`;
+${promptEnhancements.systemAddition}
+
+When relevant to the student's question, reference the course materials above using proper citations while maintaining your supportive teaching approach. Blend your general knowledge with the specific course content provided. If the student specifies a course name, filter your response to ONLY include information from that specific course.`;
           console.log(
             `✅ Added ${relevantChunks.length} relevant sources to context`
           );
+          console.log(`📚 Courses in results: ${courseSummary}`);
         } else {
           console.log("📝 No relevant course materials found above threshold");
         }

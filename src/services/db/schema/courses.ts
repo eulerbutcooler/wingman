@@ -73,10 +73,19 @@ export const documentChunks = pgTable("document_chunks", {
     .notNull(),
   chunkText: text("chunk_text").notNull(),
   chunkIndex: integer("chunk_index").notNull(),
+  
+  // Position metadata
   pageNumber: integer("page_number"), // Track which page this chunk came from
   startPosition: integer("start_position"), // Character position where chunk starts in the document
   endPosition: integer("end_position"), // Character position where chunk ends
   tokenCount: integer("token_count"),
+  
+  // Structural metadata (NEW for Issue 10)
+  headingText: text("heading_text"), // Section/chapter heading for this chunk
+  headingLevel: integer("heading_level"), // Heading hierarchy level (1=H1, 2=H2, etc)
+  chunkType: text("chunk_type"), // Content type: 'text', 'list', 'table', 'code', 'formula'
+  
+  // Embedding
   embedding: vector("embedding", { dimensions: 768 }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });

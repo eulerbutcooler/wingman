@@ -1,3 +1,5 @@
+import { countTokens } from './tokenizer';
+
 export interface TextChunk {
   text: string;
   index: number;
@@ -14,10 +16,11 @@ export interface PagedTextChunk {
 }
 
 /**
- * Simple token counting (approximation: 1 token ≈ 4 characters)
+ * Accurate token counting using tiktoken
+ * @deprecated Use countTokens from tokenizer.ts instead
  */
 export function estimateTokenCount(text: string): number {
-  return Math.ceil(text.length / 4);
+  return countTokens(text);
 }
 
 /**
