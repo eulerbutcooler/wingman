@@ -86,7 +86,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
             className="overflow-hidden"
           >
             {/* Put padding inside inner wrapper to avoid height measurement glitches */}
-            <div className="pt-3 text-sm leading-6 text-navy font-medium">
+            <div className="px-4 pb-4 text-sm leading-6 text-navy font-medium">
               {a}
             </div>
           </motion.div>
@@ -181,13 +181,13 @@ export default function Hero() {
               Your personal AI{" "}
               <TypeAnimation
                 sequence={[
-                  "tutor.",
+                  "tutor",
                   1000,
-                  "study buddy.",
+                  "study buddy",
                   1000,
-                  "coach.",
+                  "coach",
                   1000,
-                  "guide.",
+                  "guide",
                   1000,
                 ]}
                 wrapper="span"
@@ -243,11 +243,12 @@ export default function Hero() {
                 </h1>
               </div>
               <p className="text-lg md:text-xl text-navy font-semibold">
-                Talk to your PDFs
+                Your AI Study Companion
               </p>
               <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-                Chat with documents, websites, and notes in natural language,
-                and get cited answers, summaries, and follow ups instantly.
+                Ask questions in natural language and get instant, cited answers
+                from your study materials. Get summaries, explanations, and
+                intelligent follow-ups tailored to your learning pace.
               </p>
               <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-2 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 "></div>
             </motion.div>
@@ -270,12 +271,12 @@ export default function Hero() {
                 </h1>
               </div>
               <p className="text-lg md:text-xl text-navy font-semibold">
-                Build courses from your knowledge
+                Global Knowledge Repository
               </p>
               <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-                Turn saved content into structured study plans and bite‑sized
-                courses, complete with milestones, reminders, and progress
-                tracking.
+                Access a comprehensive collection of shared study materials,
+                resources, and learning content. Browse, explore, and dive deep
+                into topics curated by your community.
               </p>
               <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-2 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
             </motion.div>
@@ -298,11 +299,12 @@ export default function Hero() {
                 </h1>
               </div>
               <p className="text-lg md:text-xl text-navy font-semibold">
-                Quiz me from your data
+                Test Your Knowledge
               </p>
               <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-                Auto‑generate personalized quizzes from uploaded files, chats,
-                and bookmarks, with adaptive difficulty and instant feedback.
+                Challenge yourself with AI-generated quizzes tailored to your
+                learning materials. Track your progress, identify weak areas,
+                and reinforce your understanding through adaptive testing.
               </p>
               <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-2 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
             </motion.div>
@@ -346,9 +348,9 @@ export default function Hero() {
               © 2025 NIAT. All rights reserved.
             </p>
           </div>
-          <div className="flex flex-col justify-between w-full lg:w-1/2 gap-6 md:gap-4">
+          <div className="flex flex-col justify-between w-full  text-right   lg:w-1/2 gap-6 md:gap-4">
             <div className="flex flex-col md:flex-row justify-between gap-6 md:gap-4">
-              <div className="flex flex-col w-full md:w-1/3 gap-4">
+              <div className="flex flex-col w-full  gap-4">
                 <h1 className="text-lg font-bold text-white">Contact us</h1>
                 <p className="text-sm text-white">
                   Email: aeromentor.contact@gmail.com
@@ -358,7 +360,7 @@ export default function Hero() {
                   Address: INS Garuda, Naval Base, Kochi - 682004, Kerala
                 </p>
               </div>
-              <div className="flex flex-col gap-4">
+              {/* <div className="flex flex-col gap-4">
                 <h1 className="text-lg font-bold text-white">Quick links</h1>
                 <Link href="/">
                   <p className="text-sm text-white cursor-pointer hover:text-navy transition-colors">
@@ -380,11 +382,11 @@ export default function Hero() {
                     Quiz
                   </p>
                 </Link>
-              </div>
+              </div> */}
             </div>
             <div className="flex flex-col gap-4">
               <h1 className="text-lg font-bold text-white">Socials</h1>
-              <div className="flex text-white gap-6 text-xl">
+              <div className="flex text-white  justify-end gap-6 text-xl">
                 <SiGmail className="cursor-pointer hover:text-navy transition-colors" />
                 {/* <FiGithub className="cursor-pointer hover:text-navy transition-colors" />
                 <FaXTwitter className="cursor-pointer hover:text-navy transition-colors" />

@@ -85,6 +85,7 @@ export default function DocumentUploader({
         uploadFile(uploadedFile.id);
       });
     },
+    // Note: uploadFile is defined below but called within this callback
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [userId, lessonId, topicId]
   );

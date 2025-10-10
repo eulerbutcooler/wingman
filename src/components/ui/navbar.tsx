@@ -1,61 +1,41 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
-import type { User } from "@supabase/supabase-js";
+import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
+import { useAuthStore, useUIStore } from "@/stores";
 import { FiMenu, FiX } from "react-icons/fi";
 
 export default function Navbar() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, loading } = useAuthStore();
+  const { isMobileMenuOpen, setIsMobileMenuOpen } = useUIStore();
+  const pathname = usePathname();
   const navRef = useRef<HTMLDivElement | null>(null);
   const sentRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-    );
-
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   useEffect(() => {
     const nav = navRef.current;
     const sent = sentRef.current;
     if (!nav || !sent) return;
 
-    // Observe when the very top of the page is visible
     const io = new IntersectionObserver(
       ([entry]) => {
-        // When the sentinel is NOT visible, user has scrolled down a bit
         nav.classList.toggle("scrolled", !entry.isIntersecting);
       },
-      {
-        // Trigger as soon as we leave the top
-        threshold: 1,
-      }
+      { threshold: 1 }
     );
 
     io.observe(sent);
     return () => io.disconnect();
   }, []);
+
+  // Helper function to check if a path is active
+  const isActive = (path: string) => {
+    if (path === "/") {
+      return pathname === "/";
+    }
+    return pathname?.startsWith(path);
+  };
 
   return (
     <>
@@ -79,18 +59,54 @@ export default function Navbar() {
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex text-black space-x-6">
-          <Link href="/" className="hover:text-navy transition-colors">
+        <div className="hidden md:flex text-black space-x-6 relative">
+          <Link
+            href="/"
+            className={`relative pb-1 transition-colors ${
+              isActive("/") && pathname === "/"
+                ? "text-black font-semibold"
+                : "hover:text-navy"
+            }`}
+          >
             Home
+            {isActive("/") && pathname === "/" && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black rounded-full animate-slide-in" />
+            )}
           </Link>
-          <Link href="/chat" className="hover:text-navy transition-colors">
+          <Link
+            href="/chat"
+            className={`relative pb-1 transition-colors ${
+              isActive("/chat") ? "text-black font-semibold" : "hover:text-navy"
+            }`}
+          >
             Chat
+            {isActive("/chat") && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black rounded-full animate-slide-in" />
+            )}
           </Link>
-          <Link href="/library" className="hover:text-navy transition-colors">
+          <Link
+            href="/library"
+            className={`relative pb-1 transition-colors ${
+              isActive("/library")
+                ? "text-black font-semibold"
+                : "hover:text-navy"
+            }`}
+          >
             Library
+            {isActive("/library") && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black rounded-full animate-slide-in" />
+            )}
           </Link>
-          <Link href="/quiz" className="hover:text-navy transition-colors">
+          <Link
+            href="/quiz"
+            className={`relative pb-1 transition-colors ${
+              isActive("/quiz") ? "text-black font-semibold" : "hover:text-navy"
+            }`}
+          >
             Quiz
+            {isActive("/quiz") && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black rounded-full animate-slide-in" />
+            )}
           </Link>
         </div>
 
@@ -140,31 +156,59 @@ export default function Navbar() {
               {/* Mobile Navigation Links */}
               <Link
                 href="/"
-                className="text-lg font-medium text-black hover:text-navy transition-colors"
+                className={`relative text-lg font-medium transition-colors inline-block ${
+                  isActive("/") && pathname === "/"
+                    ? "text-black font-bold"
+                    : "text-black hover:text-navy"
+                }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 HOME
+                {isActive("/") && pathname === "/" && (
+                  <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-black rounded-full" />
+                )}
               </Link>
               <Link
                 href="/chat"
-                className="text-lg font-medium text-black hover:text-navy transition-colors"
+                className={`relative text-lg font-medium transition-colors inline-block ${
+                  isActive("/chat")
+                    ? "text-black font-bold"
+                    : "text-black hover:text-navy"
+                }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 CHAT
+                {isActive("/chat") && (
+                  <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-black rounded-full" />
+                )}
               </Link>
               <Link
                 href="/library"
-                className="text-lg font-medium text-black hover:text-navy transition-colors"
+                className={`relative text-lg font-medium transition-colors inline-block ${
+                  isActive("/library")
+                    ? "text-black font-bold"
+                    : "text-black hover:text-navy"
+                }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 LIBRARY
+                {isActive("/library") && (
+                  <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-black rounded-full" />
+                )}
               </Link>
               <Link
                 href="/quiz"
-                className="text-lg font-medium text-black hover:text-navy transition-colors"
+                className={`relative text-lg font-medium transition-colors inline-block ${
+                  isActive("/quiz")
+                    ? "text-black font-bold"
+                    : "text-black hover:text-navy"
+                }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 QUIZ
+                {isActive("/quiz") && (
+                  <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-black rounded-full" />
+                )}
               </Link>
 
               {/* Mobile Auth Button */}

@@ -73,7 +73,7 @@ export interface UserPreferences {
 // ============================================================================
 
 export interface Course {
-  id: number;
+  id: string; // UUID in database
   userId: number;
   title: string;
   description?: string;
@@ -86,8 +86,8 @@ export interface Course {
 }
 
 export interface Topic {
-  id: number;
-  courseId: number;
+  id: string; // UUID in database
+  courseId: string; // UUID foreign key
   title: string;
   order: number;
   createdAt: Date;
@@ -96,8 +96,8 @@ export interface Topic {
 }
 
 export interface Lesson {
-  id: number;
-  topicId: number;
+  id: string; // UUID in database
+  topicId: string; // UUID foreign key
   title: string;
   type: "pdf" | "docx" | "pptx";
   fileId?: string;

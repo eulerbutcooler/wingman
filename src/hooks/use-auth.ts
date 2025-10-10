@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/services/supabase/client";
+import { useAuthStore } from "@/stores";
 import type { User } from "@supabase/supabase-js";
 
 export interface UseAuthOptions {
-  redirectTo?: string; // Where to redirect if not authenticated
-  requireAuth?: boolean; // Whether to require authentication
+  redirectTo?: string;
+  requireAuth?: boolean;
 }
 
 export interface UseAuthReturn {
@@ -19,83 +19,36 @@ export interface UseAuthReturn {
 
 /**
  * Centralized auth hook for client components
- * Handles authentication state, redirects, and provides auth utilities
+ * Now uses Zustand store for state management
  */
 export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
   const { redirectTo = "/signin", requireAuth = false } = options;
-
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const supabase = createClient();
 
-  useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
-
-      if (error) {
-        console.error("❌ Error getting session:", error);
-      }
-
-      setUser(session?.user ?? null);
-      setLoading(false);
-    };
-
-    getInitialSession();
-
-    // Listen for auth state changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("🔄 Auth state changed:", event, session?.user?.email);
-
-      setUser(session?.user ?? null);
-      setLoading(false);
-
-      // Handle different auth events
-      switch (event) {
-        case "SIGNED_IN":
-          console.log("✅ User signed in:", session?.user?.email);
-          break;
-        case "SIGNED_OUT":
-          console.log("👋 User signed out");
-          setUser(null);
-          break;
-        case "TOKEN_REFRESHED":
-          console.log("🔄 Token refreshed for:", session?.user?.email);
-          break;
-        case "USER_UPDATED":
-          console.log("👤 User updated:", session?.user?.email);
-          break;
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase]);
+  const {
+    user,
+    loading,
+    isAuthenticated,
+    signOut: storeSignOut,
+  } = useAuthStore();
 
   // Handle authentication requirement and redirects
   useEffect(() => {
-    if (!loading) {
-      if (requireAuth && !user) {
-        console.log("🔒 Auth required, redirecting to:", redirectTo);
-        router.replace(redirectTo);
-      }
+    // Only redirect if we're done loading and auth is required but user is not authenticated
+    if (!loading && requireAuth && !user) {
+      console.log("Redirecting to signin - no authenticated user");
+      router.replace(redirectTo);
     }
   }, [user, loading, requireAuth, redirectTo, router]);
 
-  // Sign out function
+  // Enhanced sign out with navigation
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      await storeSignOut();
       router.push("/");
     } catch (error) {
-      console.error("❌ Error signing out:", error);
+      console.error("Error signing out:", error);
+      throw error;
     }
   };
 
@@ -103,7 +56,7 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
     user,
     loading,
     signOut,
-    isAuthenticated: !!user,
+    isAuthenticated,
   };
 }
 

@@ -4,11 +4,19 @@ import React, { useState, useRef } from "react";
 import * as courseService from "@/services/course-service";
 import { FaArrowRight } from "react-icons/fa";
 import { FaArrowLeft } from "react-icons/fa";
+import type { Course } from "@/types/library";
+
+type LessonUpdate = {
+  title?: string;
+  type?: "pdf" | "docx" | "pptx";
+  file?: File;
+  uploading?: boolean;
+  uploadProgress?: number;
+};
 
 interface CourseCreatorProps {
   userId: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSuccess: (course: any) => void;
+  onSuccess: (course: Course) => void;
   onCancel: () => void;
 }
 
@@ -79,8 +87,11 @@ export default function CourseCreator({
     );
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateLesson = (topicId: string, lessonId: string, updates: any) => {
+  const updateLesson = (
+    topicId: string,
+    lessonId: string,
+    updates: LessonUpdate
+  ) => {
     setTopics(
       topics.map((topic) =>
         topic.id === topicId
@@ -297,7 +308,9 @@ export default function CourseCreator({
           {/* Course Details */}
           <div className="flex flex-col lg:flex-row gap-6 md:gap-8">
             <div className="bg-white p-4 md:p-6 h-fit rounded-2xl md:rounded-4xl w-full lg:w-1/2 shadow-sm">
-              <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Course Information</h2>
+              <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">
+                Course Information
+              </h2>
               <div className="space-y-3 md:space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-2">

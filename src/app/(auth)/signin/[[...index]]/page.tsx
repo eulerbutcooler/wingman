@@ -1,11 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Toaster, toast } from "sonner";
 import { signInWithSupabase, type AuthResult } from "@/lib/auth/auth-utils";
-import { useEffect } from "react";
 import { useFormStatus } from "react-dom";
 
 function SubmitButton() {
@@ -26,10 +25,8 @@ export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Get the redirect URL from query params
   const from = searchParams.get("from") || "/dashboard";
 
-  // Show success message if coming from verification
   useEffect(() => {
     const message = searchParams.get("message");
     if (message === "verification-success") {
@@ -39,19 +36,26 @@ export default function SignInPage() {
 
   const [state, formAction] = useActionState<AuthResult, FormData>(
     async (previousState, formData) => {
-      const email = formData.get("email") as string;
+      const serviceNumber = formData.get("email") as string;
       const password = formData.get("password") as string;
 
-      if (!email || !password) {
-        return { success: false, error: "Email and password are required" };
+      if (!serviceNumber || !password) {
+        return {
+          success: false,
+          error: "Service number and password are required",
+        };
       }
+
+      // Append @gmail.com to service number to create email
+      const email = `${serviceNumber}@gmail.com`;
 
       const result = await signInWithSupabase(email, password);
 
       if (result.success) {
         toast.success("Welcome back!");
-        router.push(from);
-        router.refresh();
+        // Force a hard navigation to ensure auth state is properly updated
+        window.location.href = "/dashboard";
+        return { success: true };
       } else if (result.error) {
         toast.error(result.error);
       }
@@ -77,19 +81,19 @@ export default function SignInPage() {
         {/* Signin Form */}
         <form action={formAction}>
           <div className="space-y-6">
-            {/* Email Input */}
+            {/* Service Number Input */}
             <div>
               <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-600 mb-2"
               >
-                Email Address
+                Service Number
               </label>
               <input
-                type="email"
+                type="text"
                 id="email"
                 name="email"
-                placeholder="email@example.com"
+                placeholder="enter your service number"
                 required
                 className="w-full px-4 py-3 bg-white border border-gray-300 rounded-4xl text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition duration-300"
               />

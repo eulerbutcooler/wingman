@@ -1,19 +1,16 @@
 "use client";
 
 import React, { useState, useActionState } from "react";
-// --- IMPORTS ---
 import { deleteAccountAction, AuthResult } from "@/lib/auth/auth-utils";
 import { useRequireAuth, getDisplayName } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
 
-// --- ICONS (Unchanged) ---
 import { FaArrowRight } from "react-icons/fa";
 import { PiTimer } from "react-icons/pi";
 import { IoBookOutline } from "react-icons/io5";
 import { AiOutlineThunderbolt } from "react-icons/ai";
 
-// --- NEW COMPONENT ---
 function DeleteButton() {
   const { pending } = useFormStatus();
 
@@ -69,7 +66,7 @@ export default function DashboardPage() {
   }
 
   if (!user) {
-    return null; // Will redirect via useRequireAuth hook
+    return null;
   }
 
   return (
@@ -169,12 +166,12 @@ export default function DashboardPage() {
                     {getDisplayName(user)}
                   </p>
                   <p className="text-navy text-sm sm:text-xl">
-                    <span className="font-medium text-black">Email:</span>{" "}
-                    {user.email}
+                    <span className="font-medium text-black">Service No:</span>{" "}
+                    {user.user_metadata?.serviceId || "N/A"}
                   </p>
-                  <p className="text-navy text-xs sm:text-xl break-all">
-                    <span className="font-medium text-black">User ID:</span>{" "}
-                    {user.id}
+                  <p className="text-navy text-sm sm:text-xl">
+                    <span className="font-medium text-black">Course:</span>{" "}
+                    {user.user_metadata?.course || "N/A"}
                   </p>
                 </div>
               </div>
