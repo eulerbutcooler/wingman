@@ -1,0 +1,185 @@
+/**
+ * Query Classification for RAG System (Issue 7)
+ * 
+ * Classifies user queries to determine optimal retrieval strategy:
+ * - LIST_ALL: Queries asking for comprehensive lists (need many chunks, lower threshold)
+ * - EXPLAIN: Queries asking for specific explanations (need focused chunks, higher threshold)
+ * - COMPARE: Queries comparing concepts (need targeted chunks from multiple sources)
+ * - SEARCH: General search queries (balanced approach)
+ */
+
+export enum QueryType {
+  LIST_ALL = 'list_all',      // "list all lesson plans", "show all topics"
+  EXPLAIN = 'explain',         // "explain concept X", "what is Y"
+  COMPARE = 'compare',         // "compare X and Y", "differences between"
+  SEARCH = 'search',           // General queries
+}
+
+export interface QueryClassification {
+  type: QueryType;
+  confidence: number;
+  reasoning: string;
+  suggestedTopK: number;
+  suggestedThreshold: number;
+}
+
+/**
+ * Patterns for detecting LIST_ALL queries
+ */
+const LIST_PATTERNS = [
+  /\b(list|show|display|give|provide|get)\s+(all|every|entire|complete)\b/i,
+  /\b(all|every|entire)\s+(?:the\s+)?(lesson plans?|topics?|chapters?|sections?|modules?|files?|documents?)\b/i,
+  /\bhow many\s+(lesson plans?|topics?|chapters?|sections?)\b/i,
+  /\bwhat\s+(?:are\s+)?(?:all|every|the)\s+(?:the\s+)?(lesson plans?|topics?)\b/i,
+];
+
+/**
+ * Patterns for detecting EXPLAIN queries
+ */
+const EXPLAIN_PATTERNS = [
+  /\b(explain|describe|define|elaborate on|what is|tell me about|how does)\b/i,
+  /\b(meaning|definition|concept|theory)\s+of\b/i,
+  /\bwhy\s+(is|are|does|do)\b/i,
+];
+
+/**
+ * Patterns for detecting COMPARE queries
+ */
+const COMPARE_PATTERNS = [
+  /\b(compare|contrast|difference|distinguish|vs|versus)\b/i,
+  /\bbetween\s+.+\s+and\s+/i,
+  /\b(similar|different)\s+(to|from|than)\b/i,
+];
+
+/**
+ * Keywords indicating comprehensive retrieval needs
+ */
+const COMPREHENSIVE_KEYWORDS = [
+  'all', 'every', 'entire', 'complete', 'comprehensive', 'full',
+  'total', 'whole', 'overview', 'summary'
+];
+
+/**
+ * Classifies a query and provides optimal retrieval parameters
+ */
+export function classifyQuery(query: string): QueryClassification {
+  const lowerQuery = query.toLowerCase();
+  
+  // Check for LIST_ALL patterns (highest priority)
+  for (const pattern of LIST_PATTERNS) {
+    if (pattern.test(query)) {
+      // Check for comprehensive keywords to boost confidence
+      const hasComprehensiveKeyword = COMPREHENSIVE_KEYWORDS.some(
+        keyword => lowerQuery.includes(keyword)
+      );
+      
+      return {
+        type: QueryType.LIST_ALL,
+        confidence: hasComprehensiveKeyword ? 0.95 : 0.85,
+        reasoning: 'Query asks for a comprehensive list of items',
+        suggestedTopK: 50,  // Retrieve many chunks for comprehensive coverage
+        suggestedThreshold: 0.4,  // LOWERED to 0.4 to catch all relevant items
+      };
+    }
+  }
+
+  // Check for COMPARE patterns
+  for (const pattern of COMPARE_PATTERNS) {
+    if (pattern.test(query)) {
+      return {
+        type: QueryType.COMPARE,
+        confidence: 0.85,
+        reasoning: 'Query asks to compare or contrast concepts',
+        suggestedTopK: 15,  // Need chunks from multiple sources
+        suggestedThreshold: 0.5,  // LOWERED for better recall
+      };
+    }
+  }
+
+  // Check for EXPLAIN patterns
+  for (const pattern of EXPLAIN_PATTERNS) {
+    if (pattern.test(query)) {
+      return {
+        type: QueryType.EXPLAIN,
+        confidence: 0.9,
+        reasoning: 'Query asks for explanation or definition',
+        suggestedTopK: 8,  // Focused retrieval
+        suggestedThreshold: 0.5,  // LOWERED for better recall
+      };
+    }
+  }
+
+  // Default to SEARCH
+  // Check if query has comprehensive intent even without explicit patterns
+  const comprehensiveScore = COMPREHENSIVE_KEYWORDS.reduce((score, keyword) => {
+    return lowerQuery.includes(keyword) ? score + 0.15 : score;
+  }, 0);
+
+  if (comprehensiveScore > 0.3) {
+    return {
+      type: QueryType.LIST_ALL,
+      confidence: 0.7,
+      reasoning: 'Query suggests comprehensive information needs',
+      suggestedTopK: 30,
+      suggestedThreshold: 0.4,  // LOWERED for better recall
+    };
+  }
+
+  return {
+    type: QueryType.SEARCH,
+    confidence: 0.7,
+    reasoning: 'General search query',
+    suggestedTopK: 10,  // Balanced retrieval
+    suggestedThreshold: 0.4,  // LOWERED to match default
+  };
+}
+
+/**
+ * Get query-specific LLM prompt (Issue 11)
+ */
+export function getQuerySpecificPrompt(classification: QueryClassification): {
+  systemAddition: string;
+  userAddition: string;
+} {
+  switch (classification.type) {
+    case QueryType.LIST_ALL:
+      return {
+        systemAddition: `
+IMPORTANT: This is a LIST_ALL query. The user wants a COMPREHENSIVE list.
+- List ALL relevant items found in the context, even if there are many
+- Use bullet points or numbered lists for clarity
+- Include brief descriptions for each item if available
+- If sources mention the same item, avoid duplication but note it
+- If the list seems incomplete, explicitly state that these are the items found in the available context`,
+        userAddition: '\n\nPlease provide a COMPLETE list of all relevant items, not just a few examples.',
+      };
+
+    case QueryType.EXPLAIN:
+      return {
+        systemAddition: `
+IMPORTANT: This is an EXPLAIN query. Focus on providing a clear, detailed explanation.
+- Provide step-by-step explanations when appropriate
+- Use examples from the context to illustrate concepts
+- Define key terms
+- Be thorough but organized`,
+        userAddition: '\n\nPlease provide a comprehensive explanation with examples.',
+      };
+
+    case QueryType.COMPARE:
+      return {
+        systemAddition: `
+IMPORTANT: This is a COMPARE query. Structure your response to highlight similarities and differences.
+- Use a structured format (e.g., "Similarities:", "Differences:")
+- Be balanced in covering both items being compared
+- Cite sources for each point of comparison`,
+        userAddition: '\n\nPlease provide a structured comparison.',
+      };
+
+    case QueryType.SEARCH:
+    default:
+      return {
+        systemAddition: '',
+        userAddition: '',
+      };
+  }
+}
