@@ -96,6 +96,7 @@ Please provide a detailed answer based on the course materials provided in the c
       model: google("gemini-2.5-flash-lite"),
       system: systemPrompt,
       prompt: userPrompt,
+      temperature: classification.suggestedTemperature,
     });
 
     console.log("✅ Generated AI response");
