@@ -22,6 +22,7 @@ export interface QueryClassification {
   reasoning: string;
   suggestedTopK: number;
   suggestedThreshold: number;
+  suggestedTemperature: number;
 }
 
 /**
@@ -123,6 +124,7 @@ export function classifyQuery(query: string): QueryClassification {
         reasoning: "Query asks for a comprehensive list of items",
         suggestedTopK: 50, // Retrieve many chunks for comprehensive coverage
         suggestedThreshold: 0.4, // LOWERED to 0.4 to catch all relevant items
+        suggestedTemperature: 0, // Deterministic for consistent listings
       };
     }
   }
@@ -136,6 +138,7 @@ export function classifyQuery(query: string): QueryClassification {
         reasoning: "Query asks to compare or contrast concepts",
         suggestedTopK: 15, // Need chunks from multiple sources
         suggestedThreshold: 0.5, // LOWERED for better recall
+        suggestedTemperature: 0.3, // Low creativity for structured comparison
       };
     }
   }
@@ -149,6 +152,7 @@ export function classifyQuery(query: string): QueryClassification {
         reasoning: "Query asks for explanation or definition",
         suggestedTopK: 8, // Focused retrieval
         suggestedThreshold: 0.5, // LOWERED for better recall
+        suggestedTemperature: 0.6, // Moderate creativity for varied explanations
       };
     }
   }
@@ -166,6 +170,7 @@ export function classifyQuery(query: string): QueryClassification {
         reasoning: "Query asks for teaching or learning guidance",
         suggestedTopK: 20,
         suggestedThreshold: 0.45,
+        suggestedTemperature: 0.7, // Higher creativity for teaching approaches
       };
     }
   }
@@ -183,6 +188,7 @@ export function classifyQuery(query: string): QueryClassification {
       reasoning: "Query suggests comprehensive information needs",
       suggestedTopK: 30,
       suggestedThreshold: 0.4, // LOWERED for better recall
+      suggestedTemperature: 0, // Deterministic for consistent listings
     };
   }
 
@@ -192,6 +198,7 @@ export function classifyQuery(query: string): QueryClassification {
     reasoning: "General search query",
     suggestedTopK: 10, // Balanced retrieval
     suggestedThreshold: 0.4, // LOWERED to match default
+    suggestedTemperature: 0.5, // Balanced temperature
   };
 }
 
@@ -236,6 +243,20 @@ IMPORTANT: This is a COMPARE query. Structure your response to highlight similar
 - Be balanced in covering both items being compared
 - Cite sources for each point of comparison`,
         userAddition: "\n\nPlease provide a structured comparison.",
+      };
+
+    case QueryType.TEACH:
+      return {
+        systemAddition: `
+IMPORTANT: This is a TEACH query. The user wants to learn or understand something.
+- Break down complex concepts into simple, digestible parts
+- Use a pedagogical approach with progressive difficulty
+- Provide examples, analogies, and practice exercises when available
+- Structure the response with clear learning objectives
+- Include foundational concepts before advanced ones
+- Encourage active learning with questions or exercises`,
+        userAddition:
+          "\n\nPlease teach this concept in a clear, step-by-step manner with examples.",
       };
 
     case QueryType.SEARCH:

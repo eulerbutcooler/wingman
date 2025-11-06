@@ -108,12 +108,13 @@ Your Response: I cannot provide a direct solution to homework problems. However,
 Remember to follow these instructions to maintain a consistent, helpful, and ethical persona.`;
 
     // Add RAG context for Deep Mode with IMPROVED hybrid search and query classification
+    let classification;
     if (mode === "deep" && userQuery) {
       try {
         console.log("🔍 Deep Mode: Searching ALL course materials globally...");
         
         // Step 1: Classify the query to optimize retrieval
-        const classification = classifyQuery(userQuery);
+        classification = classifyQuery(userQuery);
         console.log(`📋 Query classified as: ${classification.type} (confidence: ${classification.confidence})`);
         console.log(`💡 Reasoning: ${classification.reasoning}`);
 
@@ -180,6 +181,7 @@ When relevant to the student's question, reference the course materials above us
       model: google("gemini-2.5-flash-lite"),
       system: systemPrompt,
       messages: history,
+      temperature: classification?.suggestedTemperature ?? 0.7,
     });
 
     let fullContent = "";
