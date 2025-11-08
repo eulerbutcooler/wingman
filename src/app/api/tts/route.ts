@@ -1,21 +1,22 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { GoogleGenAI } from "@google/genai";
 
 export async function POST(request: NextRequest) {
   try {
-    const { text } = await request.json();
+    const { text, voiceName = "Kore", temperature = 1.8, pace = "fast" } = await request.json();
 
     if (!text) {
-      return NextResponse.json({ error: "Text is required" }, { status: 400 });
+      return new Response(JSON.stringify({ error: "Text is required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
-    const apiKey = process.env.ELEVENLABS_API_KEY;
-    if (!apiKey || apiKey === "your_elevenlabs_api_key_here") {
-      return NextResponse.json(
-        {
-          error:
-            "ElevenLabs API key not configured. Please add ELEVENLABS_API_KEY to your .env file.",
-        },
-        { status: 500 }
+    const apiKey = process.env.GEMINI_TTS_API_KEY;
+    if (!apiKey) {
+      return new Response(
+        JSON.stringify({ error: "GEMINI_TTS_API_KEY not configured. Please add it to your .env file." }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -28,58 +29,83 @@ export async function POST(request: NextRequest) {
       .replace(/#{1,6}\s/g, "") // Remove headers
       .replace(/>\s/g, "") // Remove blockquotes
       .replace(/\n+/g, ". ") // Replace newlines with pauses
-      .substring(0, 5000); // Limit to 5000 chars to control cost
+      .substring(0, 3000); // Limit chars
 
-    // Use ElevenLabs TTS API
-    // Using custom voice ID
-    const voiceId = "9PvnT6XRzlljoaDG6Knu"; // Custom Indian voice
+    const ai = new GoogleGenAI({ apiKey });
 
-    const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-      {
-        method: "POST",
-        headers: {
-          Accept: "audio/mpeg",
-          "Content-Type": "application/json",
-          "xi-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          text: cleanText,
-          model_id: "eleven_multilingual_v2", // Better for Indian accent
-          voice_settings: {
-            stability: 0.6, // Higher stability for warm, consistent tone
-            similarity_boost: 0.8, // Higher similarity for authentic voice
-            style: 0.3, // Slight style for friendliness
-            use_speaker_boost: true,
+    // Natural exciting tone
+    const prompt = `Say in a exciting, informative, deep middle-pitched tone at a ${pace} pace: ${cleanText}`;
+
+    console.log("🎤 [TTS] Starting Gemini TTS stream...");
+    const geminiStream = await ai.models.generateContentStream({
+      model: "gemini-2.5-flash-preview-tts",
+      config: {
+        temperature,
+        responseModalities: ["AUDIO"],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName },
           },
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const error = await response.text();
-      console.error("ElevenLabs API error:", error);
-      return NextResponse.json(
-        { error: "Failed to generate speech. Check your API key and quota." },
-        { status: response.status }
-      );
-    }
-
-    // Get audio as array buffer
-    const audioBuffer = await response.arrayBuffer();
-
-    // Convert to base64
-    const base64Audio = Buffer.from(audioBuffer).toString("base64");
-
-    // Return the base64 encoded audio
-    return NextResponse.json({
-      audioContent: base64Audio,
+        },
+      },
+      contents: prompt,
     });
-  } catch (error) {
+
+    // TRUE STREAMING: Stream chunks as they arrive
+    let chunkCount = 0;
+    let totalBytes = 0;
+    let isFirstChunk = true;
+    let mimeType = "audio/pcm;rate=24000";
+
+    const readableStream = new ReadableStream({
+      async start(controller) {
+        try {
+          const startTime = Date.now();
+          
+          for await (const chunk of geminiStream) {
+            const part = chunk?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+            if (part?.data) {
+              chunkCount++;
+              const audioData = Buffer.from(part.data, "base64");
+              totalBytes += audioData.length;
+              
+              if (isFirstChunk) {
+                mimeType = part.mimeType || mimeType;
+                const firstChunkTime = Date.now() - startTime;
+                console.log(`🎵 [TTS] First chunk received in ${firstChunkTime}ms (${audioData.length} bytes)`);
+                isFirstChunk = false;
+              } else {
+                console.log(`📦 [TTS] Chunk ${chunkCount}: ${audioData.length} bytes (total: ${totalBytes} bytes)`);
+              }
+              
+              // Stream raw PCM chunks immediately
+              controller.enqueue(audioData);
+            }
+          }
+          
+          const totalTime = Date.now() - startTime;
+          console.log(`✅ [TTS] Stream complete: ${chunkCount} chunks, ${totalBytes} bytes in ${totalTime}ms`);
+          controller.close();
+        } catch (error) {
+          console.error("❌ [TTS] Stream error:", error);
+          controller.error(error);
+        }
+      },
+    });
+
+    return new Response(readableStream, {
+      headers: {
+        "Content-Type": "audio/pcm;rate=24000",
+        "Transfer-Encoding": "chunked",
+        "X-Mime-Type": mimeType,
+      },
+    });
+  } catch (error: unknown) {
     console.error("TTS error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 }
