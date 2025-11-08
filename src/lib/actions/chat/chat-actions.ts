@@ -10,10 +10,6 @@ import {
 } from "@/services/db/schema/chats";
 import { eq, desc } from "drizzle-orm";
 
-// Remove this - it's executed at module level!
-// const user = await getCurrentUser();
-// const userId = session!.user.id;
-
 export async function createChat(
   title: string,
   userId?: number
