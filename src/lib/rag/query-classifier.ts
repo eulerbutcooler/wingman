@@ -26,6 +26,18 @@ export interface QueryClassification {
 }
 
 /**
+ * Interface for lesson plan query detection
+ */
+export interface LessonPlanQuery {
+  isLessonPlanQuery: boolean;
+  lessonPlanNumber?: string; // e.g., "5", "3", "12"
+  lessonPlanName?: string; // e.g., "Plan 5", "Lesson Plan 3"
+  courseName?: string; // e.g., "aerodynamics", "solid mechanics"
+  intent: "teach" | "explain" | "list" | "general";
+  confidence: number;
+}
+
+/**
  * Patterns for detecting LIST_ALL queries
  */
 const LIST_PATTERNS = [
@@ -77,6 +89,36 @@ const TEACH_PATTERNS = [
   /\bi\s+(want to|need to|would like to)\s+(learn|study|understand|master)\b/i,
   /\b(beginner|start|getting started|introduction)\s+(?:to|with)\b/i,
   /\bstep[- ]by[- ]step\b/i,
+];
+
+/**
+ * Patterns for detecting lesson plan queries
+ */
+const LESSON_PLAN_PATTERNS = [
+  /\b(?:lesson\s*)?plan\s*(\d+)\b/i, // "plan 5", "lesson plan 3"
+  /\bplan\s+(\d+)\b/i, // "plan 2"
+  /\blesson\s+(\d+)\b/i, // "lesson 4"
+  /\b(?:lp|l\.p\.)\s*(\d+)\b/i, // "lp 3", "l.p. 2"
+];
+
+/**
+ * Patterns for detecting general lesson plan queries (without specific number)
+ */
+const GENERAL_LESSON_PLAN_PATTERNS = [
+  /\blesson\s+plans?\b/i, // "lesson plan", "lesson plans"
+  /\ball\s+(?:the\s+)?(?:lesson\s+)?plans?\b/i, // "all plans", "all the lesson plans"
+  /\blist\s+(?:all\s+)?(?:the\s+)?(?:lesson\s+)?plans?\b/i, // "list plans", "list all lesson plans"
+];
+
+/**
+ * Course name patterns and aliases
+ */
+const COURSE_PATTERNS = [
+  { pattern: /\baero(?:dynamics?)?\b/i, name: "Aerodynamics" },
+  { pattern: /\bair\s+course\b/i, name: "Aerodynamics" },
+  { pattern: /\bsolid\s+mechanics?\b/i, name: "Solid Mechanics" },
+  { pattern: /\baerospace\s+vehicle\s+system\b/i, name: "Aerospace Vehicle System" },
+  { pattern: /\bavs\b/i, name: "Aerospace Vehicle System" },
 ];
 
 /**
@@ -265,5 +307,127 @@ IMPORTANT: This is a TEACH query. The user wants to learn or understand somethin
         systemAddition: "",
         userAddition: "",
       };
+  }
+}
+
+/**
+ * Detects if a query is about lesson plans and extracts relevant information
+ */
+export function detectLessonPlanQuery(query: string): LessonPlanQuery {
+  // Check if query mentions lesson plan with specific number
+  let lessonPlanNumber: string | undefined;
+  let lessonPlanName: string | undefined;
+  let isGeneralLessonPlanQuery = false;
+  
+  // First, check for specific numbered lesson plans
+  for (const pattern of LESSON_PLAN_PATTERNS) {
+    const match = query.match(pattern);
+    if (match) {
+      lessonPlanNumber = match[1];
+      lessonPlanName = `Plan ${lessonPlanNumber}`;
+      break;
+    }
+  }
+  
+  // If no specific number, check for general lesson plan queries
+  if (!lessonPlanNumber) {
+    for (const pattern of GENERAL_LESSON_PLAN_PATTERNS) {
+      if (pattern.test(query)) {
+        isGeneralLessonPlanQuery = true;
+        break;
+      }
+    }
+  }
+  
+  // If neither specific nor general lesson plan query, return early
+  if (!lessonPlanNumber && !isGeneralLessonPlanQuery) {
+    return {
+      isLessonPlanQuery: false,
+      intent: "general",
+      confidence: 0,
+    };
+  }
+  
+  // Detect course name
+  let courseName: string | undefined;
+  for (const { pattern, name } of COURSE_PATTERNS) {
+    if (pattern.test(query)) {
+      courseName = name;
+      break;
+    }
+  }
+  
+  // Detect intent
+  let intent: "teach" | "explain" | "list" | "general" = "general";
+  let confidence = 0.9;
+  
+  if (/\b(teach|learn|study|understand|master|according to)\b/i.test(query)) {
+    intent = "teach";
+    confidence = 0.95;
+  } else if (/\b(explain|describe|what is|tell me about|about)\b/i.test(query)) {
+    intent = "explain";
+    confidence = 0.9;
+  } else if (/\b(list|show|display|all)\b/i.test(query)) {
+    intent = "list";
+    confidence = 0.85;
+  }
+  
+  return {
+    isLessonPlanQuery: true,
+    lessonPlanNumber,
+    lessonPlanName: lessonPlanName || "lesson plans",
+    courseName,
+    intent,
+    confidence,
+  };
+}
+
+/**
+ * Get lesson plan-specific prompt enhancement
+ */
+export function getLessonPlanPromptEnhancement(
+  lpQuery: LessonPlanQuery
+): string {
+  if (!lpQuery.isLessonPlanQuery) return "";
+  
+  const basePlan = lpQuery.lessonPlanName || "the lesson plan";
+  const course = lpQuery.courseName ? ` from ${lpQuery.courseName}` : "";
+  
+  switch (lpQuery.intent) {
+    case "teach":
+      return `
+LESSON PLAN TEACHING MODE:
+You are teaching based on ${basePlan}${course}.
+- Follow the structure and sequence of the lesson plan
+- Break down each section step-by-step
+- Explain concepts progressively as laid out in the plan
+- Reference specific sections/topics from the plan
+- Provide examples and practice problems if mentioned in the plan
+- Keep the teaching aligned with the lesson plan's learning objectives`;
+
+    case "explain":
+      return `
+LESSON PLAN EXPLANATION MODE:
+Explain ${basePlan}${course}.
+- Summarize the lesson plan's title and main objectives
+- List the key topics covered
+- Describe the learning outcomes
+- Mention any prerequisites if stated
+- Be concise but comprehensive`;
+
+    case "list":
+      return `
+LESSON PLAN LISTING MODE:
+List information about ${basePlan}${course}.
+- Show the lesson plan title
+- List all sections/topics in order
+- Include any subtopics or key points
+- Note the duration or sequence if mentioned`;
+
+    default:
+      return `
+LESSON PLAN QUERY:
+The user is asking about ${basePlan}${course}.
+Use the retrieved lesson plan content to answer accurately.`;
   }
 }

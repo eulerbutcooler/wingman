@@ -1,5 +1,6 @@
 import { db } from "@/services/db/drizzle";
-import { documentChunks, files, courses } from "@/services/db/schema/courses";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { documentChunks, files, courses, lessons, topics } from "@/services/db/schema/courses";
 import { eq, desc, sql } from "drizzle-orm";
 import { generateEmbedding, cosineSimilarity } from "./embeddings";
 
@@ -11,6 +12,8 @@ export interface SearchResult {
   fileName: string;
   courseId: string;
   courseTitle: string;
+  lessonTitle?: string | null;
+  topicTitle?: string | null;
   similarity: number;
   pageNumber?: number | null;
   startPosition?: number | null;
@@ -117,6 +120,7 @@ export async function searchAllCoursesHybrid(
     similarityThreshold?: number;
     vectorWeight?: number;
     keywordWeight?: number;
+    lessonPlanNumber?: string; // For targeted lesson plan boosting
   } = {}
 ): Promise<SearchResult[]> {
   const {
@@ -124,34 +128,44 @@ export async function searchAllCoursesHybrid(
     similarityThreshold = 0.4, // LOWERED to 0.4 to catch more relevant results
     vectorWeight = 0.7,
     keywordWeight = 0.3,
+    lessonPlanNumber,
   } = options;
 
   try {
     console.log(`🔍 Hybrid search ALL courses for: "${query}"`);
     console.log(`⚙️  Settings: max=${maxResults}, threshold=${similarityThreshold}`);
+    if (lessonPlanNumber) {
+      console.log(`📋 Targeting lesson plan: ${lessonPlanNumber}`);
+    }
 
     // Detect if user is asking about a specific course (multiple patterns)
     let targetCourseName: string | null = null;
     
-    // Pattern 1: "course X", "from course X", "in course X"
-    let courseNameMatch = query.match(/(?:course|from course|in course)\s+["']?(\w+)["']?/i);
-    if (courseNameMatch) {
-      targetCourseName = courseNameMatch[1].toLowerCase();
-    }
+    // Known course names and aliases (for precise matching)
+    const courseAliases = [
+      { patterns: ['aerodynamics', 'aero', 'air'], fullName: 'Aerodynamics' },
+      { patterns: ['solid mechanics', 'solid', 'mechanics'], fullName: 'Solid Mechanics' },
+      { patterns: ['aerospace vehicle system', 'avs', 'aerospace'], fullName: 'Aerospace Vehicle System' },
+    ];
     
-    // Pattern 2: "for the X", "for X course", "of X", "of the X"
-    if (!targetCourseName) {
-      courseNameMatch = query.match(/(?:for|of)\s+(?:the\s+)?["']?(\w+)["']?(?:\s+course)?/i);
-      if (courseNameMatch) {
-        targetCourseName = courseNameMatch[1].toLowerCase();
+    const lowerQuery = query.toLowerCase();
+    
+    // Check for known course names/aliases in the query
+    for (const course of courseAliases) {
+      for (const pattern of course.patterns) {
+        if (lowerQuery.includes(pattern)) {
+          targetCourseName = course.fullName;
+          break;
+        }
       }
+      if (targetCourseName) break;
     }
     
-    // Pattern 3: "X lesson plan", "X's lesson", to catch "air lesson plan"
+    // Fallback: Pattern "from course X" or "course X" for exact course specification
     if (!targetCourseName) {
-      courseNameMatch = query.match(/\b(\w+)(?:'s)?\s+lesson/i);
-      if (courseNameMatch && courseNameMatch[1].toLowerCase() !== 'all') {
-        targetCourseName = courseNameMatch[1].toLowerCase();
+      const courseMatch = query.match(/(?:from\s+)?course\s+["']([^"']+)["']/i);
+      if (courseMatch) {
+        targetCourseName = courseMatch[1];
       }
     }
     
@@ -176,6 +190,7 @@ export async function searchAllCoursesHybrid(
 
     // Hybrid search query (vector + keyword across all courses)
     // If a specific course is detected, filter to that course ONLY
+    // Join with lessons and topics to get lesson names and filter by "Lesson Plan" topic
     const results = await db.execute(sql`
       WITH vector_search AS (
         SELECT 
@@ -191,7 +206,7 @@ export async function searchAllCoursesHybrid(
         FROM document_chunks dc
         ${targetCourseName ? sql`
           INNER JOIN courses target_course ON dc.course_id = target_course.id
-          WHERE LOWER(target_course.title) LIKE ${`%${targetCourseName}%`}
+          WHERE target_course.title = ${targetCourseName}
             AND dc.embedding IS NOT NULL
         ` : sql`WHERE dc.embedding IS NOT NULL`}
         ORDER BY dc.embedding <=> ${embeddingStr}::vector
@@ -208,14 +223,42 @@ export async function searchAllCoursesHybrid(
           dc.file_id,
           dc.course_id,
           ts_rank_cd(
-            to_tsvector('english', dc.chunk_text || ' ' || COALESCE(c.title, '') || ' ' || COALESCE(f.original_name, '')),
+            to_tsvector('english', 
+              dc.chunk_text || ' ' || 
+              COALESCE(c.title, '') || ' ' || 
+              COALESCE(f.original_name, '') || ' ' ||
+              COALESCE(l.title, '') || ' ' ||
+              COALESCE(t.title, '')
+            ),
             to_tsquery('english', ${keywords})
-          ) as keyword_score
+          ) * CASE 
+            -- AGGRESSIVE boost: 10x if lesson title exactly matches "Plan X"
+            ${lessonPlanNumber ? sql`
+              WHEN l.title ILIKE ${'Plan ' + lessonPlanNumber} THEN 10.0
+              WHEN l.title ILIKE ${'Plan' + lessonPlanNumber} THEN 10.0
+              -- Also boost if in filename (fallback for lessons without proper titles)
+              WHEN f.original_name ILIKE ${'%Plan ' + lessonPlanNumber + '%'} THEN 8.0
+              WHEN f.original_name ILIKE ${'%Plan' + lessonPlanNumber + '%'} THEN 8.0
+            ` : sql``}
+            -- Medium boost: 3x if from "Lesson Plan" topic (for general lesson plan queries)
+            WHEN t.title ILIKE '%Lesson Plan%' THEN 3.0
+            -- Standard boost: 2x if filename contains "Plan"
+            WHEN f.original_name ILIKE '%Plan%' THEN 2.0
+            ELSE 1.0
+          END as keyword_score
         FROM document_chunks dc
         INNER JOIN courses c ON dc.course_id = c.id
         INNER JOIN files f ON dc.file_id = f.id
-        WHERE to_tsvector('english', dc.chunk_text || ' ' || COALESCE(c.title, '') || ' ' || COALESCE(f.original_name, '')) @@ to_tsquery('english', ${keywords})
-        ${targetCourseName ? sql`AND LOWER(c.title) LIKE ${`%${targetCourseName}%`}` : sql``}
+        LEFT JOIN lessons l ON f.id = l.file_id
+        LEFT JOIN topics t ON l.topic_id = t.id
+        WHERE to_tsvector('english', 
+          dc.chunk_text || ' ' || 
+          COALESCE(c.title, '') || ' ' || 
+          COALESCE(f.original_name, '') || ' ' ||
+          COALESCE(l.title, '') || ' ' ||
+          COALESCE(t.title, '')
+        ) @@ to_tsquery('english', ${keywords})
+        ${targetCourseName ? sql`AND c.title = ${targetCourseName}` : sql``}
         ORDER BY keyword_score DESC
         LIMIT ${maxResults * 2}
       ),
@@ -238,11 +281,29 @@ export async function searchAllCoursesHybrid(
         c.*,
         f.original_name as file_name,
         co.title as course_title,
-        -- Standard hybrid scoring (no boost needed since we filter by course directly)
-        (c.vector_similarity * ${vectorWeight} + c.keyword_score * ${keywordWeight}) as hybrid_score
+        l.title as lesson_title,
+        t.title as topic_title,
+        -- Hybrid scoring with lesson-based boosting
+        (c.vector_similarity * ${vectorWeight} + c.keyword_score * ${keywordWeight}) * CASE
+          -- MASSIVE boost: 8x if lesson title exactly matches "Plan X"
+          ${lessonPlanNumber ? sql`
+            WHEN l.title ILIKE ${'Plan ' + lessonPlanNumber} THEN 8.0
+            WHEN l.title ILIKE ${'Plan' + lessonPlanNumber} THEN 8.0
+            -- Fallback: 5x if in filename
+            WHEN f.original_name ILIKE ${'%Plan ' + lessonPlanNumber + '%'} THEN 5.0
+            WHEN f.original_name ILIKE ${'%Plan' + lessonPlanNumber + '%'} THEN 5.0
+          ` : sql``}
+          -- Medium boost: 2x if from "Lesson Plan" topic
+          WHEN t.title ILIKE '%Lesson Plan%' THEN 2.0
+          -- Standard boost: 1.5x if filename contains "Plan"
+          WHEN f.original_name ILIKE '%Plan%' THEN 1.5
+          ELSE 1.0
+        END as hybrid_score
       FROM combined c
       INNER JOIN files f ON c.file_id = f.id
       INNER JOIN courses co ON c.course_id = co.id
+      LEFT JOIN lessons l ON f.id = l.file_id
+      LEFT JOIN topics t ON l.topic_id = t.id
       WHERE (c.vector_similarity >= ${similarityThreshold} OR c.keyword_score >= 0.05)
       ORDER BY hybrid_score DESC
       LIMIT ${maxResults}
@@ -257,6 +318,8 @@ export async function searchAllCoursesHybrid(
         fileName: row.file_name as string,
         courseId: row.course_id as string,
         courseTitle: row.course_title as string,
+        lessonTitle: (row.lesson_title as string) || null,
+        topicTitle: (row.topic_title as string) || null,
         similarity: parseFloat(row.vector_similarity as string),
         pageNumber: row.page_number as number | null,
         startPosition: row.start_position as number | null,
