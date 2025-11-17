@@ -13,7 +13,12 @@ import {
   formatContextForWingman,
   getCourseSummary,
 } from "@/lib/rag/user-search";
-import { classifyQuery, getQuerySpecificPrompt } from "@/lib/rag/query-classifier";
+import { 
+  classifyQuery, 
+  getQuerySpecificPrompt,
+  detectLessonPlanQuery,
+  getLessonPlanPromptEnhancement 
+} from "@/lib/rag/query-classifier";
 
 export interface Message {
   role: "user" | "assistant";
@@ -113,19 +118,39 @@ Remember to follow these instructions to maintain a consistent, helpful, and eth
       try {
         console.log("🔍 Deep Mode: Searching ALL course materials globally...");
         
+        // Step 0: Check for lesson plan queries FIRST
+        const lessonPlanQuery = detectLessonPlanQuery(userQuery);
+        
+        if (lessonPlanQuery.isLessonPlanQuery) {
+          console.log(`📝 Lesson Plan Query Detected!`);
+          console.log(`   Plan: ${lessonPlanQuery.lessonPlanName}`);
+          console.log(`   Course: ${lessonPlanQuery.courseName || "Not specified"}`);
+          console.log(`   Intent: ${lessonPlanQuery.intent}`);
+          console.log(`   Confidence: ${lessonPlanQuery.confidence}`);
+        }
+        
         // Step 1: Classify the query to optimize retrieval
         classification = classifyQuery(userQuery);
         console.log(`📋 Query classified as: ${classification.type} (confidence: ${classification.confidence})`);
         console.log(`💡 Reasoning: ${classification.reasoning}`);
 
         // Step 2: Use adaptive parameters based on query type
-        const searchParams = {
-          maxResults: classification.suggestedTopK,
-          similarityThreshold: classification.suggestedThreshold,
-          // Adjust weights for "list all" queries
-          vectorWeight: classification.type === 'list_all' ? 0.5 : 0.7,
-          keywordWeight: classification.type === 'list_all' ? 0.5 : 0.3,
-        };
+        // Override parameters for lesson plan queries
+        const searchParams = lessonPlanQuery.isLessonPlanQuery 
+          ? {
+              maxResults: 40, // Higher topK for lesson plans
+              similarityThreshold: 0.35, // Lower threshold for better recall
+              vectorWeight: 0.5,
+              keywordWeight: 0.5, // Equal weight for filename matching
+              lessonPlanNumber: lessonPlanQuery.lessonPlanNumber, // Pass plan number for targeted boosting
+            }
+          : {
+              maxResults: classification.suggestedTopK,
+              similarityThreshold: classification.suggestedThreshold,
+              // Adjust weights for "list all" queries
+              vectorWeight: classification.type === 'list_all' ? 0.5 : 0.7,
+              keywordWeight: classification.type === 'list_all' ? 0.5 : 0.3,
+            };
 
         console.log(`⚙️  Search params: topK=${searchParams.maxResults}, threshold=${searchParams.similarityThreshold}`);
 
@@ -141,6 +166,9 @@ Remember to follow these instructions to maintain a consistent, helpful, and eth
           
           // Step 4: Get query-specific prompt guidance
           const promptEnhancements = getQuerySpecificPrompt(classification);
+          
+          // Step 5: Get lesson plan-specific prompt if applicable
+          const lessonPlanPrompt = getLessonPlanPromptEnhancement(lessonPlanQuery);
           
           systemPrompt += `
 
@@ -163,6 +191,7 @@ IMPORTANT CITATION REQUIREMENTS FOR DEEP MODE:
 - IMPORTANT: If the student asks about a specific course by name, ONLY use sources from that course. The course name is clearly marked in each source citation.
 
 ${promptEnhancements.systemAddition}
+${lessonPlanPrompt}
 
 When relevant to the student's question, reference the course materials above using proper citations while maintaining your supportive teaching approach. Blend your general knowledge with the specific course content provided. If the student specifies a course name, filter your response to ONLY include information from that specific course.`;
           console.log(
