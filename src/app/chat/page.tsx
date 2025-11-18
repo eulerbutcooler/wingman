@@ -15,6 +15,8 @@ import CustomMarkdown from "@/components/CustomMarkdown";
 import { useRequireAuth } from "@/hooks/use-auth";
 import { useChatStore } from "@/stores";
 import { useTextToSpeech } from "@/hooks/use-tts";
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
+import MicButton from "@/components/chat/MicButton";
 export const maxDuration = 30;
 
 function ChatContent() {
@@ -39,11 +41,21 @@ function ChatContent() {
   } = useChatStore();
 
   const { toggleSpeak, stopSpeaking } = useTextToSpeech();
+  const {
+    transcript,
+    isListening,
+    isSupported: isSpeechSupported,
+    error: speechError,
+    startListening,
+    stopListening,
+    resetTranscript,
+    hasFinishedSpeaking,
+  } = useSpeechRecognition();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, loading: authLoading } = useRequireAuth(); // Get auth status
+  const { loading: authLoading } = useRequireAuth(); // Get auth status
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -67,6 +79,37 @@ function ChatContent() {
       stopSpeaking();
     };
   }, [stopSpeaking]);
+
+  // Update input field with transcript
+  useEffect(() => {
+    if (transcript) {
+      setInput(transcript);
+    }
+  }, [transcript, setInput]);
+
+  // Show error notification if speech recognition fails
+  useEffect(() => {
+    if (speechError) {
+      console.error("Speech recognition error:", speechError);
+      // You can add a toast notification here if you have a toast library
+    }
+  }, [speechError]);
+
+  // Auto-submit when user finishes speaking
+  useEffect(() => {
+    if (hasFinishedSpeaking && transcript.trim() && !isLoading) {
+      // Small delay to ensure transcript is fully updated
+      const submitTimer = setTimeout(() => {
+        // Trigger form submission programmatically
+        const form = document.querySelector("form");
+        if (form) {
+          form.requestSubmit();
+        }
+      }, 100);
+
+      return () => clearTimeout(submitTimer);
+    }
+  }, [hasFinishedSpeaking, transcript, isLoading]);
 
   // Show loading while auth is initializing
   if (authLoading) {
@@ -139,6 +182,15 @@ function ChatContent() {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e as React.FormEvent);
+    }
+  };
+
+  const handleMicToggle = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      resetTranscript();
+      startListening();
     }
   };
 
@@ -352,10 +404,19 @@ function ChatContent() {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Ask Aeromentor about your studies..."
-                    className="w-full px-3 md:px-4 py-3 md:py-4 border border-gray-600/40 rounded-2xl md:rounded-4xl shadow-lg focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-transparent resize-none min-h-[48px] max-h-32 text-sm md:text-base"
+                    className="w-full px-3 md:px-4 py-3 md:py-4 pr-14 border border-gray-600/40 rounded-2xl md:rounded-4xl shadow-lg focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-transparent resize-none min-h-[48px] max-h-32 text-sm md:text-base"
                     rows={1}
                     disabled={isLoading}
                   />
+                  {/* Floating Mic Button */}
+                  <div className="absolute right-2 bottom-4 z-[100]">
+                    <MicButton
+                      isListening={isListening}
+                      isSupported={isSpeechSupported}
+                      onClick={handleMicToggle}
+                      disabled={isLoading}
+                    />
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 md:gap-6 w-full md:w-auto">
                   <button
@@ -394,7 +455,7 @@ function ChatContent() {
                     disabled={!input.trim() || isLoading}
                     className="p-3 md:p-5 bg-navy/80 text-white rounded-2xl md:rounded-4xl hover:bg-navy cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
                   >
-                    <FaArrowUp size={14} />
+                    <FaArrowUp size={16} />
                   </button>
                 </div>
               </form>
