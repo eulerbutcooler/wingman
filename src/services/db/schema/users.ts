@@ -8,6 +8,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 export const courseTypeEnum = pgEnum("course_type", ["AEO", "ALO"]);
+export const userTypeEnum = pgEnum("user_type", ["student", "admin"]);
 
 export const users = pgTable("users", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
@@ -17,4 +18,5 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   course: courseTypeEnum("course").notNull(),
   serviceId: text("service_id").notNull().unique(),
+  type: userTypeEnum("type").notNull().default("student"),
 });

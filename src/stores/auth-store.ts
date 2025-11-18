@@ -4,24 +4,48 @@ import type { User } from "@supabase/supabase-js";
 
 interface AuthState {
   user: User | null;
+  userType: "student" | "admin" | null;
   loading: boolean;
   isAuthenticated: boolean;
 
   // Actions
   setUser: (user: User | null) => void;
+  setUserType: (userType: "student" | "admin" | null) => void;
   setLoading: (loading: boolean) => void;
   initialize: () => Promise<void>;
   signOut: () => Promise<void>;
+  fetchUserType: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
+  userType: null,
   loading: true,
   isAuthenticated: false,
 
   setUser: (user) => set({ user, isAuthenticated: !!user }),
 
+  setUserType: (userType) => set({ userType }),
+
   setLoading: (loading) => set({ loading }),
+
+  fetchUserType: async () => {
+    const { user } = get();
+    if (!user) {
+      set({ userType: null });
+      return;
+    }
+
+    try {
+      // Call server action to get user type
+      const { getUserType } = await import("@/lib/actions/analytics/analytics-actions");
+      const userType = await getUserType();
+      set({ userType });
+    } catch (error) {
+      console.error("Error fetching user type:", error);
+      set({ userType: "student" });
+    }
+  },
 
   initialize: async () => {
     const supabase = createClient();
@@ -43,6 +67,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         loading: false,
       });
 
+      // Fetch user type if user exists
+      if (session?.user) {
+        get().fetchUserType();
+      }
+
       // Listen for auth state changes
       supabase.auth.onAuthStateChange((_event, session) => {
         console.log("Auth state changed:", _event, !!session?.user);
@@ -51,6 +80,13 @@ export const useAuthStore = create<AuthState>((set) => ({
           isAuthenticated: !!session?.user,
           loading: false,
         });
+
+        // Fetch user type when user signs in
+        if (session?.user) {
+          get().fetchUserType();
+        } else {
+          set({ userType: null });
+        }
       });
     } catch (error) {
       console.error("Error initializing auth:", error);
@@ -62,7 +98,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     const supabase = createClient();
     try {
       await supabase.auth.signOut();
-      set({ user: null, isAuthenticated: false });
+      set({ user: null, userType: null, isAuthenticated: false });
     } catch (error) {
       console.error("Error signing out:", error);
       throw error;

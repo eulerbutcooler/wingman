@@ -270,7 +270,7 @@ function ChatContent() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-4 md:space-y-6 min-h-0">
+            <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-4 md:space-y-6 min-h-0 scrollbar-hide">
               {conversation.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center max-w-2xl mx-auto px-4">
                   <div className="w-12 h-12 md:w-16 md:h-16 bg-navy rounded-full flex items-center justify-center mb-4 md:mb-6">
@@ -404,7 +404,7 @@ function ChatContent() {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Ask Aeromentor about your studies..."
-                    className="w-full px-3 md:px-4 py-3 md:py-4 pr-14 border border-gray-600/40 rounded-2xl md:rounded-4xl shadow-lg focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-transparent resize-none min-h-[48px] max-h-32 text-sm md:text-base"
+                    className="w-full px-3 md:px-4 py-3 md:py-4 pr-14 border border-gray-600/40 rounded-2xl md:rounded-4xl shadow-lg focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-transparent resize-none min-h-[48px] max-h-32 text-sm md:text-base scrollbar-hide"
                     rows={1}
                     disabled={isLoading}
                   />

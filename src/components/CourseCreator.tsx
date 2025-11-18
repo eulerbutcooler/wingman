@@ -292,8 +292,9 @@ export default function CourseCreator({
   };
 
   return (
-    <div className="flex flex-col items-center bg-[#f5f5f5] min-h-screen w-full pt-24 md:pt-34">
-      <div className="w-full md:w-11/12 px-4 md:px-6 pb-12">
+    <div className="flex flex-col items-center min-h-screen w-full">
+      <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
+      <div className="relative z-10 w-full md:w-11/12 px-4 md:px-6 pt-24 md:pt-34 pb-12">
         <div className="flex items-center justify-between mb-6 md:mb-8">
           <button
             onClick={onCancel}
@@ -342,65 +343,7 @@ export default function CourseCreator({
                     placeholder="Describe what students will learn"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">
-                    Course Image
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <input
-                      ref={imageInputRef}
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/webp"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          handleImageSelect(file);
-                        }
-                      }}
-                      className="hidden"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => imageInputRef.current?.click()}
-                      disabled={formData.imageUploading}
-                      className="px-4 py-2 bg-black text-white rounded-4xl cursor-pointer disabled:bg-gray-400 transition-colors"
-                    >
-                      {formData.imageUploading
-                        ? "Uploading..."
-                        : "Upload Image"}
-                    </button>
-                    {formData.imageUrl && (
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={formData.imageUrl}
-                          alt="Course preview"
-                          className="w-12 h-12 object-cover rounded-lg"
-                        />
-                        <span className="text-sm text-green-600">
-                          ✓ Image uploaded
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Upload a course image (JPEG, PNG, WebP - max 10MB) or leave
-                    empty for auto-generated
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">
-                    Course Image URL (optional)
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.imageUrl}
-                    onChange={(e) =>
-                      setFormData({ ...formData, imageUrl: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-4xl "
-                    placeholder="https://example.com/image.jpg or upload image above"
-                  />
-                </div>
+                
               </div>
               <div className="flex justify-end mt-8 gap-4">
                 <button
@@ -436,7 +379,7 @@ export default function CourseCreator({
               </div>
 
               <div className="space-y-6">
-                {topics.map((topic, topicIndex) => (
+                {topics.map((topic) => (
                   <div
                     key={topic.id}
                     className="shadow-sm bg-white rounded-4xl p-4"
@@ -467,7 +410,7 @@ export default function CourseCreator({
 
                     {/* Lessons */}
                     <div className="space-y-3 ml-4">
-                      {topic.lessons.map((lesson, lessonIndex) => (
+                      {topic.lessons.map((lesson) => (
                         <div
                           key={lesson.id}
                           className="flex items-center gap-3 p-3  rounded-lg"

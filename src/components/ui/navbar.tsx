@@ -7,11 +7,14 @@ import { useAuthStore, useUIStore } from "@/stores";
 import { FiMenu, FiX } from "react-icons/fi";
 
 export default function Navbar() {
-  const { user, loading } = useAuthStore();
+  const { user, userType, loading } = useAuthStore();
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useUIStore();
   const pathname = usePathname();
   const navRef = useRef<HTMLDivElement | null>(null);
   const sentRef = useRef<HTMLDivElement | null>(null);
+  
+  // Only show analytics link to admins
+  const showAnalytics = user && userType === "admin";
 
   useEffect(() => {
     const nav = navRef.current;
@@ -108,6 +111,21 @@ export default function Navbar() {
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black rounded-full animate-slide-in" />
             )}
           </Link>
+          {showAnalytics && (
+            <Link
+              href="/analytics"
+              className={`relative pb-1 transition-colors ${
+                isActive("/analytics")
+                  ? "text-black font-semibold"
+                  : "hover:text-navy"
+              }`}
+            >
+              Analytics
+              {isActive("/analytics") && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black rounded-full animate-slide-in" />
+              )}
+            </Link>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -210,6 +228,22 @@ export default function Navbar() {
                   <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-black rounded-full" />
                 )}
               </Link>
+              {showAnalytics && (
+                <Link
+                  href="/analytics"
+                  className={`relative text-lg font-medium transition-colors inline-block ${
+                    isActive("/analytics")
+                      ? "text-black font-bold"
+                      : "text-black hover:text-navy"
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  ANALYTICS
+                  {isActive("/analytics") && (
+                    <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-black rounded-full" />
+                  )}
+                </Link>
+              )}
 
               {/* Mobile Auth Button */}
               <div className="pt-4 border-t border-gray-200">

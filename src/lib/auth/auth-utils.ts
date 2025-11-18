@@ -12,6 +12,7 @@ export interface AuthUser {
   supabaseId: string;
   email: string;
   name: string;
+  type: "student" | "admin";
   raw: User;
 }
 
@@ -64,6 +65,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
         user.user_metadata?.full_name ||
         user.email?.split("@")[0] ||
         "User",
+      type: dbUser.type || "student", // Add user type with fallback to student
       raw: user,
     };
   } catch (error) {
