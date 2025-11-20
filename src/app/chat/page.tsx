@@ -14,7 +14,7 @@ import ChatSidebar from "@/components/chat/ChatSidebar";
 import CustomMarkdown from "@/components/CustomMarkdown";
 import { useRequireAuth } from "@/hooks/use-auth";
 import { useChatStore } from "@/stores";
-import { useTextToSpeech } from "@/hooks/use-tts";
+import { useElevenLabsTTS } from "@/hooks/use-elevenlabs-tts";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import MicButton from "@/components/chat/MicButton";
 export const maxDuration = 30;
@@ -40,7 +40,8 @@ function ChatContent() {
     resetChat,
   } = useChatStore();
 
-  const { toggleSpeak, stopSpeaking } = useTextToSpeech();
+  // TTS setup: ElevenLabs with browser fallback
+  const { toggleSpeak, stopSpeaking } = useElevenLabsTTS();
   const {
     transcript,
     isListening,
@@ -56,6 +57,7 @@ function ChatContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { loading: authLoading } = useRequireAuth(); // Get auth status
+  const isVoiceSubmitRef = useRef<boolean>(false); // Track if next submit is from voice
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -98,6 +100,9 @@ function ChatContent() {
   // Auto-submit when user finishes speaking
   useEffect(() => {
     if (hasFinishedSpeaking && transcript.trim() && !isLoading) {
+      // Mark this as a voice input using ref
+      isVoiceSubmitRef.current = true;
+      
       // Small delay to ensure transcript is fully updated
       const submitTimer = setTimeout(() => {
         // Trigger form submission programmatically
@@ -145,6 +150,11 @@ function ChatContent() {
     setInput("");
     setIsLoading(true);
 
+    // Check if this was a voice submit using the ref
+    const wasVoiceInput = isVoiceSubmitRef.current;
+    // Reset the ref immediately
+    isVoiceSubmitRef.current = false;
+
     try {
       const {
         messages,
@@ -171,8 +181,19 @@ function ChatContent() {
           { role: "assistant", content: textContent },
         ]);
       }
+
+      // Auto-trigger TTS if user input was via voice
+      if (wasVoiceInput && textContent) {
+        // Small delay to ensure message is fully rendered
+        setTimeout(() => {
+          const assistantMessageIndex = messages.length; // Index of the new assistant message
+          toggleSpeak(textContent, assistantMessageIndex);
+        }, 300);
+      }
     } catch (error) {
       console.error("Error in conversation:", error);
+      // Reset ref on error
+      isVoiceSubmitRef.current = false;
     } finally {
       setIsLoading(false);
     }
@@ -181,6 +202,8 @@ function ChatContent() {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
+      // Manual enter press - ensure ref is false
+      isVoiceSubmitRef.current = false;
       handleSubmit(e as React.FormEvent);
     }
   };
@@ -453,6 +476,10 @@ function ChatContent() {
                   <button
                     type="submit"
                     disabled={!input.trim() || isLoading}
+                    onClick={() => {
+                      // Manual button click - ensure ref is false
+                      isVoiceSubmitRef.current = false;
+                    }}
                     className="p-3 md:p-5 bg-navy/80 text-white rounded-2xl md:rounded-4xl hover:bg-navy cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
                   >
                     <FaArrowUp size={16} />
