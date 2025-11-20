@@ -12,6 +12,7 @@ interface ChatState {
   isMobileSidebarOpen: boolean;
   speakingIndex: number | null;
   isLoadingAudio: boolean;
+  isVoiceInput: boolean; // Track if last user input was via voice
 
   // Actions
   setConversation: (conversation: Message[]) => void;
@@ -24,6 +25,7 @@ interface ChatState {
   setIsMobileSidebarOpen: (isOpen: boolean) => void;
   setSpeakingIndex: (index: number | null) => void;
   setIsLoadingAudio: (isLoading: boolean) => void;
+  setIsVoiceInput: (isVoiceInput: boolean) => void;
   resetChat: () => void;
 }
 
@@ -38,6 +40,7 @@ export const useChatStore = create<ChatState>((set) => ({
   isMobileSidebarOpen: false,
   speakingIndex: null,
   isLoadingAudio: false,
+  isVoiceInput: false,
 
   // Actions
   setConversation: (conversation) => set({ conversation }),
@@ -61,6 +64,8 @@ export const useChatStore = create<ChatState>((set) => ({
 
   setIsLoadingAudio: (isLoadingAudio) => set({ isLoadingAudio }),
 
+  setIsVoiceInput: (isVoiceInput) => set({ isVoiceInput }),
+
   resetChat: () =>
     set({
       conversation: [],
@@ -68,5 +73,6 @@ export const useChatStore = create<ChatState>((set) => ({
       chatId: undefined,
       speakingIndex: null,
       isLoadingAudio: false,
+      isVoiceInput: false,
     }),
 }));
