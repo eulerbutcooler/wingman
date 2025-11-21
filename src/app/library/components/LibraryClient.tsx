@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect } from "react";
+import Image from "next/image";
 import { useLibraryStore } from "@/stores";
 import CourseCreator from "@/components/CourseCreator";
 import { FaPlus, FaArrowLeft } from "react-icons/fa6";
@@ -44,25 +45,38 @@ const ErrorMessage = ({
 );
 
 const CourseCard = React.memo(
-  ({ course, onClick }: { course: Course; onClick: () => void }) => (
-    <div
-      onClick={onClick}
-      className="modern-card rounded-2xl md:rounded-4xl overflow-hidden cursor-pointer group transition-all duration-300 animate-slide-in-up hover:scale-105"
-    >
-      <div className="relative bg-black h-32 md:h-40 flex items-center justify-center p-4">
-        <h3 className="text-xl md:text-2xl font-bold text-white text-center capitalize leading-tight">
-          {course.title}
-        </h3>
-      </div>
+  ({ course, onClick, index }: { course: Course; onClick: () => void; index: number }) => {
+    // Simple sequential image naming - rename these files in /public folder
+    const imagePath = `/image${index + 1}.jpg`;
+    
+    return (
+      <div
+        onClick={onClick}
+        className="modern-card rounded-2xl md:rounded-4xl overflow-hidden cursor-pointer group transition-all duration-300 animate-slide-in-up hover:scale-105"
+      >
+        <div className="relative h-32 md:h-40 flex items-center justify-center p-4">
+          <Image
+            src={imagePath}
+            alt={course.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300" />
+          <h3 className="relative z-10 text-xl md:text-2xl font-bold text-white text-center capitalize leading-tight">
+            {course.title}
+          </h3>
+        </div>
 
-      <div className="p-4 md:p-6">
-        <p className="text-navy text-sm md:text-base capitalize font-medium">
-          {course.description}
-        </p>
-        <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-3 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+        <div className="p-4 md:p-6">
+          <p className="text-navy text-sm md:text-base capitalize font-medium">
+            {course.description}
+          </p>
+          <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-3 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+        </div>
       </div>
-    </div>
-  )
+    );
+  }
 );
 
 CourseCard.displayName = "CourseCard";
@@ -108,7 +122,7 @@ const LibraryView = ({
   onCourseSelect: (course: Course) => void;
   onCreateCourse: () => void;
 }) => (
-  <div className="flex flex-col items-center min-h-screen w-full">
+  <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
     <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
     <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
@@ -128,10 +142,11 @@ const LibraryView = ({
       ) : (
         <div className="rounded-2xl md:rounded-4xl w-full py-6 md:py-8 mb-10 md:mb-14">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
-            {courses.map((course) => (
+            {courses.map((course, index) => (
               <CourseCard
                 key={course.id}
                 course={course}
+                index={index}
                 onClick={() => onCourseSelect(course)}
               />
             ))}
@@ -157,7 +172,7 @@ const CourseView = ({
   onDelete: () => void;
   onTopicSelect: (topic: Topic) => void;
 }) => (
-  <div className="flex flex-col items-center min-h-screen w-full">
+  <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
     <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
     <div className="relative z-10 w-full md:w-11/12 pt-24 md:pt-34 px-4 md:px-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -255,7 +270,7 @@ const TopicView = ({
   courseName: string;
   onBack: () => void;
 }) => (
-  <div className="flex flex-col items-center min-h-screen w-full">
+  <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
     <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
     <div className="relative z-10 w-full md:w-11/12 pt-24 md:pt-34 px-4 md:px-6">
       <BackButton onClick={onBack}>Back to {courseName}</BackButton>

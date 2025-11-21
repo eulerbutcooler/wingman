@@ -127,7 +127,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden">
+    <div className="min-h-screen w-full relative overflow-hidden scrollbar-hide">
       {/* Blurred background image layer - scale up to hide blur edges */}
       <div
         className="absolute z-0"

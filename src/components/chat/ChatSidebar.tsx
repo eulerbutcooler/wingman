@@ -70,7 +70,7 @@ export default function ChatSidebar({
           isMobile ? "pt-4 flex-1" : "w-64 md:w-80 pt-16 md:pt-18"
         } rounded-2xl md:rounded-4xl flex flex-col h-full`}
       >
-        <div className="flex-1 bg-white shadow-sm rounded-2xl md:rounded-4xl overflow-y-auto px-4 md:px-6 p-3 md:p-4">
+        <div className="flex-1 bg-white shadow-sm rounded-2xl md:rounded-4xl overflow-y-auto scrollbar-hide px-4 md:px-6 p-3 md:p-4">
           <div className="font-medium text-gray-600 tracking-wide mb-3 md:mb-4 text-sm md:text-base">
             Recent Chats
           </div>
