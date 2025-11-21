@@ -74,6 +74,7 @@ export async function getAllStudentsAnalytics(): Promise<StudentAnalytics[]> {
       })
       .from(users)
       .leftJoin(quizResults, eq(users.id, quizResults.userId))
+      .where(eq(users.type, "student"))
       .groupBy(users.id)
       .orderBy(desc(users.createdAt));
 

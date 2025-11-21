@@ -6,7 +6,31 @@ import {
   StudentAnalytics,
   StudentDetailedAnalytics,
 } from "@/lib/actions/analytics/analytics-actions";
-import { Users, Award, Clock, TrendingUp, X } from "lucide-react";
+import { Users, Award, Clock, TrendingUp, X, RefreshCw } from "lucide-react";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 interface AnalyticsClientProps {
   initialStudents: StudentAnalytics[];
@@ -17,8 +41,10 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
   const [selectedStudent, setSelectedStudent] =
     useState<StudentDetailedAnalytics | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loadingStudentId, setLoadingStudentId] = useState<number | null>(null);
 
   const handleStudentClick = async (studentId: number) => {
+    setLoadingStudentId(studentId);
     try {
       const details = await getStudentDetailedAnalytics(studentId);
       if (details) {
@@ -26,7 +52,9 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
         setIsModalOpen(true);
       }
     } catch (error) {
-      console.error("Failed to load student details:", error);
+      console.error("Error fetching student details:", error);
+    } finally {
+      setLoadingStudentId(null);
     }
   };
 
@@ -36,7 +64,7 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen w-full">
+    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
       <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
       <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
         {/* Header */}
@@ -113,13 +141,20 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
 
         {/* Student Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
-          {students.map((student, index) => (
-            <div
-              key={student.id}
-              className="modern-card p-4 md:p-6 rounded-2xl md:rounded-4xl cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slide-in-up"
-              style={{ animationDelay: `${0.1 * (index % 8)}s` }}
-              onClick={() => handleStudentClick(student.id)}
-            >
+          {students.map((student, index) => {
+            const isLoading = loadingStudentId === student.id;
+            return (
+              <div
+                key={student.id}
+                className="modern-card p-4 md:p-6 rounded-2xl md:rounded-4xl cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slide-in-up relative"
+                style={{ animationDelay: `${0.1 * (index % 8)}s` }}
+                onClick={() => !isLoading && handleStudentClick(student.id)}
+              >
+                {isLoading && (
+                  <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center rounded-2xl md:rounded-4xl z-20">
+                    <RefreshCw className="w-8 h-8 md:w-12 md:h-12 text-navy animate-spin" />
+                  </div>
+                )}
               {/* Student Avatar */}
               <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center mb-3 md:mb-4">
                 <span className="text-lg md:text-2xl font-bold text-white">
@@ -132,7 +167,7 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
                 {student.name}
               </h3>
               <p className="text-xs md:text-sm text-neutral-600 mb-3 truncate">
-                {student.email}
+                {student.serviceId || student.email}
               </p>
 
               {/* Stats */}
@@ -170,7 +205,8 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
                 </div>
               )}
             </div>
-          ))}
+          );
+          })}
         </div>
 
         {/* Empty State */}
@@ -194,7 +230,7 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
           onClick={closeModal}
         >
           <div
-            className="modern-card rounded-2xl md:rounded-4xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            className="modern-card rounded-2xl md:rounded-4xl max-w-4xl w-full max-h-[90vh] overflow-y-auto scrollbar-hide"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -209,7 +245,7 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
                   <h2 className="text-2xl font-bold text-black">
                     {selectedStudent.name}
                   </h2>
-                  <p className="text-neutral-600">{selectedStudent.email}</p>
+                  <p className="text-neutral-600">{selectedStudent.serviceId || selectedStudent.email}</p>
                 </div>
               </div>
               <button
@@ -301,35 +337,119 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
                 </div>
               </div>
 
-              {/* Enrolled Courses */}
+              {/* Performance Chart */}
               <div>
                 <h3 className="text-xl font-bold text-black mb-4">
-                  Enrolled Courses
+                  Performance Over Time
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {selectedStudent.coursesEnrolled.length > 0 ? (
-                    selectedStudent.coursesEnrolled.map((course) => (
-                      <div
-                        key={course.id}
-                        className="p-4 bg-gradient-to-r from-navy/10 to-blue-600/10 rounded-xl"
-                      >
-                        <h4 className="font-semibold text-black mb-1">
-                          {course.title}
-                        </h4>
-                        {course.createdAt && (
-                          <p className="text-sm text-neutral-600">
-                            Enrolled:{" "}
-                            {new Date(course.createdAt).toLocaleDateString()}
-                          </p>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-neutral-600 text-center py-4 col-span-2">
-                      No courses enrolled yet
+                {selectedStudent.quizAttempts.length > 0 ? (
+                  <div className="bg-white p-4 rounded-xl border border-neutral-200">
+                    <Line
+                      data={{
+                        labels: selectedStudent.quizAttempts
+                          .slice()
+                          .reverse()
+                          .map((attempt) =>
+                            attempt.completedAt
+                              ? new Date(attempt.completedAt).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                })
+                              : 'N/A'
+                          ),
+                        datasets: [
+                          {
+                            label: 'Score (%)',
+                            data: selectedStudent.quizAttempts
+                              .slice()
+                              .reverse()
+                              .map((attempt) => Math.round(attempt.percentage)),
+                            borderColor: 'rgb(59, 130, 246)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: 'rgb(59, 130, 246)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                          },
+                        ],
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        aspectRatio: 2,
+                        plugins: {
+                          legend: {
+                            display: false,
+                          },
+                          title: {
+                            display: false,
+                          },
+                          tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                              size: 14,
+                              weight: 'bold',
+                            },
+                            bodyFont: {
+                              size: 13,
+                            },
+                            callbacks: {
+                              label: function (context) {
+                                return `Score: ${context.parsed.y}%`;
+                              },
+                            },
+                          },
+                        },
+                        scales: {
+                          x: {
+                            title: {
+                              display: true,
+                              text: 'Quiz Date',
+                              font: {
+                                size: 12,
+                                weight: 'bold',
+                              },
+                            },
+                            grid: {
+                              display: false,
+                            },
+                          },
+                          y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                              display: true,
+                              text: 'Score (%)',
+                              font: {
+                                size: 12,
+                                weight: 'bold',
+                              },
+                            },
+                            ticks: {
+                              callback: function (value) {
+                                return value + '%';
+                              },
+                            },
+                            grid: {
+                              color: 'rgba(0, 0, 0, 0.05)',
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="text-center py-12 bg-neutral-50 rounded-xl">
+                    <TrendingUp className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
+                    <p className="text-neutral-600">
+                      No quiz data available to display performance chart
                     </p>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

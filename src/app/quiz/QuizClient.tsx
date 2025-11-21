@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   CheckCircle,
   XCircle,
@@ -72,13 +73,15 @@ const ErrorDisplay = ({
 const CourseList = ({
   courses,
   onSelectCourse,
+  loadingCourseId,
 }: {
   courses: Course[];
   onSelectCourse: (course: Course) => void;
+  loadingCourseId: string | null;
 }) => {
   if (courses.length === 0) {
     return (
-      <div className="flex flex-col items-center min-h-screen w-full">
+      <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
         <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
         <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
           <div className="text-center py-12">
@@ -96,7 +99,7 @@ const CourseList = ({
   }
 
   return (
-    <div className="flex flex-col items-center min-h-screen w-full">
+    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
       <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
       <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
         <div>
@@ -108,26 +111,47 @@ const CourseList = ({
 
         <div className="rounded-2xl md:rounded-4xl w-full py-6 md:py-8 mb-10 md:mb-14">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
-            {courses.map((course) => (
-              <div
-                key={course.id}
-                onClick={() => onSelectCourse(course)}
-                className="modern-card rounded-2xl md:rounded-4xl overflow-hidden cursor-pointer group transition-all duration-300 animate-slide-in-up hover:scale-105"
-              >
-                <div className="relative bg-black h-32 md:h-40 flex items-center justify-center p-4">
-                  <h3 className="text-xl md:text-2xl font-bold text-white text-center capitalize leading-tight">
-                    {course.title}
-                  </h3>
-                </div>
+            {courses.map((course, index) => {
+              const isLoading = loadingCourseId === course.id;
+              return (
+                <div
+                  key={course.id}
+                  onClick={() => !isLoading && onSelectCourse(course)}
+                  className={cn(
+                    "modern-card rounded-2xl md:rounded-4xl overflow-hidden transition-all duration-300 animate-slide-in-up hover:scale-105 relative",
+                    isLoading ? "cursor-wait" : "cursor-pointer group"
+                  )}
+                >
+                  <div className="relative h-32 md:h-40 flex items-center justify-center p-4">
+                    <Image
+                      src={`/image${index + 1}.jpg`}
+                      alt={course.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300" />
+                    <h3 className="relative z-10 text-xl md:text-2xl font-bold text-white text-center capitalize leading-tight">
+                      {course.title}
+                    </h3>
+                  </div>
 
-                <div className="p-4 md:p-6">
-                  <p className="text-neutral-600 text-sm md:text-base capitalize font-medium">
-                    {course.description}
-                  </p>
-                  <div className="w-full h-1 bg-gradient-to-r from-black to-gray-600 rounded-full mt-3 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                  <div className="p-4 md:p-6">
+                    <p className="text-neutral-600 text-sm md:text-base capitalize font-medium">
+                      {course.description}
+                    </p>
+                    <div className="w-full h-1 bg-gradient-to-r from-black to-gray-600 rounded-full mt-3 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                  </div>
+
+                  {/* Loading Overlay */}
+                  {isLoading && (
+                    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center rounded-2xl md:rounded-4xl z-20">
+                      <RefreshCw className="h-8 w-8 animate-spin text-black" />
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -154,7 +178,7 @@ const CourseQuizzes = ({
   resettingQuizId: string | null;
 }) => {
   return (
-    <div className="flex flex-col items-center min-h-screen w-full">
+    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
       <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
       <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
         <button
@@ -347,7 +371,7 @@ const QuizInProgress = ({
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen w-full">
+    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
       <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
       <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
         <div className="max-w-3xl mx-auto">
@@ -428,7 +452,7 @@ const QuizResults = ({
   const percentage = (score / totalQuestions) * 100;
 
   return (
-    <div className="flex flex-col items-center min-h-screen w-full">
+    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
       <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
       <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
         <div className="max-w-2xl mx-auto">
@@ -497,7 +521,7 @@ const ReviewAnswers = ({
   const questions = quiz.questions as Question[];
 
   return (
-    <div className="flex flex-col items-center min-h-screen w-full">
+    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
       <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
       <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
         <div className="max-w-4xl mx-auto">
@@ -617,6 +641,7 @@ export default function QuizClient({
   } = useQuizStore();
 
   const [initialized, setInitialized] = useState(false);
+  const [loadingCourseId, setLoadingCourseId] = useState<string | null>(null);
 
   // ✅ Initialize with server data
   useEffect(() => {
@@ -639,6 +664,7 @@ export default function QuizClient({
 
   const handleSelectCourse = async (course: Course) => {
     try {
+      setLoadingCourseId(course.id);
       setLoading(true);
       setSelectedCourse(course);
       const quizzes = await quizService.getQuizzesForCourse(course.id, userId);
@@ -649,6 +675,7 @@ export default function QuizClient({
       setError("Failed to load quizzes");
     } finally {
       setLoading(false);
+      setLoadingCourseId(null);
     }
   };
 
@@ -747,7 +774,11 @@ export default function QuizClient({
     switch (view) {
       case "courses":
         return (
-          <CourseList courses={courses} onSelectCourse={handleSelectCourse} />
+          <CourseList 
+            courses={courses} 
+            onSelectCourse={handleSelectCourse}
+            loadingCourseId={loadingCourseId}
+          />
         );
 
       case "course_quizzes":
