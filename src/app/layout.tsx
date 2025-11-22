@@ -1,23 +1,26 @@
 import type { Metadata } from "next";
-import { Ubuntu } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 import Navbar from "@/components/ui/navbar";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-const ubuntu = Ubuntu({
-  variable: "--font-ubuntu",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
-});
-
 export const metadata: Metadata = {
-  title: "Wingman App",
-  description: "AI-powered learning assistant",
+  title: "AeroMentor - AI Learning Platform",
+  description: "AI-powered learning assistant for intelligent tutoring and personalized study",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
+    apple: "/icons/icon-192x192.png",
+  },
+  manifest: "/manifest.json",
+  themeColor: "#2563eb",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
   },
 };
 
@@ -27,8 +30,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${ubuntu.variable} antialiased`}>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <body className="antialiased font-sans">
         <AuthProvider>
           <ErrorBoundary>
             <div className="flex flex-col justify-center items-center min-h-screen">
