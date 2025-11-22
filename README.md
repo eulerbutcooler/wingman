@@ -1,1 +1,1 @@
-Aeromentor - RAG based e-learning app.
+Aeromentor - RAG based e-learning app!
