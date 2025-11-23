@@ -15,8 +15,7 @@ export const courses = pgTable("courses", {
   gendesc: text("gendesc").notNull(),
   imageUrl: text("image_url"),
   userId: integer("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
+    .references(() => users.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
@@ -53,8 +52,7 @@ export const files = pgTable("files", {
   size: integer("size").notNull(),
   publicUrl: text("url").notNull(),
   userId: integer("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
+    .references(() => users.id, { onDelete: "set null" }),
   processingStatus: text("processing_status", {
     enum: ["pending", "queued", "processing", "completed", "failed"],
   }).default("pending"),

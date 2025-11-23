@@ -23,9 +23,18 @@ export async function POST(request: NextRequest) {
 
     console.log(`⚙️ Worker picked up job for fileId: ${fileId}`);
 
-    // --- Execute the Document Processing Logic ---
-    // The heavy lifting is done here, outside of the user's request lifecycle.
-    const result = await processDocument(fileId);
+    // --- ✅ Add timeout wrapper (5 minutes) ---
+    const TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+    
+    const result = await Promise.race([
+      processDocument(fileId),
+      new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Processing timeout after 5 minutes')),
+          TIMEOUT_MS
+        )
+      ),
+    ]);
 
     if (result.success) {
       console.log(

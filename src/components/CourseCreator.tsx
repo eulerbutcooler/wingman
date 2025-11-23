@@ -292,13 +292,17 @@ export default function CourseCreator({
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen w-full">
-      <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
+    <div className="flex flex-col items-center min-h-screen w-full bg-slate-50 relative overflow-hidden">
+      {/* Grid Pattern Background */}
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-soft-light"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-transparent via-50% to-slate-50"></div>
+
       <div className="relative z-10 w-full md:w-11/12 px-4 md:px-6 pt-24 md:pt-34 pb-12">
         <div className="flex items-center justify-between mb-6 md:mb-8">
           <button
             onClick={onCancel}
-            className="px-3 md:px-4 py-2 text-neutral-600 cursor-pointer flex hover:text-black items-center gap-2 md:gap-4 transition-colors text-sm md:text-base"
+            className="px-3 md:px-4 py-2 text-slate-600 cursor-pointer flex hover:text-blue-600 items-center gap-2 md:gap-4 transition-colors text-sm md:text-base"
           >
             <FaArrowLeft />
             Go back
@@ -308,13 +312,13 @@ export default function CourseCreator({
         <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8 w-full">
           {/* Course Details */}
           <div className="flex flex-col lg:flex-row gap-6 md:gap-8">
-            <div className="bg-white p-4 md:p-6 h-fit rounded-2xl md:rounded-4xl w-full lg:w-1/2 shadow-sm">
-              <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">
+            <div className="bg-white p-4 md:p-6 h-fit rounded-3xl w-full lg:w-1/2 border border-blue-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4 text-slate-900">
                 Course Information
               </h2>
               <div className="space-y-3 md:space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     Course Title *
                   </label>
                   <input
@@ -324,12 +328,12 @@ export default function CourseCreator({
                     onChange={(e) =>
                       setFormData({ ...formData, title: e.target.value })
                     }
-                    className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-2xl md:rounded-4xl text-sm md:text-base"
+                    className="w-full px-3 md:px-4 py-2 border border-slate-200 rounded-xl text-sm md:text-base bg-slate-50 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
                     placeholder="Enter course title"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     Description *
                   </label>
                   <textarea
@@ -339,7 +343,7 @@ export default function CourseCreator({
                       setFormData({ ...formData, description: e.target.value })
                     }
                     rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-4xl "
+                    className="w-full px-4 py-2 border border-slate-200 rounded-xl bg-slate-50 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
                     placeholder="Describe what students will learn"
                   />
                 </div>
@@ -349,7 +353,7 @@ export default function CourseCreator({
                 <button
                   type="button"
                   onClick={onCancel}
-                  className="px-6 py-3 border border-gray-300 text-gray-600 rounded-4xl hover:border-gray-600 cursor-pointer transition-colors"
+                  className="px-6 py-3 border border-slate-200 text-slate-600 rounded-xl hover:border-blue-600 hover:text-blue-600 cursor-pointer transition-colors"
                 >
                   Cancel
                 </button>
@@ -358,7 +362,7 @@ export default function CourseCreator({
                   disabled={
                     isSubmitting || !formData.title || !formData.description
                   }
-                  className="px-6 py-3 bg-black text-white rounded-4xl cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  className="px-6 py-3 bg-blue-600 text-white rounded-xl cursor-pointer hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors"
                 >
                   {isSubmitting ? "Creating Course..." : "Create Course"}
                 </button>
@@ -366,13 +370,13 @@ export default function CourseCreator({
             </div>
 
             {/* Topics */}
-            <div className=" p-6 rounded-4xl shadow-sm bg-white w-1/2 ">
+            <div className="p-6 rounded-3xl border border-blue-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white w-1/2">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">Course Topics</h2>
+                <h2 className="text-xl font-semibold text-slate-900">Course Topics</h2>
                 <button
                   type="button"
                   onClick={addTopic}
-                  className="px-4 py-2 bg-black text-white rounded-4xl cursor-pointer transition-colors"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-xl cursor-pointer hover:bg-blue-700 transition-colors"
                 >
                   Add Topic
                 </button>
@@ -382,27 +386,27 @@ export default function CourseCreator({
                 {topics.map((topic) => (
                   <div
                     key={topic.id}
-                    className="shadow-sm bg-white rounded-4xl p-4"
+                    className="border border-slate-200 bg-slate-50 rounded-2xl p-4"
                   >
-                    <div className="flex items-center  gap-4 mb-4">
+                    <div className="flex items-center gap-4 mb-4">
                       <input
                         type="text"
                         value={topic.title}
                         onChange={(e) => updateTopic(topic.id, e.target.value)}
-                        className="flex-1 px-4 py-2 shadow-sm rounded-4xl focus:ring-2 "
+                        className="flex-1 px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none bg-white"
                         placeholder="Topic title"
                       />
                       <button
                         type="button"
                         onClick={() => addLesson(topic.id)}
-                        className="px-4 py-2 bg-black text-white rounded-4xl cursor-pointer transition-colors text-sm"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-xl cursor-pointer hover:bg-blue-700 transition-colors text-sm"
                       >
                         Add Lesson
                       </button>
                       <button
                         type="button"
                         onClick={() => removeTopic(topic.id)}
-                        className="px-4 py-2 cursor-pointer border border-gray-300 text-gray-600 rounded-4xl hover:border-gray-600 transition-colors text-sm"
+                        className="px-4 py-2 cursor-pointer border border-slate-200 text-slate-600 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-colors text-sm"
                       >
                         Remove
                       </button>
@@ -413,9 +417,9 @@ export default function CourseCreator({
                       {topic.lessons.map((lesson) => (
                         <div
                           key={lesson.id}
-                          className="flex items-center gap-3 p-3  rounded-lg"
+                          className="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200"
                         >
-                          <FaArrowRight />
+                          <FaArrowRight className="text-blue-600" />
                           <input
                             type="text"
                             value={lesson.title}
@@ -424,7 +428,7 @@ export default function CourseCreator({
                                 title: e.target.value,
                               })
                             }
-                            className="flex-1 px-4 py-2 border border-gray-300 rounded-4xl text-sm"
+                            className="flex-1 px-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
                             placeholder="Lesson title"
                           />
                           <select
@@ -434,7 +438,7 @@ export default function CourseCreator({
                                 type: e.target.value as "pdf" | "docx" | "pptx",
                               })
                             }
-                            className="px-4 py-2 border border-gray-300 rounded-4xl  text-sm"
+                            className="px-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
                           >
                             <option value="pdf">PDF</option>
                             <option value="docx">Word Document</option>
@@ -470,7 +474,7 @@ export default function CourseCreator({
                               ]?.click();
                             }}
                             disabled={lesson.uploading}
-                            className="px-4 py-2 bg-black text-white rounded-4xl cursor-pointer disabled:bg-gray-400 transition-colors text-sm"
+                            className="px-4 py-2 bg-blue-600 text-white rounded-xl cursor-pointer hover:bg-blue-700 disabled:bg-slate-400 transition-colors text-sm"
                           >
                             {lesson.uploading
                               ? `${lesson.uploadProgress || 0}%`
@@ -486,7 +490,7 @@ export default function CourseCreator({
                           <button
                             type="button"
                             onClick={() => removeLesson(topic.id, lesson.id)}
-                            className="px-4 py-2 bg-white border border-gray-300 cursor-pointer text-gray-600 rounded-4xl hover:border-gray-600 transition-colors text-sm"
+                            className="px-4 py-2 bg-white border border-slate-200 cursor-pointer text-slate-600 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-colors text-sm"
                           >
                             Remove
                           </button>

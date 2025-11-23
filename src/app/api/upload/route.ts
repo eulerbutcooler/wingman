@@ -143,8 +143,12 @@ export async function POST(request: NextRequest) {
           body: {
             fileId: savedFile.id,
           },
-          // Optional: Add a delay or configure retries
-          // retries: 3,
+          // ✅ Retry configuration: 3 retries with 5 second initial delay
+          retries: 3,
+          // ✅ Timeout: 5 minutes (300 seconds) for processing
+          timeout: 300,
+          // ✅ Failure callback: Called after all retries fail
+          failureCallback: `${process.env.NEXT_PUBLIC_URL}/api/ingest/failed`,
         });
 
         console.log(`✅ File ${savedFile.id} has been queued for processing.`);
@@ -154,24 +158,44 @@ export async function POST(request: NextRequest) {
           qstashError
         );
 
-        // Fallback to direct processing if QStash fails
-        processDocument(savedFile.id)
-          .then((result) => {
-            console.log(
-              `✅ Fallback processing completed for file ${savedFile.id}:`,
-              result
-            );
-          })
-          .catch((error: unknown) => {
-            console.error(
-              `❌ Fallback processing failed for file ${savedFile.id}:`,
-              error
-            );
-          });
-
-        console.log(
-          `✅ File ${savedFile.id} is being processed directly (fallback mode).`
-        );
+        // ✅ Fallback to direct processing and AWAIT completion
+        try {
+          const result = await processDocument(savedFile.id);
+          console.log(
+            `✅ Fallback processing completed for file ${savedFile.id}:`,
+            result
+          );
+        } catch (processingError: unknown) {
+          console.error(
+            `❌ Fallback processing failed for file ${savedFile.id}:`,
+            processingError
+          );
+          
+          // Mark file as failed since both queue and fallback failed
+          const { db } = await import("@/services/db/drizzle");
+          const { files } = await import("@/services/db/schema/courses");
+          const { eq } = await import("drizzle-orm");
+          
+          await db
+            .update(files)
+            .set({
+              processingStatus: "failed",
+              processingError: processingError instanceof Error 
+                ? processingError.message 
+                : "Processing failed"
+            })
+            .where(eq(files.id, savedFile.id));
+          
+          return NextResponse.json(
+            { 
+              error: "Failed to process document",
+              details: processingError instanceof Error 
+                ? processingError.message 
+                : "Unknown error"
+            },
+            { status: 500 }
+          );
+        }
       }
     }
 

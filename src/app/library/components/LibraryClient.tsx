@@ -7,10 +7,13 @@
  * It receives initial data from the server component for faster loading.
  */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useLibraryStore } from "@/stores";
 import CourseCreator from "@/components/CourseCreator";
+import AddTopicButton from "@/components/AddTopicButton";
+import AddLessonButton from "@/components/AddLessonButton";
+import FileViewerModal from "@/components/FileViewerModal";
 import { FaPlus, FaArrowLeft } from "react-icons/fa6";
 import { BookOpen, FileText, Presentation, ExternalLink } from "lucide-react";
 import * as courseService from "@/services/course-service";
@@ -52,7 +55,7 @@ const CourseCard = React.memo(
     return (
       <div
         onClick={onClick}
-        className="modern-card rounded-2xl md:rounded-4xl overflow-hidden cursor-pointer group transition-all duration-300 animate-slide-in-up hover:scale-105"
+        className="bg-white rounded-3xl border-2 border-slate-300 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(37,99,235,0.1)] overflow-hidden cursor-pointer group transition-all duration-300 hover:-translate-y-1"
       >
         <div className="relative h-32 md:h-40 flex items-center justify-center p-4">
           <Image
@@ -62,17 +65,16 @@ const CourseCard = React.memo(
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
-          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300" />
+          <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/30 transition-colors duration-300" />
           <h3 className="relative z-10 text-xl md:text-2xl font-bold text-white text-center capitalize leading-tight">
             {course.title}
           </h3>
         </div>
 
         <div className="p-4 md:p-6">
-          <p className="text-navy text-sm md:text-base capitalize font-medium">
+          <p className="text-slate-600 text-sm md:text-base capitalize leading-relaxed">
             {course.description}
           </p>
-          <div className="w-full h-1 bg-gradient-to-r from-navy to-blue-600 rounded-full mt-3 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
         </div>
       </div>
     );
@@ -82,13 +84,13 @@ const CourseCard = React.memo(
 CourseCard.displayName = "CourseCard";
 
 const CreateCourseCard = ({ onClick }: { onClick: () => void }) => (
-  <div
+  <button
     onClick={onClick}
-    className="flex gap-2 md:gap-4 text-neutral-600 hover:text-black cursor-pointer items-center pr-2 md:pr-4 transition-colors text-sm md:text-base"
+    className="flex gap-2 md:gap-3 items-center px-4 md:px-6 py-2 md:py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 cursor-pointer transition-colors text-sm md:text-base font-medium shadow-sm"
   >
-    Add a new course
-    <FaPlus className="text-base md:text-xl" />
-  </div>
+    <FaPlus className="text-sm md:text-base" />
+    Add New Course
+  </button>
 );
 
 const BackButton = ({
@@ -100,7 +102,7 @@ const BackButton = ({
 }) => (
   <button
     onClick={onClick}
-    className="flex items-center cursor-pointer font-semibold text-gray-600 hover:text-black mb-4 md:mb-6 transition-colors duration-300 text-sm md:text-base"
+    className="flex items-center cursor-pointer font-medium text-slate-600 hover:text-slate-900 mb-4 md:mb-6 transition-colors duration-300 text-sm md:text-base"
   >
     <FaArrowLeft className="w-3 h-3 md:w-4 md:h-4 mr-2" />
     {children}
@@ -122,15 +124,20 @@ const LibraryView = ({
   onCourseSelect: (course: Course) => void;
   onCreateCourse: () => void;
 }) => (
-  <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
-    <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
+  <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide bg-slate-50 relative overflow-hidden">
+    {/* Grid Pattern Background */}
+    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-soft-light"></div>
+    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    {/* Gradient fade overlay - fades grid on both left and right sides */}
+    <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-transparent via-50% to-slate-50"></div>
+
     <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
         <div>
-          <h1 className="text-left text-xl md:text-2xl font-semibold">
+          <h1 className="text-left text-3xl md:text-4xl font-bold text-slate-900">
             Library
           </h1>
-          <p className="text-gray-600 text-left mt-2 md:mt-4 mb-4 md:mb-6 text-sm md:text-base">
+          <p className="text-slate-600 text-left mt-2 md:mt-4 mb-4 md:mb-6 text-base md:text-lg">
             Explore your courses or create a new one to get started.
           </p>
         </div>
@@ -140,8 +147,8 @@ const LibraryView = ({
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <div className="rounded-2xl md:rounded-4xl w-full py-6 md:py-8 mb-10 md:mb-14">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
+        <div className="rounded-2xl md:rounded-3xl w-full py-6 md:py-8 mb-10 md:mb-14">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
             {courses.map((course, index) => (
               <CourseCard
                 key={course.id}
@@ -164,6 +171,7 @@ const CourseView = ({
   onBack,
   onDelete,
   onTopicSelect,
+  onRefresh,
 }: {
   course: Course;
   courseSummary: string;
@@ -171,51 +179,57 @@ const CourseView = ({
   onBack: () => void;
   onDelete: () => void;
   onTopicSelect: (topic: Topic) => void;
+  onRefresh?: () => void;
 }) => (
-  <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
-    <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
+  <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide bg-slate-50 relative overflow-hidden">
+    {/* Grid Pattern Background */}
+    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-soft-light"></div>
+    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    {/* Gradient fade overlay - fades grid on both left and right sides */}
+    <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-transparent via-50% to-slate-50"></div>
+
     <div className="relative z-10 w-full md:w-11/12 pt-24 md:pt-34 px-4 md:px-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <BackButton onClick={onBack}>Back to Library</BackButton>
         <button
-          className={`font-semibold transition-colors duration-300 mb-4 md:mb-6 ${
+          className={`font-medium transition-colors duration-300 mb-4 md:mb-6 px-4 py-2 rounded-xl ${
             loading
-              ? "text-gray-400 cursor-not-allowed"
-              : "text-red-600 hover:text-red-800"
+              ? "text-slate-400 bg-slate-100 cursor-not-allowed"
+              : "text-red-600 hover:text-white hover:bg-red-600 border border-red-200"
           }`}
           onClick={onDelete}
           disabled={loading}
         >
-          {loading ? "Deleting..." : "Delete"}
+          {loading ? "Deleting..." : "Delete Course"}
         </button>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-start mb-8 gap-6">
-        <div className="w-full md:w-72 h-48 bg-black rounded-2xl md:rounded-4xl flex items-center justify-center p-4 mx-auto md:mx-0">
+        <div className="w-full md:w-72 h-48 bg-slate-900 rounded-3xl flex items-center justify-center p-4 mx-auto md:mx-0 shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
           <h3 className="text-lg md:text-xl font-bold text-white text-center capitalize leading-tight">
             {course.title}
           </h3>
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl md:text-4xl font-bold text-black capitalize text-center md:text-left">
+          <h1 className="text-2xl md:text-4xl font-bold text-slate-900 capitalize text-center md:text-left">
             {course.title}
           </h1>
-          <p className="text-neutral-600 mt-2 capitalize text-center md:text-left text-sm md:text-base">
+          <p className="text-slate-600 mt-2 capitalize text-center md:text-left text-sm md:text-base">
             {course.description}
           </p>
         </div>
       </div>
 
-      <div className="modern-card p-4 md:p-6 rounded-2xl md:rounded-4xl mb-8 animate-fade-in-scale">
+      <div className="bg-white p-6 md:p-8 rounded-3xl mb-8 border border-blue-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-white text-lg">📋</span>
+          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+            <span className="text-2xl">📋</span>
           </div>
-          <h3 className="text-lg md:text-xl font-semibold text-black">
+          <h3 className="text-lg md:text-xl font-bold text-slate-900">
             Course Summary
           </h3>
         </div>
-        <div className="text-navy text-sm md:text-base leading-relaxed font-medium bg-gradient-to-r from-gray-50 to-blue-50 p-4 rounded-lg border-l-4 border-navy">
+        <div className="text-slate-600 text-sm md:text-base leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100">
           {courseSummary ||
             "This course will enhance your aeronautical engineering knowledge."}
         </div>
@@ -223,37 +237,42 @@ const CourseView = ({
 
       <div className="space-y-4 mb-14">
         {course.topics && course.topics.length > 0 ? (
-          course.topics.map((topic, index) => (
-            <div
-              key={topic.id}
-              onClick={() => onTopicSelect(topic)}
-              className="modern-card p-4 md:p-5 rounded-2xl md:rounded-4xl cursor-pointer transition-all duration-300 flex flex-col sm:flex-row justify-between sm:items-center gap-3 sm:gap-0 group animate-slide-in-up"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center mr-3 md:mr-4">
-                  <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-white" />
+          <>
+            {course.topics.map((topic) => (
+              <div
+                key={topic.id}
+                onClick={() => onTopicSelect(topic)}
+                className="bg-white p-4 md:p-5 rounded-3xl cursor-pointer transition-all duration-300 flex flex-col sm:flex-row justify-between sm:items-center gap-3 sm:gap-0 group border border-blue-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(37,99,235,0.1)] hover:-translate-y-0.5"
+              >
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-3 md:mr-4 group-hover:bg-blue-600 transition-colors duration-300">
+                    <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-blue-600 group-hover:text-white transition-colors duration-300" />
+                  </div>
+                  <span className="font-semibold text-base md:text-lg text-slate-900 group-hover:text-blue-600 transition-colors">
+                    {topic.title}
+                  </span>
                 </div>
-                <span className="font-semibold text-base md:text-lg group-hover:text-navy transition-colors">
-                  {topic.title}
-                </span>
-              </div>
-              <div className="flex items-center justify-between sm:justify-end gap-4 ml-13 sm:ml-0">
-                <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                  {topic.lessons?.length || 0} lessons
-                </span>
-                <div className="w-8 h-8 bg-navy/10 rounded-full flex items-center justify-center group-hover:bg-navy group-hover:text-white transition-all duration-300">
-                  <span className="text-navy group-hover:text-white">→</span>
+                <div className="flex items-center justify-between sm:justify-end gap-4 ml-13 sm:ml-0">
+                  <span className="text-sm text-slate-600 bg-slate-100 px-3 py-1 rounded-full font-medium">
+                    {topic.lessons?.length || 0} lessons
+                  </span>
+                  <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-blue-600 transition-all duration-300">
+                    <span className="text-slate-600 group-hover:text-white">→</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            ))}
+            <AddTopicButton courseId={course.id} onSuccess={onRefresh} />
+          </>
         ) : (
-          <div className="text-center py-8 text-gray-500">
-            <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p className="text-sm md:text-base">
+          <div className="text-center py-12 bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <BookOpen className="w-8 h-8 text-slate-400" />
+            </div>
+            <p className="text-sm md:text-base mb-6 text-slate-600">
               No topics available for this course yet.
             </p>
+            <AddTopicButton courseId={course.id} onSuccess={onRefresh} />
           </div>
         )}
       </div>
@@ -265,34 +284,51 @@ const TopicView = ({
   topic,
   courseName,
   onBack,
+  onRefresh,
+  onViewFile,
 }: {
   topic: Topic;
   courseName: string;
   onBack: () => void;
+  onRefresh?: () => void;
+  onViewFile: (lesson: Lesson) => void;
 }) => (
-  <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
-    <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
+  <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide bg-slate-50 relative overflow-hidden">
+    {/* Grid Pattern Background */}
+    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-soft-light"></div>
+    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    {/* Gradient fade overlay - fades grid on both left and right sides */}
+    <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-transparent via-50% to-slate-50"></div>
+
     <div className="relative z-10 w-full md:w-11/12 pt-24 md:pt-34 px-4 md:px-6">
       <BackButton onClick={onBack}>Back to {courseName}</BackButton>
 
-      <h1 className="text-2xl md:text-4xl font-bold mb-4 text-black capitalize">
-        {topic.title}
-      </h1>
-      <p className="text-neutral-600 mb-4 pb-4 text-sm md:text-base">
-        All lessons for this topic.
-      </p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+        <div>
+          <h1 className="text-2xl md:text-4xl font-bold text-slate-900 capitalize">
+            {topic.title}
+          </h1>
+          <p className="text-slate-600 mt-2 text-sm md:text-base">
+            All lessons for this topic.
+          </p>
+        </div>
+        <AddLessonButton topicId={topic.id} onSuccess={onRefresh} />
+      </div>
 
       <div className="space-y-3 mb-14">
         {topic.lessons && topic.lessons.length > 0 ? (
           topic.lessons.map((lesson) => (
-            <LessonCard key={lesson.id} lesson={lesson} />
+            <LessonCard key={lesson.id} lesson={lesson} onView={onViewFile} />
           ))
         ) : (
-          <div className="text-center py-8 text-gray-500">
-            <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p className="text-sm md:text-base">
+          <div className="text-center py-12 bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-8 h-8 text-slate-400" />
+            </div>
+            <p className="text-sm md:text-base mb-6 text-slate-600">
               No lessons available for this topic yet.
             </p>
+            <AddLessonButton topicId={topic.id} onSuccess={onRefresh} />
           </div>
         )}
       </div>
@@ -300,7 +336,7 @@ const TopicView = ({
   </div>
 );
 
-const LessonCard = React.memo(({ lesson }: { lesson: Lesson }) => {
+const LessonCard = React.memo(({ lesson, onView }: { lesson: Lesson; onView: (lesson: Lesson) => void }) => {
   const getIcon = () => {
     switch (lesson.type) {
       case "pdf":
@@ -317,37 +353,40 @@ const LessonCard = React.memo(({ lesson }: { lesson: Lesson }) => {
         );
       default:
         return (
-          <FileText className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-gray-500" />
+          <FileText className="w-4 h-4 md:w-5 md:h-5 mr-3 md:mr-4 text-slate-500" />
         );
     }
   };
 
   return (
-    <div className="bg-white p-3 md:p-4 px-4 md:px-6 cursor-pointer rounded-2xl md:rounded-4xl shadow-sm hover:shadow-xl transition-all duration-300">
+    <div 
+      onClick={() => lesson.fileUrl && onView(lesson)}
+      className="bg-white p-4 md:p-5 px-5 md:px-6 cursor-pointer rounded-3xl border border-blue-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(37,99,235,0.1)] transition-all duration-300 hover:-translate-y-0.5"
+    >
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 sm:gap-0">
         <div className="flex items-center">
           {getIcon()}
           <div className="flex flex-col">
-            <span className="font-medium capitalize text-sm md:text-base">
+            <span className="font-semibold capitalize text-sm md:text-base text-slate-900">
               {lesson.title}
             </span>
-            <span className="text-xs text-gray-400 capitalize">
+            <span className="text-xs text-slate-500 capitalize font-medium">
               {lesson.type} file
             </span>
           </div>
         </div>
         <div className="flex items-center gap-3 ml-7 sm:ml-0">
           {lesson.fileUrl && (
-            <a
-              href={lesson.fileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center text-blue-600 hover:text-blue-800 text-xs md:text-sm font-medium transition-colors"
-              onClick={(e) => e.stopPropagation()}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onView(lesson);
+              }}
+              className="flex items-center px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 text-xs md:text-sm font-medium transition-colors rounded-lg"
             >
               <ExternalLink className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-              Open File
-            </a>
+              View
+            </button>
           )}
         </div>
       </div>
@@ -402,6 +441,10 @@ export default function LibraryClient({
     removeCourse,
     reset,
   } = useLibraryStore();
+
+  // File viewer state
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
 
   // Track if we've initialized to prevent double updates
   const [initialized, setInitialized] = React.useState(false);
@@ -496,6 +539,61 @@ export default function LibraryClient({
     setView("library");
   };
 
+  const handleRefreshCourse = async () => {
+    if (!selectedCourse) return;
+    
+    try {
+      setLoading(true);
+      const userCourses = await courseService.getCourses(userId.toString());
+      const updatedCourse = userCourses.find((c) => c.id === selectedCourse.id);
+      
+      if (updatedCourse) {
+        setSelectedCourse(updatedCourse);
+        setCourses(userCourses);
+      }
+    } catch (err) {
+      console.error("Failed to refresh course:", err);
+      setError(err instanceof Error ? err.message : "Failed to refresh course");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefreshTopic = async () => {
+    if (!selectedCourse || !selectedTopic) return;
+    
+    try {
+      setLoading(true);
+      const userCourses = await courseService.getCourses(userId.toString());
+      const updatedCourse = userCourses.find((c) => c.id === selectedCourse.id);
+      
+      if (updatedCourse) {
+        const updatedTopic = updatedCourse.topics?.find((t) => t.id === selectedTopic.id);
+        
+        if (updatedTopic) {
+          setSelectedTopic(updatedTopic);
+          setSelectedCourse(updatedCourse);
+          setCourses(userCourses);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to refresh topic:", err);
+      setError(err instanceof Error ? err.message : "Failed to refresh topic");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewFile = (lesson: Lesson) => {
+    setSelectedLesson(lesson);
+    setViewerOpen(true);
+  };
+
+  const handleCloseViewer = () => {
+    setViewerOpen(false);
+    setSelectedLesson(null);
+  };
+
   const backToLibrary = () => {
     reset();
   };
@@ -530,6 +628,7 @@ export default function LibraryClient({
               onBack={backToLibrary}
               onDelete={() => handleCourseDelete(selectedCourse.id)}
               onTopicSelect={handleTopicSelect}
+              onRefresh={handleRefreshCourse}
             />
           )
         );
@@ -542,6 +641,8 @@ export default function LibraryClient({
               topic={selectedTopic}
               courseName={selectedCourse.title}
               onBack={backToCourse}
+              onRefresh={handleRefreshTopic}
+              onViewFile={handleViewFile}
             />
           )
         );
@@ -560,5 +661,20 @@ export default function LibraryClient({
     }
   };
 
-  return <div className="space-y-6">{renderContent()}</div>;
+  return (
+    <>
+      <div className="space-y-6">{renderContent()}</div>
+      
+      {/* File Viewer Modal */}
+      {selectedLesson && (
+        <FileViewerModal
+          isOpen={viewerOpen}
+          onClose={handleCloseViewer}
+          fileUrl={selectedLesson.fileUrl || ""}
+          fileName={selectedLesson.title}
+          fileType={selectedLesson.type}
+        />
+      )}
+    </>
+  );
 }

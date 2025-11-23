@@ -4,6 +4,7 @@ import { courses, topics, lessons, files } from "@/services/db/schema/courses";
 import { eq, desc } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth/auth-utils";
 import { generateCourseSummary } from "@/lib/actions/course/course-summary";
+import { qstashClient } from "@/lib/qstash";
 
 // GET /api/courses - Fetch all courses
 export async function GET() {
@@ -340,28 +341,40 @@ export async function POST(request: NextRequest) {
       ),
     });
 
-    // After course creation, generate quizzes for all difficulties
-    // This is done asynchronously to not block the response
-    if (result.id) {
-      console.log("🎯 [COURSE] Starting async quiz generation", {
+    // ✅ After course creation, QUEUE quiz generation via QStash
+    if (result.id && qstashClient) {
+      console.log("🎯 [COURSE] Queueing quiz generation", {
         courseId: result.id,
         userId: user.id,
-        title,
-        description: description.substring(0, 50) + "...",
       });
 
-      generateQuizzesForCourse(
-        result.id,
-        user.id.toString(),
-        title,
-        description
-      ).catch((error) => {
-        console.error("❌ [COURSE] Quiz generation failed:", {
-          error: error.message,
-          courseId: result.id,
-          userId: user.id,
+      try {
+        await qstashClient.publishJSON({
+          url: `${process.env.NEXT_PUBLIC_URL}/api/quiz/generate-worker`,
+          body: {
+            courseId: result.id,
+            userId: user.id.toString(),
+            difficulties: ["easy", "medium", "hard"],
+          },
+          retries: 3,
+          timeout: 120, // 2 minutes timeout for quiz generation
+          failureCallback: `${process.env.NEXT_PUBLIC_URL}/api/quiz/failed`,
         });
-        console.error(error);
+
+        console.log("✅ [COURSE] Quiz generation queued successfully");
+      } catch (queueError) {
+        console.error("❌ [COURSE] Failed to queue quiz generation:", queueError);
+        // Fallback: Generate quizzes directly if queueing fails (e.g., localhost)
+        console.log("🏠 [COURSE] Falling back to direct quiz generation");
+        generateQuizzesForCourse(result.id, user.id.toString()).catch((error) => {
+          console.error("❌ [COURSE] Quiz generation failed:", error);
+        });
+      }
+    } else if (result.id && !qstashClient) {
+      // Fallback for localhost/development without QStash
+      console.log("🏠 [COURSE] No QStash - generating quizzes directly");
+      generateQuizzesForCourse(result.id, user.id.toString()).catch((error) => {
+        console.error("❌ [COURSE] Quiz generation failed:", error);
       });
     }
 
@@ -434,12 +447,10 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-// Helper function to generate quizzes for a course
+// Helper function to generate quizzes for a course (fallback for localhost)
 async function generateQuizzesForCourse(
   courseId: string,
-  userId: string,
-  title: string,
-  description: string
+  userId: string
 ) {
   // Import the quiz generation function directly
   const { generateQuizForCourse } = await import("@/lib/quiz/quiz-generator");

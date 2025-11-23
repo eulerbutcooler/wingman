@@ -17,8 +17,7 @@ export const quizzes = pgTable("quizzes", {
     .references(() => courses.id, { onDelete: "cascade" })
     .notNull(),
   userId: integer("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
+    .references(() => users.id, { onDelete: "set null" }),
   difficulty: text("difficulty", {
     enum: ["easy", "medium", "hard"],
   }).notNull(),
@@ -34,8 +33,7 @@ export const quizResults = pgTable("quiz_results", {
     .references(() => quizzes.id, { onDelete: "cascade" })
     .notNull(),
   userId: integer("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
+    .references(() => users.id, { onDelete: "set null" }),
   score: integer("score").notNull(),
   totalQuestions: integer("total_questions").notNull(),
   answers: jsonb("answers").notNull(),

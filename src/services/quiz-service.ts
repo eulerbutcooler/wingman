@@ -98,6 +98,24 @@ export async function resetQuiz(
   return generateQuiz(courseId, userId, difficulty, true);
 }
 
+// Trigger quiz generation for all difficulties (uses queue system)
+export async function triggerQuizGeneration(
+  courseId: string | number
+): Promise<void> {
+  const response = await fetch(`/api/quiz/generate-all`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ courseId }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to trigger quiz generation");
+  }
+}
+
 // ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================

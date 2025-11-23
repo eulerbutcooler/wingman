@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/services/db/drizzle";
 import { quizResults, quizzes } from "@/services/db/schema/quizzes";
 import { getCurrentUser } from "@/lib/auth/auth-utils";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 // POST /api/quiz/submit - Submit quiz results
 export async function POST(request: NextRequest) {
