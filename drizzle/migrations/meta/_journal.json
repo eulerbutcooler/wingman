@@ -78,6 +78,13 @@
       "when": 1732046400000,
       "tag": "0010_add_user_type_column",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1763915608053,
+      "tag": "0011_careless_miracleman",
+      "breakpoints": true
     }
   ]
 }

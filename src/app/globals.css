@@ -340,20 +340,12 @@
 /* Mobile and desktop optimized styles */
 body {
   font-family: var(--font-ubuntu);
-  background-image: url("/scketch.jpeg");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
+  background-color: #f8fafc;
 }
 
 /* Default page background for non-hero pages */
 .page-background {
-  background-image: url("/scketch.jpeg");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
+  background-color: #f8fafc;
 }
 
 /* Override background for hero page specifically */

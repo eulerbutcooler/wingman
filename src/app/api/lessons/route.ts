@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/services/db/drizzle";
-import { lessons, files } from "@/services/db/schema/courses";
+import { lessons } from "@/services/db/schema/courses";
 import { eq } from "drizzle-orm";
 
 // POST /api/lessons - Create a new lesson

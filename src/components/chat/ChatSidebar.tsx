@@ -53,10 +53,10 @@ export default function ChatSidebar({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="bg-[#f5f5f5] px-4">
+      <div className="bg-slate-50 px-4">
         <button
           onClick={onNewChat}
-          className={`flex items-center gap-2 cursor-pointer px-4 py-3 font-medium text-black bg-white shadow-sm hover:shadow-xl rounded-2xl md:rounded-4xl transition-colors text-sm md:text-base ${
+          className={`flex items-center gap-2 cursor-pointer px-4 py-3 font-medium text-slate-900 bg-white border-2 border-slate-300  rounded-xl transition-colors text-sm md:text-base ${
             isMobile ? "w-full" : "w-64 md:w-72 fixed"
           }`}
         >
@@ -68,19 +68,19 @@ export default function ChatSidebar({
       <div
         className={` ${
           isMobile ? "pt-4 flex-1" : "w-64 md:w-80 pt-16 md:pt-18"
-        } rounded-2xl md:rounded-4xl flex flex-col h-full`}
+        } rounded-3xl flex flex-col h-full`}
       >
-        <div className="flex-1 bg-white shadow-sm rounded-2xl md:rounded-4xl overflow-y-auto scrollbar-hide px-4 md:px-6 p-3 md:p-4">
-          <div className="font-medium text-gray-600 tracking-wide mb-3 md:mb-4 text-sm md:text-base">
+        <div className="flex-1 bg-white border-2 border-slate-300  rounded-3xl overflow-y-auto scrollbar-hide px-4 md:px-6 p-3 md:p-4">
+          <div className="font-medium text-slate-600 tracking-wide mb-3 md:mb-4 text-sm md:text-base">
             Recent Chats
           </div>
 
           {isLoading ? (
-            <div className="text-xs md:text-sm text-gray-600">
+            <div className="text-xs md:text-sm text-slate-600">
               Loading chats...
             </div>
           ) : chats.length === 0 ? (
-            <div className="text-xs md:text-sm text-gray-600 italic">
+            <div className="text-xs md:text-sm text-slate-600 italic">
               No chats yet. Start a new conversation!
             </div>
           ) : (
@@ -89,21 +89,21 @@ export default function ChatSidebar({
                 <div
                   key={chat.id}
                   onClick={() => onSelectChat(chat.id)}
-                  className={`group flex items-center gap-2 md:gap-3 transition-all duration-300  text-white p-2 px-3 md:px-4 rounded-2xl md:rounded-4xl cursor-pointer ${
+                  className={`group flex items-center gap-2 md:gap-3 transition-all duration-300 p-2 px-3 md:px-4 rounded-xl cursor-pointer ${
                     currentChatId === chat.id
-                      ? "bg-navy hover:shadow-xl text-white"
-                      : "hover:shadow-xl"
+                      ? "bg-blue-600 hover:shadow-md text-white"
+                      : "hover:bg-slate-50 hover:shadow-sm"
                   }`}
                 >
                   <div
-                    className={`w-5 h-5 md:w-6 md:h-6 rounded-full text-white flex items-center justify-center flex-shrink-0`}
+                    className={`w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center flex-shrink-0`}
                   >
                     <MessageSquare
                       size={12}
                       className={`md:w-3.5 md:h-3.5 ${
                         currentChatId === chat.id
                           ? "text-white"
-                          : "text-gray-900"
+                          : "text-slate-900"
                       }`}
                     />
                   </div>
@@ -113,7 +113,7 @@ export default function ChatSidebar({
                       className={`text-xs md:text-sm font-medium truncate ${
                         currentChatId === chat.id
                           ? "text-white"
-                          : "text-gray-900"
+                          : "text-slate-900"
                       }`}
                     >
                       {chat.title}
@@ -122,7 +122,7 @@ export default function ChatSidebar({
                       className={`text-xs truncate ${
                         currentChatId === chat.id
                           ? "text-white/70"
-                          : "text-gray-900/70"
+                          : "text-slate-600"
                       }`}
                     >
                       {new Date(chat.updatedAt).toLocaleDateString()}
@@ -134,7 +134,7 @@ export default function ChatSidebar({
                     className={`opacity-0 group-hover:opacity-100 p-1 cursor-pointer rounded transition-opacity ${
                       currentChatId === chat.id
                         ? "hover:text-white"
-                        : "hover:text-gray-900"
+                        : "hover:text-slate-900"
                     }`}
                   >
                     <Trash2
@@ -142,7 +142,7 @@ export default function ChatSidebar({
                       className={`md:w-4.5 md:h-4.5 ${
                         currentChatId === chat.id
                           ? "text-white/70"
-                          : "text-gray-900/70"
+                          : "text-slate-600"
                       }`}
                     />
                   </button>

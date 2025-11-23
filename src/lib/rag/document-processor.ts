@@ -159,19 +159,24 @@ export async function processDocument(
       embedding: embeddings[index],
     }));
 
-    await db.insert(documentChunks).values(chunkRecords);
-    console.log(`💾 Stored ${chunkRecords.length} chunks in database`);
+    // ✅ Wrap DB operations in transaction - all or nothing
+    await db.transaction(async (tx) => {
+      // Insert all chunks
+      await tx.insert(documentChunks).values(chunkRecords);
+      console.log(`💾 Stored ${chunkRecords.length} chunks in database`);
 
-    await db
-      .update(files)
-      .set({
-        processingStatus: "completed",
-        chunkCount: chunks.length,
-        processingError: null,
-      })
-      .where(eq(files.id, fileId));
-
-    console.log(`✅ Document processing completed for file ${fileId}`);
+      // Update file status
+      await tx
+        .update(files)
+        .set({
+          processingStatus: "completed",
+          chunkCount: chunks.length,
+          processingError: null,
+        })
+        .where(eq(files.id, fileId));
+      
+      console.log(`✅ Document processing completed for file ${fileId}`);
+    });
 
     return { success: true, fileId, chunkCount: chunks.length };
   } catch (error) {

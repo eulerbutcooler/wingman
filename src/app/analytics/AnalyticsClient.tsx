@@ -6,7 +6,7 @@ import {
   StudentAnalytics,
   StudentDetailedAnalytics,
 } from "@/lib/actions/analytics/analytics-actions";
-import { Users, Award, Clock, TrendingUp, X, RefreshCw } from "lucide-react";
+import { Users, Award, Clock, TrendingUp, X } from "lucide-react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -19,6 +19,7 @@ import {
   Filler,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import { MultiStepLoader } from "@/components/ui/multi-step-loader";
 
 // Register Chart.js components
 ChartJS.register(
@@ -64,47 +65,49 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
-      <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
+    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide bg-slate-50 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-soft-light"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-transparent via-50% to-slate-50"></div>
       <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
         {/* Header */}
         <div className="mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-black mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
             Student Analytics
           </h1>
-          <p className="text-neutral-600 text-sm md:text-base">
+          <p className="text-slate-600 text-sm md:text-base">
             Overview of all enrolled students and their performance
           </p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
-          <div className="modern-card p-4 md:p-6 rounded-2xl md:rounded-4xl transition-all duration-300 hover:shadow-xl animate-slide-in-up">
+          <div className="bg-white p-4 md:p-6 rounded-3xl border border-blue-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_8px_30px_rgb(37,99,235,0.1)]">
             <div className="flex items-center gap-3 md:gap-4">
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-600 rounded-xl flex items-center justify-center">
                 <Users className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div>
-                <p className="text-xs md:text-sm text-neutral-600">
+                <p className="text-xs md:text-sm text-slate-600">
                   Total Students
                 </p>
-                <p className="text-xl md:text-2xl font-bold text-black">
+                <p className="text-xl md:text-2xl font-bold text-slate-900">
                   {students.length}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="modern-card p-4 md:p-6 rounded-2xl md:rounded-4xl transition-all duration-300 hover:shadow-xl animate-slide-in-up" style={{ animationDelay: "0.1s" }}>
+          <div className="bg-white p-4 md:p-6 rounded-3xl border border-blue-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_8px_30px_rgb(37,99,235,0.1)]">
             <div className="flex items-center gap-3 md:gap-4">
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-green-600 rounded-xl flex items-center justify-center">
                 <Award className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div>
-                <p className="text-xs md:text-sm text-neutral-600">
+                <p className="text-xs md:text-sm text-slate-600">
                   Average Score
                 </p>
-                <p className="text-xl md:text-2xl font-bold text-black">
+                <p className="text-xl md:text-2xl font-bold text-slate-900">
                   {students.length > 0
                     ? Math.round(
                         students.reduce(
@@ -119,16 +122,16 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
             </div>
           </div>
 
-          <div className="modern-card p-4 md:p-6 rounded-2xl md:rounded-4xl transition-all duration-300 hover:shadow-xl animate-slide-in-up" style={{ animationDelay: "0.2s" }}>
+          <div className="bg-white p-4 md:p-6 rounded-3xl border border-blue-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_8px_30px_rgb(37,99,235,0.1)]">
             <div className="flex items-center gap-3 md:gap-4">
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-600 rounded-xl flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div>
-                <p className="text-xs md:text-sm text-neutral-600">
+                <p className="text-xs md:text-sm text-slate-600">
                   Total Quizzes
                 </p>
-                <p className="text-xl md:text-2xl font-bold text-black">
+                <p className="text-xl md:text-2xl font-bold text-slate-900">
                   {students.reduce(
                     (sum, student) => sum + student.totalQuizzes,
                     0
@@ -146,46 +149,65 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
             return (
               <div
                 key={student.id}
-                className="modern-card p-4 md:p-6 rounded-2xl md:rounded-4xl cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-slide-in-up relative"
-                style={{ animationDelay: `${0.1 * (index % 8)}s` }}
+                className="bg-white p-4 md:p-6 rounded-3xl border-2 border-slate-300 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(37,99,235,0.1)] cursor-pointer transition-all duration-300 hover:-translate-y-1 relative"
                 onClick={() => !isLoading && handleStudentClick(student.id)}
               >
                 {isLoading && (
-                  <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center rounded-2xl md:rounded-4xl z-20">
-                    <RefreshCw className="w-8 h-8 md:w-12 md:h-12 text-navy animate-spin" />
+                  <div className="absolute inset-0 bg-white/50 backdrop-blur-sm rounded-3xl z-20 flex items-center justify-center overflow-hidden">
+                    <div className="scale-75 origin-center -mt-20">
+                      <MultiStepLoader
+                        loading={isLoading}
+                        loadingStates={[
+                          { text: "Loading student..." },
+                          { text: "Fetching history..." },
+                          { text: "Almost ready..." },
+                          { text: "Loading student..." },
+                          { text: "Fetching history..." },
+                          { text: "Almost ready..." },
+                          { text: "Loading student..." },
+                          { text: "Fetching history..." },
+                          { text: "Almost ready..." },
+                          { text: "Loading student..." },
+                          { text: "Fetching history..." },
+                          { text: "Almost ready..." },
+                        ]}
+                        duration={800}
+                        loop={true}
+                      />
+                    </div>
                   </div>
                 )}
               {/* Student Avatar */}
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center mb-3 md:mb-4">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-600 rounded-xl flex items-center justify-center mb-3 md:mb-4">
                 <span className="text-lg md:text-2xl font-bold text-white">
                   {student.name.charAt(0).toUpperCase()}
                 </span>
               </div>
 
               {/* Student Info */}
-              <h3 className="text-base md:text-lg font-bold text-black mb-1">
+              <h3 className="text-base md:text-lg font-bold text-slate-900 mb-1">
                 {student.name}
               </h3>
-              <p className="text-xs md:text-sm text-neutral-600 mb-3 truncate">
+              <p className="text-xs md:text-sm text-slate-600 mb-3 truncate">
                 {student.serviceId || student.email}
               </p>
 
               {/* Stats */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs md:text-sm">
-                  <span className="text-neutral-600">Course:</span>
-                  <span className="font-semibold text-black truncate ml-2">
+                  <span className="text-slate-600">Course:</span>
+                  <span className="font-semibold text-slate-900 truncate ml-2">
                     {student.course || "N/A"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs md:text-sm">
-                  <span className="text-neutral-600">Quizzes:</span>
-                  <span className="font-semibold text-black">
+                  <span className="text-slate-600">Quizzes:</span>
+                  <span className="font-semibold text-slate-900">
                     {student.totalQuizzes}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs md:text-sm">
-                  <span className="text-neutral-600">Avg Score:</span>
+                  <span className="text-slate-600">Avg Score:</span>
                   <span className="font-semibold text-green-600">
                     {Math.round(student.averageScore)}%
                   </span>
@@ -194,8 +216,8 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
 
               {/* Last Activity */}
               {student.lastActivityAt && (
-                <div className="mt-3 pt-3 border-t border-neutral-200">
-                  <div className="flex items-center gap-2 text-xs text-neutral-500">
+                <div className="mt-3 pt-3 border-t border-slate-200">
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
                     <Clock className="w-3 h-3" />
                     <span>
                       Last activity:{" "}
@@ -212,11 +234,11 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
         {/* Empty State */}
         {students.length === 0 && (
           <div className="text-center py-12">
-            <Users className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-black mb-2">
+            <Users className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-slate-900 mb-2">
               No Students Yet
             </h3>
-            <p className="text-neutral-600">
+            <p className="text-slate-600">
               Student analytics will appear here once users start enrolling.
             </p>
           </div>
@@ -226,33 +248,33 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
       {/* Student Detail Modal */}
       {isModalOpen && selectedStudent && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={closeModal}
         >
           <div
-            className="modern-card rounded-2xl md:rounded-4xl max-w-4xl w-full max-h-[90vh] overflow-y-auto scrollbar-hide"
+            className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto scrollbar-hide border border-slate-100 shadow-[0_20px_50px_rgb(0,0,0,0.3)]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="sticky top-0 bg-white/95 backdrop-blur-sm p-6 border-b border-neutral-200 flex items-center justify-between">
+            <div className="sticky top-0 bg-white/95 backdrop-blur-sm p-6 border-b border-slate-200 flex items-center justify-between rounded-t-3xl">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-r from-navy to-blue-600 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center">
                   <span className="text-2xl font-bold text-white">
                     {selectedStudent.name.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-black">
+                  <h2 className="text-2xl font-bold text-slate-900">
                     {selectedStudent.name}
                   </h2>
-                  <p className="text-neutral-600">{selectedStudent.serviceId || selectedStudent.email}</p>
+                  <p className="text-slate-600">{selectedStudent.serviceId || selectedStudent.email}</p>
                 </div>
               </div>
               <button
                 onClick={closeModal}
-                className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
+                className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
               >
-                <X className="w-6 h-6 text-neutral-600" />
+                <X className="w-6 h-6 text-slate-600" />
               </button>
             </div>
 
@@ -260,27 +282,27 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
             <div className="p-6 space-y-6">
               {/* Overview Stats */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-r from-navy/10 to-blue-600/10 p-4 rounded-xl">
-                  <p className="text-sm text-neutral-600 mb-1">
+                <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl">
+                  <p className="text-sm text-slate-600 mb-1">
                     Total Quizzes
                   </p>
-                  <p className="text-2xl font-bold text-black">
+                  <p className="text-2xl font-bold text-slate-900">
                     {selectedStudent.totalQuizzes}
                   </p>
                 </div>
-                <div className="bg-gradient-to-r from-green-500/10 to-green-600/10 p-4 rounded-xl">
-                  <p className="text-sm text-neutral-600 mb-1">
+                <div className="bg-green-50 border border-green-100 p-4 rounded-xl">
+                  <p className="text-sm text-slate-600 mb-1">
                     Average Score
                   </p>
                   <p className="text-2xl font-bold text-green-600">
                     {Math.round(selectedStudent.averageScore)}%
                   </p>
                 </div>
-                <div className="bg-gradient-to-r from-purple-500/10 to-purple-600/10 p-4 rounded-xl">
-                  <p className="text-sm text-neutral-600 mb-1">
+                <div className="bg-purple-50 border border-purple-100 p-4 rounded-xl">
+                  <p className="text-sm text-slate-600 mb-1">
                     Courses Enrolled
                   </p>
-                  <p className="text-2xl font-bold text-black">
+                  <p className="text-2xl font-bold text-slate-900">
                     {selectedStudent.coursesEnrolled.length}
                   </p>
                 </div>
@@ -288,7 +310,7 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
 
               {/* Quiz Attempts */}
               <div>
-                <h3 className="text-xl font-bold text-black mb-4">
+                <h3 className="text-xl font-bold text-slate-900 mb-4">
                   Quiz History
                 </h3>
                 <div className="space-y-3">
@@ -296,10 +318,10 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
                     selectedStudent.quizAttempts.map((attempt) => (
                       <div
                         key={attempt.id}
-                        className="p-4 bg-neutral-50 rounded-xl hover:bg-neutral-100 transition-colors"
+                        className="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-blue-600 transition-colors"
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold text-black">
+                          <h4 className="font-semibold text-slate-900">
                             {attempt.quizTitle}
                           </h4>
                           <span
@@ -314,7 +336,7 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
                             {Math.round(attempt.percentage)}%
                           </span>
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-neutral-600">
+                        <div className="flex items-center gap-4 text-sm text-slate-600">
                           <span>
                             Score: {attempt.score}/{attempt.totalQuestions}
                           </span>
@@ -330,7 +352,7 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
                       </div>
                     ))
                   ) : (
-                    <p className="text-neutral-600 text-center py-4">
+                    <p className="text-slate-600 text-center py-4">
                       No quiz attempts yet
                     </p>
                   )}
@@ -339,11 +361,11 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
 
               {/* Performance Chart */}
               <div>
-                <h3 className="text-xl font-bold text-black mb-4">
+                <h3 className="text-xl font-bold text-slate-900 mb-4">
                   Performance Over Time
                 </h3>
                 {selectedStudent.quizAttempts.length > 0 ? (
-                  <div className="bg-white p-4 rounded-xl border border-neutral-200">
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <Line
                       data={{
                         labels: selectedStudent.quizAttempts
@@ -443,9 +465,9 @@ export default function AnalyticsClient({ initialStudents }: AnalyticsClientProp
                     />
                   </div>
                 ) : (
-                  <div className="text-center py-12 bg-neutral-50 rounded-xl">
-                    <TrendingUp className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
-                    <p className="text-neutral-600">
+                  <div className="text-center py-12 bg-slate-50 border border-slate-200 rounded-xl">
+                    <TrendingUp className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                    <p className="text-slate-600">
                       No quiz data available to display performance chart
                     </p>
                   </div>

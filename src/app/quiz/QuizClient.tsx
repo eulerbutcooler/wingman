@@ -13,6 +13,7 @@ import {
 import { Quiz, Question, Course } from "@/types";
 import * as quizService from "@/services/quiz-service";
 import { useQuizStore } from "@/stores/quiz-store";
+import { MultiStepLoader } from "@/components/ui/multi-step-loader";
 
 // ✅ Utility function
 const cn = (...classes: (string | boolean | undefined)[]) => {
@@ -38,11 +39,13 @@ type QuizResults = {
 // ============================================================================
 
 const LoadingSpinner = ({ message }: { message: string }) => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
+  <div className="min-h-screen flex items-center justify-center bg-slate-50 relative overflow-hidden">
+    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-soft-light"></div>
+    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-transparent via-50% to-slate-50"></div>
     <div className="relative z-10 text-center">
       <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-      <p className="text-gray-600">{message}</p>
+      <p className="text-slate-600">{message}</p>
     </div>
   </div>
 );
@@ -54,14 +57,16 @@ const ErrorDisplay = ({
   error: string;
   onRetry: () => void;
 }) => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
+  <div className="min-h-screen flex items-center justify-center bg-slate-50 relative overflow-hidden">
+    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-soft-light"></div>
+    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-transparent via-50% to-slate-50"></div>
     <div className="relative z-10 text-center">
       <XCircle className="h-12 w-12 mx-auto mb-4 text-red-500" />
-      <p className="text-gray-800 mb-4">{error}</p>
+      <p className="text-slate-900 mb-4">{error}</p>
       <button
         onClick={onRetry}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
       >
         Retry
       </button>
@@ -81,15 +86,17 @@ const CourseList = ({
 }) => {
   if (courses.length === 0) {
     return (
-      <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
-        <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
+      <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide bg-slate-50 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-soft-light"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-transparent via-50% to-slate-50"></div>
         <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
           <div className="text-center py-12">
-            <Award className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            <Award className="h-16 w-16 mx-auto mb-4 text-slate-400" />
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">
               No Courses Yet
             </h3>
-            <p className="text-gray-500">
+            <p className="text-slate-600">
               Create a course first to start taking quizzes.
             </p>
           </div>
@@ -99,12 +106,14 @@ const CourseList = ({
   }
 
   return (
-    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
-      <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
+    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide bg-slate-50 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-soft-light"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-transparent via-50% to-slate-50"></div>
       <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
         <div>
-          <h1 className="text-left text-xl md:text-2xl font-semibold">Quiz</h1>
-          <p className="text-gray-600 text-left mt-2 md:mt-4 mb-4 md:mb-6 text-sm md:text-base">
+          <h1 className="text-left text-xl md:text-2xl font-semibold text-slate-900">Quiz</h1>
+          <p className="text-slate-600 text-left mt-2 md:mt-4 mb-4 md:mb-6 text-sm md:text-base">
             Select a course to view and take quizzes.
           </p>
         </div>
@@ -118,7 +127,7 @@ const CourseList = ({
                   key={course.id}
                   onClick={() => !isLoading && onSelectCourse(course)}
                   className={cn(
-                    "modern-card rounded-2xl md:rounded-4xl overflow-hidden transition-all duration-300 animate-slide-in-up hover:scale-105 relative",
+                    "bg-white rounded-3xl border-2 border-slate-300 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(37,99,235,0.1)] overflow-hidden transition-all duration-300 hover:-translate-y-1 relative",
                     isLoading ? "cursor-wait" : "cursor-pointer group"
                   )}
                 >
@@ -130,23 +139,54 @@ const CourseList = ({
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
-                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300" />
+                    <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/30 transition-colors duration-300" />
                     <h3 className="relative z-10 text-xl md:text-2xl font-bold text-white text-center capitalize leading-tight">
                       {course.title}
                     </h3>
                   </div>
 
                   <div className="p-4 md:p-6">
-                    <p className="text-neutral-600 text-sm md:text-base capitalize font-medium">
+                    <p className="text-slate-600 text-sm md:text-base capitalize">
                       {course.description}
                     </p>
-                    <div className="w-full h-1 bg-gradient-to-r from-black to-gray-600 rounded-full mt-3 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
                   </div>
 
                   {/* Loading Overlay */}
                   {isLoading && (
-                    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center rounded-2xl md:rounded-4xl z-20">
-                      <RefreshCw className="h-8 w-8 animate-spin text-black" />
+                    <div className="absolute inset-0 bg-white/50 backdrop-blur-sm rounded-2xl z-20 flex items-center justify-center">
+                      <div className="scale-75 origin-center -mt-20">
+                        <MultiStepLoader
+                          loading={isLoading}
+                          loadingStates={[
+                            { text: "Loading course..." },
+                            { text: "Fetching quizzes..." },
+                            { text: "Almost ready..." },
+                            { text: "Loading course..." },
+                            { text: "Fetching quizzes..." },
+                            { text: "Almost ready..." },
+                            { text: "Loading course..." },
+                            { text: "Fetching quizzes..." },
+                            { text: "Almost ready..." },
+                            { text: "Loading course..." },
+                            { text: "Fetching quizzes..." },
+                            { text: "Almost ready..." },
+                            { text: "Loading course..." },
+                            { text: "Fetching quizzes..." },
+                            { text: "Almost ready..." },
+                            { text: "Loading course..." },
+                            { text: "Fetching quizzes..." },
+                            { text: "Almost ready..." },
+                            { text: "Loading course..." },
+                            { text: "Fetching quizzes..." },
+                            { text: "Almost ready..." },
+                            { text: "Loading course..." },
+                            { text: "Fetching quizzes..." },
+                            { text: "Almost ready..." },                            
+                          ]}
+                          duration={800}
+                          loop={true}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -168,6 +208,8 @@ const CourseQuizzes = ({
   onReviewQuiz,
   onBackToCourses,
   resettingQuizId,
+  onGenerateQuizzes,
+  isGeneratingQuizzes,
 }: {
   course: Course;
   quizzes: Quiz[];
@@ -176,41 +218,64 @@ const CourseQuizzes = ({
   onReviewQuiz: (quiz: Quiz) => void;
   onBackToCourses: () => void;
   resettingQuizId: string | null;
+  onGenerateQuizzes: () => void;
+  isGeneratingQuizzes: boolean;
 }) => {
   return (
-    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
-      <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
+    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide bg-slate-50 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-soft-light"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-transparent via-50% to-slate-50"></div>
       <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
         <button
           onClick={onBackToCourses}
-          className="flex items-center cursor-pointer font-semibold text-gray-600 hover:text-black mb-4 md:mb-6 transition-colors duration-300 text-sm md:text-base"
+          className="flex items-center cursor-pointer font-semibold text-slate-600 hover:text-blue-600 mb-4 md:mb-6 transition-colors duration-300 text-sm md:text-base"
         >
           <ArrowLeft className="w-3 h-3 md:w-4 md:h-4 mr-2" />
           Back to Courses
         </button>
 
         <div>
-          <h1 className="text-left text-2xl md:text-4xl font-bold text-black capitalize">
+          <h1 className="text-left text-2xl md:text-4xl font-bold text-slate-900 capitalize">
             {course.title}
           </h1>
-          <p className="text-gray-600 text-left mt-2 md:mt-4 mb-4 md:mb-6 text-sm md:text-base">
+          <p className="text-slate-600 text-left mt-2 md:mt-4 mb-4 md:mb-6 text-sm md:text-base">
             Test your knowledge on this course
           </p>
         </div>
 
         {quizzes.length === 0 ? (
           <div className="text-center py-12">
-            <Award className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            <Award className="h-16 w-16 mx-auto mb-4 text-slate-400" />
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">
               No Quizzes Available
             </h3>
-            <p className="text-gray-500">
-              Quizzes will be generated for this course.
+            <p className="text-slate-600 mb-6">
+              Generate quizzes to start testing your knowledge.
             </p>
+            <button
+              onClick={onGenerateQuizzes}
+              disabled={isGeneratingQuizzes}
+              className={cn(
+                "px-6 py-3 rounded-xl font-medium transition-all duration-300",
+                isGeneratingQuizzes
+                  ? "bg-slate-400 cursor-not-allowed text-white"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              )}
+            >
+              {isGeneratingQuizzes ? (
+                <span className="flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Generating Quizzes...
+                </span>
+              ) : (
+                "Generate All Quizzes"
+              )}
+            </button>
           </div>
         ) : (
           <div className="rounded-2xl md:rounded-4xl w-full py-6 md:py-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               {quizzes.map((quiz) => (
                 <QuizCard
                   key={quiz.id}
@@ -251,37 +316,39 @@ const QuizCard = ({
   const hasResult = quiz.latestResult;
 
   return (
-    <div className="modern-card rounded-2xl md:rounded-4xl overflow-hidden transition-all duration-300 hover:scale-105">
+    <div className="bg-white rounded-3xl border border-blue-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(37,99,235,0.1)] overflow-hidden transition-all duration-300">
       <div className="p-4 md:p-6">
-        <div className="flex items-center justify-between mb-4">
-          <span
-            className={cn(
-              "px-3 py-1 rounded-full text-sm font-medium capitalize border",
-              difficultyColors[quiz.difficulty]
-            )}
-          >
-            {quiz.difficulty}
-          </span>
-          <span className="text-gray-500 text-sm">
-            {quiz.totalQuestions} questions
-          </span>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+          <div className="flex items-center gap-4">
+            <span
+              className={cn(
+                "px-3 py-1 rounded-full text-sm font-medium capitalize border",
+                difficultyColors[quiz.difficulty]
+              )}
+            >
+              {quiz.difficulty}
+            </span>
+            <span className="text-slate-600 text-sm">
+              {quiz.totalQuestions} questions
+            </span>
+          </div>
+
+          {hasResult && quiz.latestResult && (
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-slate-600">Best Score:</span>
+                <span className="font-bold text-slate-900">
+                  {quiz.latestResult.score}/{quiz.totalQuestions}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
-        {hasResult && quiz.latestResult && (
-          <div className="mb-4 p-3 bg-gray-50 rounded-2xl border border-gray-200">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Best Score:</span>
-              <span className="font-bold text-black">
-                {quiz.latestResult.score}/{quiz.totalQuestions}
-              </span>
-            </div>
-          </div>
-        )}
-
-        <div className="space-y-2">
+        <div className="flex gap-2">
           <button
             onClick={onStart}
-            className="w-full px-4 py-2 bg-black text-white rounded-2xl md:rounded-4xl hover:bg-gray-800 transition-colors font-medium text-sm md:text-base"
+            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium text-sm md:text-base"
           >
             {hasResult ? "Retake Quiz" : "Start Quiz"}
           </button>
@@ -290,7 +357,7 @@ const QuizCard = ({
             <>
               <button
                 onClick={onReview}
-                className="w-full px-4 py-2 bg-white border border-gray-300 text-black rounded-2xl md:rounded-4xl hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
+                className="flex-1 px-4 py-2 bg-white border border-slate-200 text-slate-900 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
               >
                 <Eye className="w-4 h-4" /> View Answers
               </button>
@@ -298,14 +365,14 @@ const QuizCard = ({
                 onClick={onReset}
                 disabled={isResetting}
                 className={cn(
-                  "w-full px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-2xl md:rounded-4xl hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 text-sm md:text-base",
+                  "px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-colors flex items-center justify-center gap-2 text-sm md:text-base",
                   isResetting && "opacity-50 cursor-not-allowed"
                 )}
               >
                 <RefreshCw
                   className={cn("w-4 h-4", isResetting && "animate-spin")}
                 />
-                {isResetting ? "Resetting..." : "Reset Quiz"}
+                {isResetting ? "Resetting..." : "Reset"}
               </button>
             </>
           )}
@@ -371,19 +438,21 @@ const QuizInProgress = ({
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
-      <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
-      <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
+    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide bg-slate-50 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-soft-light"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-transparent via-50% to-slate-50"></div>
+      <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-40 md:pt-48">
         <div className="max-w-3xl mx-auto">
-          <div className="modern-card rounded-2xl md:rounded-4xl p-6 md:p-8">
+          <div className="bg-white rounded-3xl border border-blue-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 md:p-8">
             <div className="mb-6">
               <div className="flex justify-between items-center mb-4">
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-slate-600">
                   Question {currentQuestionIndex + 1} of {questions.length}
                 </span>
-                <div className="w-full max-w-xs bg-gray-200 rounded-full h-2 ml-4">
+                <div className="w-full max-w-xs bg-slate-200 rounded-full h-2 ml-4">
                   <div
-                    className="bg-black h-2 rounded-full transition-all duration-300"
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                     style={{
                       width: `${
                         ((currentQuestionIndex + 1) / questions.length) * 100
@@ -392,7 +461,7 @@ const QuizInProgress = ({
                   />
                 </div>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-black">
+              <h2 className="text-xl md:text-2xl font-bold text-slate-900">
                 {currentQuestion.question}
               </h2>
             </div>
@@ -403,10 +472,10 @@ const QuizInProgress = ({
                   key={index}
                   onClick={() => handleAnswerSelect(option)}
                   className={cn(
-                    "w-full p-4 text-left rounded-2xl md:rounded-4xl border-2 transition-all text-sm md:text-base",
+                    "w-full p-4 text-left rounded-xl border-2 transition-all text-sm md:text-base",
                     selectedAnswer === option
-                      ? "border-black bg-gray-50"
-                      : "border-gray-200 hover:border-gray-400"
+                      ? "border-blue-600 bg-blue-50"
+                      : "border-slate-200 hover:border-blue-600"
                   )}
                 >
                   <span className="font-medium">{option}</span>
@@ -418,10 +487,10 @@ const QuizInProgress = ({
               onClick={handleNext}
               disabled={!selectedAnswer}
               className={cn(
-                "w-full py-3 rounded-2xl md:rounded-4xl font-medium transition-colors text-sm md:text-base",
+                "w-full py-3 rounded-xl font-medium transition-colors text-sm md:text-base",
                 selectedAnswer
-                  ? "bg-black text-white hover:bg-gray-800"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-slate-300 text-slate-500 cursor-not-allowed"
               )}
             >
               {isLastQuestion ? "Submit Quiz" : "Next Question"}
@@ -452,11 +521,13 @@ const QuizResults = ({
   const percentage = (score / totalQuestions) * 100;
 
   return (
-    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
-      <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
-      <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
+    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide bg-slate-50 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-soft-light"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-transparent via-50% to-slate-50"></div>
+      <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-40 md:pt-48">
         <div className="max-w-2xl mx-auto">
-          <div className="modern-card rounded-2xl md:rounded-4xl p-6 md:p-8 text-center">
+          <div className="bg-white rounded-3xl border border-blue-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 md:p-8 text-center">
             <div className="mb-6">
               {percentage >= 70 ? (
                 <CheckCircle className="h-16 w-16 md:h-20 md:w-20 mx-auto text-green-500" />
@@ -465,18 +536,18 @@ const QuizResults = ({
               )}
             </div>
 
-            <h2 className="text-2xl md:text-3xl font-bold text-black mb-2">
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
               Quiz Complete!
             </h2>
-            <p className="text-gray-600 mb-8 text-sm md:text-base">
+            <p className="text-slate-600 mb-8 text-sm md:text-base">
               {percentage >= 70 ? "Great job!" : "Keep practicing!"}
             </p>
 
-            <div className="bg-gray-50 rounded-2xl md:rounded-4xl p-6 mb-8 border border-gray-200">
-              <div className="text-4xl md:text-5xl font-bold text-black mb-2">
+            <div className="bg-slate-50 rounded-2xl p-6 mb-8 border border-slate-200">
+              <div className="text-4xl md:text-5xl font-bold text-slate-900 mb-2">
                 {score}/{totalQuestions}
               </div>
-              <div className="text-gray-600 text-sm md:text-base">
+              <div className="text-slate-600 text-sm md:text-base">
                 {percentage.toFixed(0)}% Correct
               </div>
             </div>
@@ -484,19 +555,19 @@ const QuizResults = ({
             <div className="space-y-3">
               <button
                 onClick={onReview}
-                className="w-full px-6 py-3 bg-black text-white rounded-2xl md:rounded-4xl hover:bg-gray-800 transition-colors font-medium text-sm md:text-base"
+                className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium text-sm md:text-base"
               >
                 Review Answers
               </button>
               <button
                 onClick={onRestart}
-                className="w-full px-6 py-3 bg-white border border-gray-300 text-black rounded-2xl md:rounded-4xl hover:bg-gray-50 transition-colors font-medium text-sm md:text-base"
+                className="w-full px-6 py-3 bg-white border border-slate-200 text-slate-900 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-colors font-medium text-sm md:text-base"
               >
                 Retake Quiz
               </button>
               <button
                 onClick={onBackToQuizzes}
-                className="w-full px-6 py-3 text-gray-600 hover:text-black transition-colors text-sm md:text-base"
+                className="w-full px-6 py-3 text-slate-600 hover:text-blue-600 transition-colors text-sm md:text-base"
               >
                 Back to Quizzes
               </button>
@@ -521,19 +592,21 @@ const ReviewAnswers = ({
   const questions = quiz.questions as Question[];
 
   return (
-    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide">
-      <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
+    <div className="flex flex-col items-center min-h-screen w-full scrollbar-hide bg-slate-50 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-soft-light"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-transparent via-50% to-slate-50"></div>
       <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6">
             <button
               onClick={onBackToResults}
-              className="flex items-center cursor-pointer font-semibold text-gray-600 hover:text-black mb-4 md:mb-6 transition-colors duration-300 text-sm md:text-base"
+              className="flex items-center cursor-pointer font-semibold text-slate-600 hover:text-blue-600 mb-4 md:mb-6 transition-colors duration-300 text-sm md:text-base"
             >
               <ArrowLeft className="w-3 h-3 md:w-4 md:h-4 mr-2" />
               Back to Results
             </button>
-            <h1 className="text-2xl md:text-3xl font-bold text-black">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
               Review Answers
             </h1>
           </div>
@@ -547,7 +620,7 @@ const ReviewAnswers = ({
                 <div
                   key={question.id}
                   className={cn(
-                    "modern-card rounded-2xl md:rounded-4xl border-2 p-4 md:p-6",
+                    "bg-white rounded-3xl border-2 p-4 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
                     isCorrect ? "border-green-200" : "border-red-200"
                   )}
                 >
@@ -558,10 +631,10 @@ const ReviewAnswers = ({
                       <XCircle className="w-5 h-5 md:w-6 md:h-6 text-red-500 flex-shrink-0 mt-1" />
                     )}
                     <div className="flex-1">
-                      <div className="text-sm text-gray-500 mb-2">
+                      <div className="text-sm text-slate-600 mb-2">
                         Question {index + 1}
                       </div>
-                      <h3 className="text-base md:text-lg font-semibold text-black mb-4">
+                      <h3 className="text-base md:text-lg font-semibold text-slate-900 mb-4">
                         {question.question}
                       </h3>
 
@@ -571,12 +644,12 @@ const ReviewAnswers = ({
                             <div
                               key={optIndex}
                               className={cn(
-                                "p-3 rounded-2xl md:rounded-4xl border text-sm md:text-base",
+                                "p-3 rounded-xl border text-sm md:text-base",
                                 option === question.correctAnswer
                                   ? "bg-green-50 border-green-300"
                                   : option === userAnswer && !isCorrect
                                   ? "bg-red-50 border-red-300"
-                                  : "bg-gray-50 border-gray-200"
+                                  : "bg-slate-50 border-slate-200"
                               )}
                             >
                               <span>{option}</span>
@@ -642,6 +715,7 @@ export default function QuizClient({
 
   const [initialized, setInitialized] = useState(false);
   const [loadingCourseId, setLoadingCourseId] = useState<string | null>(null);
+  const [isGeneratingQuizzes, setIsGeneratingQuizzes] = useState(false);
 
   // ✅ Initialize with server data
   useEffect(() => {
@@ -718,6 +792,44 @@ export default function QuizClient({
     }
   };
 
+  const handleGenerateQuizzes = async () => {
+    if (!selectedCourse) return;
+
+    try {
+      setIsGeneratingQuizzes(true);
+      await quizService.triggerQuizGeneration(selectedCourse.id);
+      
+      // Poll for quizzes to appear (they're being generated in background)
+      let attempts = 0;
+      const maxAttempts = 10;
+      const pollInterval = 3000; // 3 seconds
+
+      const pollForQuizzes = async () => {
+        attempts++;
+        const quizzes = await quizService.getQuizzesForCourse(
+          selectedCourse.id,
+          userId
+        );
+
+        if (quizzes.length > 0 || attempts >= maxAttempts) {
+          setCourseQuizzes(quizzes);
+          setIsGeneratingQuizzes(false);
+          if (quizzes.length === 0) {
+            setError("Quiz generation is taking longer than expected. Please refresh the page in a moment.");
+          }
+        } else {
+          setTimeout(pollForQuizzes, pollInterval);
+        }
+      };
+
+      setTimeout(pollForQuizzes, pollInterval);
+    } catch (error) {
+      console.error("Error generating quizzes:", error);
+      setError("Failed to generate quizzes");
+      setIsGeneratingQuizzes(false);
+    }
+  };
+
   const handleResetQuiz = async (quiz: Quiz) => {
     if (!selectedCourse) return;
 
@@ -791,6 +903,8 @@ export default function QuizClient({
             onReviewQuiz={handleReviewQuiz}
             onBackToCourses={() => setView("courses")}
             resettingQuizId={resettingQuizId}
+            onGenerateQuizzes={handleGenerateQuizzes}
+            isGeneratingQuizzes={isGeneratingQuizzes}
           />
         ) : null;
 
