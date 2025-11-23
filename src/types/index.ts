@@ -74,7 +74,7 @@ export interface UserPreferences {
 
 export interface Course {
   id: string; // UUID in database
-  userId: number;
+  userId: number | null; // Nullable - preserved when user is deleted
   title: string;
   description?: string;
   gendesc?: string; // AI-generated description
@@ -139,7 +139,7 @@ export interface Quiz {
   totalQuestions: number;
   timeLimit?: number;
   latestResult?: QuizResult;
-  userId: number; // Updated to use integer ID
+  userId: number | null; // Nullable - preserved when user is deleted
 }
 
 export interface Question {
@@ -155,7 +155,7 @@ export interface Question {
 export interface QuizResult {
   id: string;
   quizId: string;
-  userId: number; // Updated to use integer ID
+  userId: number | null; // Nullable - preserved when user is deleted
   answers: Record<string, string | string[]>;
   score: number;
   totalQuestions: number;
@@ -169,7 +169,7 @@ export interface QuizResult {
 
 export interface UploadedFile {
   id: string; // UUID from database
-  userId?: number;
+  userId?: number | null; // Nullable - preserved when user is deleted
   lessonId?: number;
   fileName: string;
   originalName?: string; // Backward compatibility

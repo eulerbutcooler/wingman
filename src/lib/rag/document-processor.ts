@@ -116,17 +116,21 @@ export async function processDocument(
     if (!courseId) {
       console.log(`⚠️ No direct course association found for file ${fileRecord.id}, looking for user's courses...`);
       
-      // Try to find any course by this user
-      const [userCourse] = await db
-        .select({ id: courses.id })
-        .from(courses)
-        .where(eq(courses.userId, fileRecord.userId))
-        .limit(1);
-        
-      if (userCourse) {
-        courseId = userCourse.id;
-        console.log(`✅ Using user's existing course ${courseId} for file ${fileRecord.id}`);
-      } else {
+      // Try to find any course by this user (only if userId is not null)
+      if (fileRecord.userId !== null) {
+        const [userCourse] = await db
+          .select({ id: courses.id })
+          .from(courses)
+          .where(eq(courses.userId, fileRecord.userId))
+          .limit(1);
+          
+        if (userCourse) {
+          courseId = userCourse.id;
+          console.log(`✅ Using user's existing course ${courseId} for file ${fileRecord.id}`);
+        }
+      }
+      
+      if (!courseId) {
         // Create a default course for testing if none exists
         const [newCourse] = await db
           .insert(courses)

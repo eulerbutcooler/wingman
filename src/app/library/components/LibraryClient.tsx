@@ -408,7 +408,7 @@ interface ServerCourse {
   imageUrl: string | null;
   createdAt: Date | null;
   updatedAt: Date | null;
-  userId: number;
+  userId: number | null; // Nullable - preserved when user is deleted
   topics: unknown[];
 }
 
