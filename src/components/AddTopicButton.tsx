@@ -61,7 +61,7 @@ export default function AddTopicButton({
       {/* Add Topic Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-white p-4 rounded-3xl flex items-center justify-center gap-3 text-slate-600 hover:text-blue-600 hover:border-blue-600 transition-all duration-300 group border-2 border-dashed border-slate-200 shadow-[0_4px_15px_rgb(0,0,0,0.04)]"
+        className="bg-white p-4 rounded-2xl md:rounded-4xl flex items-center justify-center gap-3 text-neutral-600 border border-gray-200 shadow-sm"
       >
         <FaPlus className="text-lg" />
         <span className="font-semibold">Add New Topic</span>
@@ -69,10 +69,10 @@ export default function AddTopicButton({
 
       {/* Modal */}
       {isOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-[0_20px_50px_rgb(0,0,0,0.3)] w-full max-w-md border border-slate-100">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl md:rounded-4xl shadow-2xl w-full max-w-md">
             <div className="p-6 md:p-8">
-              <h2 className="text-2xl font-bold mb-6 text-slate-900">
+              <h2 className="text-2xl font-bold mb-6 text-black">
                 Add New Topic
               </h2>
               
@@ -80,7 +80,7 @@ export default function AddTopicButton({
                 <div className="mb-6">
                   <label
                     htmlFor="topicTitle"
-                    className="block text-sm font-semibold text-slate-700 mb-2"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
                   >
                     Topic Title
                   </label>
@@ -90,7 +90,7 @@ export default function AddTopicButton({
                     value={topicTitle}
                     onChange={(e) => setTopicTitle(e.target.value)}
                     placeholder="e.g., Advanced Propulsion Systems"
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all bg-slate-50"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-all"
                     disabled={isLoading}
                     autoFocus
                   />
@@ -104,14 +104,14 @@ export default function AddTopicButton({
                     type="button"
                     onClick={handleClose}
                     disabled={isLoading}
-                    className="flex-1 px-6 py-3 border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium bg-white"
+                    className="flex-1 px-6 py-3 border border-gray-300 rounded-2xl text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isLoading || !topicTitle.trim()}
-                    className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-sm"
+                    className="flex-1 px-6 py-3 bg-black text-white rounded-2xl hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >
                     {isLoading ? (
                       <span className="flex items-center justify-center gap-2">

@@ -113,7 +113,7 @@ export default function AddLessonButton({
       {/* Add Lesson Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 text-sm text-navy hover:text-blue-600 font-medium transition-colors group"
+        className="flex items-center gap-2 text-sm text-neutral-600 hover:text-black font-medium transition-colors group"
       >
         <div className="w-6 h-6 bg-navy/10 rounded-full flex items-center justify-center group-hover:bg-navy group-hover:text-white transition-all">
           <FaPlus className="text-xs" />
@@ -123,10 +123,10 @@ export default function AddLessonButton({
 
       {/* Modal */}
       {isOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-[0_20px_50px_rgb(0,0,0,0.3)] w-full max-w-md border border-slate-100">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl md:rounded-4xl shadow-2xl w-full max-w-md">
             <div className="p-6 md:p-8">
-              <h2 className="text-2xl font-bold mb-6 text-slate-900">
+              <h2 className="text-2xl font-bold mb-6 text-black">
                 Add New Lesson
               </h2>
 
@@ -135,7 +135,7 @@ export default function AddLessonButton({
                 <div className="mb-4">
                   <label
                     htmlFor="lessonTitle"
-                    className="block text-sm font-semibold text-slate-700 mb-2"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
                   >
                     Lesson Title
                   </label>
@@ -145,7 +145,7 @@ export default function AddLessonButton({
                     value={lessonTitle}
                     onChange={(e) => setLessonTitle(e.target.value)}
                     placeholder="e.g., Ramjet Engine Fundamentals"
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all bg-slate-50"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-all"
                     disabled={isLoading}
                     autoFocus
                   />
@@ -155,7 +155,7 @@ export default function AddLessonButton({
                 <div className="mb-4">
                   <label
                     htmlFor="lessonType"
-                    className="block text-sm font-semibold text-slate-700 mb-2"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
                   >
                     File Type
                   </label>
@@ -165,7 +165,7 @@ export default function AddLessonButton({
                     onChange={(e) =>
                       setLessonType(e.target.value as "pdf" | "docx" | "pptx")
                     }
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all bg-slate-50"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-all"
                     disabled={isLoading || !!selectedFile}
                   >
                     <option value="pdf">PDF Document</option>
@@ -197,15 +197,15 @@ export default function AddLessonButton({
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isLoading}
-                    className="w-full px-4 py-3 border-2 border-dashed border-slate-200 rounded-xl hover:border-blue-600 hover:bg-blue-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-2xl hover:border-navy hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    <FileText className="w-5 h-5 text-slate-500" />
+                    <FileText className="w-5 h-5 text-gray-500" />
                     {selectedFile ? (
-                      <span className="text-sm font-medium text-blue-600">
+                      <span className="text-sm font-medium text-navy">
                         ✓ {selectedFile.name}
                       </span>
                     ) : (
-                      <span className="text-sm text-slate-600">
+                      <span className="text-sm text-gray-600">
                         Click to select file
                       </span>
                     )}
@@ -215,13 +215,13 @@ export default function AddLessonButton({
                 {/* Upload Progress */}
                 {isLoading && uploadProgress > 0 && (
                   <div className="mb-4">
-                    <div className="flex justify-between text-sm text-slate-600 mb-1">
+                    <div className="flex justify-between text-sm text-gray-600 mb-1">
                       <span>Uploading...</span>
                       <span>{Math.round(uploadProgress)}%</span>
                     </div>
-                    <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-blue-600 transition-all duration-300"
+                        className="h-full bg-navy transition-all duration-300"
                         style={{ width: `${uploadProgress}%` }}
                       />
                     </div>
@@ -230,7 +230,7 @@ export default function AddLessonButton({
 
                 {/* Error Message */}
                 {error && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-2xl">
                     <p className="text-sm text-red-600">{error}</p>
                   </div>
                 )}
@@ -241,7 +241,7 @@ export default function AddLessonButton({
                     type="button"
                     onClick={handleClose}
                     disabled={isLoading}
-                    className="flex-1 px-6 py-3 border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium bg-white"
+                    className="flex-1 px-6 py-3 border border-gray-300 rounded-2xl text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >
                     Cancel
                   </button>
@@ -250,7 +250,7 @@ export default function AddLessonButton({
                     disabled={
                       isLoading || !lessonTitle.trim() || !selectedFile
                     }
-                    className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-sm"
+                    className="flex-1 px-6 py-3 bg-black text-white rounded-2xl hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >
                     {isLoading ? (
                       <span className="flex items-center justify-center gap-2">

@@ -230,13 +230,10 @@ function ChatContent() {
   };
 
   return (
-    <div className="w-full h-screen overflow-hidden pb-12 pt-24 md:pt-34 bg-slate-50">
-      {/* Grid pattern background */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-soft-light"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-transparent via-50% to-slate-50" />
-      </div>
+    <div className="w-full h-screen overflow-hidden pb-12 pt-24 md:pt-34">
+      {/* Background */}
+      <div className="fixed inset-0 z-0 bg-[url('/scketch.jpeg')] bg-cover bg-center"></div>
+      <div className="fixed inset-0 z-0 bg-white/40 backdrop-blur-sm"></div>
       <div className="relative z-10 w-full px-2 md:px-6 md:w-11/12 mx-auto justify-between flex h-full">
         <div className="flex h-full flex-1 gap-2 md:gap-8">
           {/* Desktop: Show sidebar normally */}
@@ -250,18 +247,18 @@ function ChatContent() {
 
           {/* Mobile: Sidebar overlay */}
           {isMobileSidebarOpen && (
-            <div className="fixed inset-0 bg-slate-900/50 z-40 md:hidden">
+            <div className="fixed inset-0 bg-black/50 z-40 md:hidden">
               <div className="fixed left-0 top-0 h-full w-80 z-50 transform transition-transform bg-white">
                 {/* Mobile sidebar header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-200">
-                  <h2 className="text-lg font-semibold text-slate-900">
+                <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900">
                     Chat History
                   </h2>
                   <button
                     onClick={() => setIsMobileSidebarOpen(false)}
-                    className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
+                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
                   >
-                    <X size={20} className="text-slate-600" />
+                    <X size={20} className="text-gray-600" />
                   </button>
                 </div>
 
@@ -281,18 +278,18 @@ function ChatContent() {
             </div>
           )}
 
-          <div className="flex-1 flex flex-col bg-white rounded-3xl border-2 border-slate-300 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full">
+          <div className="flex-1 flex flex-col bg-white rounded-2xl md:rounded-4xl border border-gray-200 shadow-sm h-full">
             {/* Mobile: Add history button */}
-            <div className="md:hidden flex items-center justify-between p-4 border-b border-slate-200">
+            <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-200">
               <button
                 onClick={() => setIsMobileSidebarOpen(true)}
-                className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
               >
-                <History size={18} className="text-slate-600" />
-                <span className="text-sm font-medium text-slate-900">History</span>
+                <History size={18} className="text-gray-600" />
+                <span className="text-sm font-medium text-gray-900">History</span>
               </button>
 
-              <div className="text-sm font-medium text-slate-600">
+              <div className="text-sm font-medium text-gray-600">
                 Aeromentor Chat
               </div>
             </div>
@@ -300,10 +297,10 @@ function ChatContent() {
             <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-4 md:space-y-6 min-h-0 scrollbar-hide">
               {conversation.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center max-w-2xl mx-auto px-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-600 rounded-full flex items-center justify-center mb-4 md:mb-6">
+                  <div className="w-12 h-12 md:w-16 md:h-16 bg-navy rounded-full flex items-center justify-center mb-4 md:mb-6">
                     <Bot size={20} className="text-white md:w-6 md:h-6" />
                   </div>
-                  <p className="text-slate-600 mb-6 md:mb-8 leading-relaxed text-sm md:text-base">
+                  <p className="text-gray-600 mb-6 md:mb-8 leading-relaxed text-sm md:text-base">
                     I&apos;m AeroMentor, your virtual teaching assistant for the
                     Naval Institute of Aeronautical Technology (NIAT). Ask me
                     about aeronautical engineering, naval technology, or any
@@ -311,19 +308,19 @@ function ChatContent() {
                     and understand complex concepts!
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full max-w-lg">
-                    <div className="p-3 md:p-4 bg-white rounded-3xl border border-slate-200 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
-                      <h3 className="font-medium text-slate-900 mb-2 text-sm md:text-base">
+                    <div className="p-3 md:p-4 bg-white rounded-2xl md:rounded-4xl border border-gray-200 shadow-sm">
+                      <h3 className="font-medium text-gray-900 mb-2 text-sm md:text-base">
                         Engineering Concepts
                       </h3>
-                      <p className="text-sm text-slate-600">
+                      <p className="text-sm text-gray-600">
                         Ask about aerodynamics, propulsion, structures, and more
                       </p>
                     </div>
-                    <div className="p-3 md:p-4 bg-white rounded-3xl border border-slate-200 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
-                      <h3 className="font-medium text-slate-900 mb-2 text-sm md:text-base">
+                    <div className="p-3 md:p-4 bg-white rounded-2xl md:rounded-4xl border border-gray-200 shadow-sm">
+                      <h3 className="font-medium text-gray-900 mb-2 text-sm md:text-base">
                         Problem Solving
                       </h3>
-                      <p className="text-sm text-slate-600">
+                      <p className="text-sm text-gray-600">
                         Get guidance on formulas, methods, and logical steps
                       </p>
                     </div>
@@ -338,15 +335,15 @@ function ChatContent() {
                     }`}
                   >
                     {message.role === "assistant" && (
-                      <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <div className="w-8 h-8 bg-navy rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                         <Bot size={16} className="text-white" />
                       </div>
                     )}
                     <div
-                      className={`max-w-3xl rounded-3xl px-4 py-3 relative ${
+                      className={`max-w-3xl rounded-2xl md:rounded-4xl px-4 py-3 relative ${
                         message.role === "user"
-                          ? "bg-blue-600 text-white ml-12"
-                          : "bg-slate-50 border border-slate-200 text-slate-900 shadow-[0_2px_10px_rgb(0,0,0,0.02)]"
+                          ? "bg-navy text-white ml-12"
+                          : "bg-gray-50 border border-gray-200 text-gray-900 shadow-sm"
                       }`}
                     >
                       <div className="text-sm leading-relaxed prose whitespace-pre-wrap">
@@ -360,8 +357,8 @@ function ChatContent() {
                           disabled={isLoadingAudio && speakingIndex === index}
                           className={`absolute bottom-2 right-2 p-1.5 rounded-full transition-all duration-200 ${
                             speakingIndex === index
-                              ? "bg-blue-600 text-white shadow-md"
-                              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                              ? "bg-navy text-white shadow-md"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                           } ${
                             isLoadingAudio && speakingIndex === index
                               ? "opacity-50 cursor-wait"
@@ -386,8 +383,8 @@ function ChatContent() {
                       )}
                     </div>
                     {message.role === "user" && (
-                      <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <User size={16} className="text-slate-600" />
+                      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                        <User size={16} className="text-gray-600" />
                       </div>
                     )}
                   </div>
@@ -395,21 +392,21 @@ function ChatContent() {
               )}
               {isLoading && (
                 <div className="flex gap-4 justify-start">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-8 h-8 bg-navy rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <Bot size={16} className="text-white" />
                   </div>
-                  <div className="bg-slate-50 border border-slate-200 rounded-3xl px-4 py-3 shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
+                  <div className="bg-gray-50 border border-gray-200 rounded-2xl md:rounded-4xl px-4 py-3 shadow-sm">
                     <div className="flex items-center gap-1">
                       <div
-                        className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
                         style={{ animationDelay: "0s" }}
                       ></div>
                       <div
-                        className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
                         style={{ animationDelay: "0.1s" }}
                       ></div>
                       <div
-                        className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
                         style={{ animationDelay: "0.2s" }}
                       ></div>
                     </div>
@@ -419,7 +416,7 @@ function ChatContent() {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="px-3 md:px-6 pb-3 md:pb-6 rounded-3xl shadow-[0_-25px_15px_-4px] shadow-white flex-shrink-0">
+            <div className="px-3 md:px-6 pb-3 md:pb-6 rounded-2xl md:rounded-4xl shadow-[0_-25px_15px_-4px] shadow-white flex-shrink-0">
               <form
                 onSubmit={handleSubmit}
                 className="flex flex-col md:flex-row items-center gap-2 md:gap-4"
@@ -431,7 +428,7 @@ function ChatContent() {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Ask Aeromentor about your studies..."
-                    className="w-full px-3 md:px-4 py-3 md:py-4 pr-14 border-2 border-slate-200  rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent resize-none min-h-[48px] max-h-32 text-sm md:text-base text-slate-900 placeholder:text-slate-400 scrollbar-hide"
+                    className="w-full px-3 md:px-4 py-3 md:py-4 pr-14 border border-gray-200 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent resize-none min-h-[48px] max-h-32 text-sm md:text-base text-gray-900 placeholder:text-gray-400 scrollbar-hide"
                     rows={1}
                     disabled={isLoading}
                   />
@@ -445,16 +442,16 @@ function ChatContent() {
                     />
                   </div>
                 </div>
-                <div className="flex items-center gap-2 md:gap-6 w-full md:w-auto">
+                <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto">
                   <button
                     type="button"
                     onClick={() =>
                       setMode(mode === "normal" ? "deep" : "normal")
                     }
-                    className={`px-3 md:px-4 py-3 md:py-4 text-sm md:text-base rounded-xl cursor-pointer transition-all duration-300 flex-1 md:flex-none ${
+                    className={`px-4 md:px-6 py-3 md:py-4 text-sm md:text-base rounded-full cursor-pointer transition-all duration-300 flex-1 md:flex-none ${
                       mode === "deep"
-                        ? "bg-slate-900 text-white shadow-sm hover:shadow-md"
-                        : "bg-white border border-slate-200 shadow-sm text-slate-900 hover:shadow-md"
+                        ? "bg-black text-white shadow-sm"
+                        : "bg-white border border-gray-200 shadow-sm text-gray-900"
                     }`}
                     disabled={isLoading}
                   >
@@ -463,10 +460,10 @@ function ChatContent() {
                   <button
                     type="button"
                     onClick={() => setVideoMode(!videoMode)}
-                    className={`px-3 md:px-4 py-3 md:py-4 text-sm md:text-base rounded-xl cursor-pointer transition-all duration-300 flex-1 md:flex-none ${
+                    className={`px-4 md:px-6 py-3 md:py-4 text-sm md:text-base rounded-full cursor-pointer transition-all duration-300 flex-1 md:flex-none ${
                       videoMode
-                        ? "bg-blue-600 text-white shadow-sm hover:shadow-md"
-                        : "bg-white border border-slate-200 shadow-sm text-slate-900 hover:shadow-md"
+                        ? "bg-navy text-white shadow-sm"
+                        : "bg-white border border-gray-200 shadow-sm text-gray-900"
                     }`}
                     disabled={isLoading}
                     title={
@@ -484,7 +481,7 @@ function ChatContent() {
                       // Manual button click - ensure ref is false
                       isVoiceSubmitRef.current = false;
                     }}
-                    className="p-3 md:p-5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-sm"
+                    className="p-4 md:p-5 bg-navy text-white rounded-full hover:opacity-90 cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center shadow-sm"
                   >
                     <FaArrowUp size={16} />
                   </button>
