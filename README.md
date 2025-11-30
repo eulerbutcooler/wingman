@@ -1,3 +1,3 @@
 Aeromentor - RAG based e-learning app!
-- V2
+- V2 back to v1
 
