@@ -142,10 +142,18 @@ export async function searchAllCoursesHybrid(
     let targetCourseName: string | null = null;
     
     // Known course names and aliases (for precise matching)
+    // NOTE: Order matters - more specific patterns should come first to avoid partial matches
     const courseAliases = [
-      { patterns: ['aerodynamics', 'aero', 'air'], fullName: 'Aerodynamics' },
-      { patterns: ['solid mechanics', 'solid', 'mechanics'], fullName: 'Solid Mechanics' },
-      { patterns: ['aerospace vehicle system', 'avs', 'aerospace'], fullName: 'Aerospace Vehicle System' },
+      // Multi-word courses (check these FIRST to avoid partial matches)
+      { patterns: ['helicopter theory', 'helicopter'], fullName: 'Helicopter Theory' },
+      { patterns: ['solid mechanics'], fullName: 'Solid Mechanics' },
+      { patterns: ['aircraft structures', 'aircraft structure'], fullName: 'Aircraft Structures' },
+      { patterns: ['aerospace vehicle system', 'avs'], fullName: 'Aerospace Vehicle System' },
+      { patterns: ['power generation and distribution', 'power generation', 'power distribution'], fullName: 'Power Generation and Distribution' },
+      { patterns: ['propulsion system', 'propulsion'], fullName: 'Propulsion System' },
+      { patterns: ['introduction to armament', 'armament'], fullName: 'Introduction to Armament' },
+      // Single-word courses (check these LAST)
+      { patterns: ['aerodynamics', 'aero'], fullName: 'Aerodynamics' },
     ];
     
     const lowerQuery = query.toLowerCase();

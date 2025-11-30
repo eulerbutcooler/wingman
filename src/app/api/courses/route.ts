@@ -469,8 +469,7 @@ async function generateQuizzesForCourse(
       const result = await generateQuizForCourse(
         courseId,
         parseInt(userId), // Convert string to number
-        difficulty,
-        false // not regenerating
+        difficulty
       );
 
       console.log(

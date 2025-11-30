@@ -68,33 +68,33 @@ export default function FileViewerModal({
         )}`;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-[0_20px_50px_rgb(0,0,0,0.3)] w-full max-w-7xl h-[90vh] flex flex-col border border-slate-100">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl md:rounded-4xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 md:p-6 border-b border-slate-200">
+        <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200">
           <div className="flex-1 min-w-0">
-            <h2 className="text-xl md:text-2xl font-bold text-slate-900 truncate">
+            <h2 className="text-xl md:text-2xl font-bold text-black truncate">
               {fileName}
             </h2>
-            <p className="text-sm text-slate-500 uppercase mt-1 font-medium">
+            <p className="text-sm text-gray-500 uppercase mt-1 font-medium">
               {fileType} Document
             </p>
           </div>
           <button
             onClick={onClose}
-            className="ml-4 w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors flex-shrink-0"
+            className="ml-4 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors flex-shrink-0"
             aria-label="Close viewer"
           >
-            <X className="w-6 h-6 text-slate-600" />
+            <X className="w-6 h-6 text-gray-600" />
           </button>
         </div>
 
         {/* Viewer */}
-        <div className="flex-1 overflow-hidden bg-slate-50 flex items-center justify-center">
+        <div className="flex-1 overflow-hidden bg-gray-50 flex items-center justify-center">
           {loading && fileType === "pdf" ? (
             <div className="flex flex-col items-center gap-3">
-              <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-              <p className="text-slate-600">Loading PDF...</p>
+              <div className="w-12 h-12 border-4 border-navy border-t-transparent rounded-full animate-spin" />
+              <p className="text-gray-600">Loading PDF...</p>
             </div>
           ) : error && fileType === "pdf" ? (
             <div className="text-center p-8">
@@ -102,7 +102,7 @@ export default function FileViewerModal({
               <a
                 href={fileUrl}
                 download={fileName}
-                className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-medium inline-block shadow-sm"
+                className="px-6 py-3 bg-black text-white rounded-2xl hover:bg-gray-800 transition-all font-medium inline-block"
               >
                 Download PDF Instead
               </a>
@@ -118,18 +118,18 @@ export default function FileViewerModal({
         </div>
 
         {/* Footer with actions */}
-        <div className="flex items-center justify-between p-4 border-t border-slate-200">
+        <div className="flex items-center justify-between p-4 border-t border-gray-200">
           <a
             href={fileUrl}
             download={fileName}
-            className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
+            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-black transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
             Download Original
           </a>
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-medium shadow-sm"
+            className="px-6 py-2 bg-black text-white rounded-2xl hover:bg-gray-800 transition-all font-medium"
           >
             Close
           </button>

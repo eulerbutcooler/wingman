@@ -112,13 +112,24 @@ const GENERAL_LESSON_PLAN_PATTERNS = [
 
 /**
  * Course name patterns and aliases
+ * NOTE: Order matters - more specific patterns should come first
  */
 const COURSE_PATTERNS = [
-  { pattern: /\baero(?:dynamics?)?\b/i, name: "Aerodynamics" },
-  { pattern: /\bair\s+course\b/i, name: "Aerodynamics" },
+  // Multi-word courses (check first)
+  { pattern: /\bhelicopter\s+theory\b/i, name: "Helicopter Theory" },
+  { pattern: /\bhelicopter\b/i, name: "Helicopter Theory" },
   { pattern: /\bsolid\s+mechanics?\b/i, name: "Solid Mechanics" },
+  { pattern: /\baircraft\s+structures?\b/i, name: "Aircraft Structures" },
   { pattern: /\baerospace\s+vehicle\s+system\b/i, name: "Aerospace Vehicle System" },
   { pattern: /\bavs\b/i, name: "Aerospace Vehicle System" },
+  { pattern: /\bpower\s+generation\b/i, name: "Power Generation and Distribution" },
+  { pattern: /\bpower\s+distribution\b/i, name: "Power Generation and Distribution" },
+  { pattern: /\bpropulsion\s+system\b/i, name: "Propulsion System" },
+  { pattern: /\bpropulsion\b/i, name: "Propulsion System" },
+  { pattern: /\bintroduction\s+to\s+armament\b/i, name: "Introduction to Armament" },
+  { pattern: /\barmament\b/i, name: "Introduction to Armament" },
+  // Single-word courses (check last)
+  { pattern: /\baero(?:dynamics?)?\b/i, name: "Aerodynamics" },
 ];
 
 /**

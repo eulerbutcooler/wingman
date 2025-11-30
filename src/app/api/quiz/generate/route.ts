@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { courseId, difficulty, regenerate = false } = await request.json();
+    const { courseId, difficulty } = await request.json();
 
     if (!courseId || !difficulty) {
       return NextResponse.json(
@@ -32,8 +32,7 @@ export async function POST(request: NextRequest) {
     const result = await generateQuizForCourse(
       courseId,
       user.id,
-      difficulty as "easy" | "medium" | "hard",
-      regenerate
+      difficulty as "easy" | "medium" | "hard"
     );
 
     return NextResponse.json(result);

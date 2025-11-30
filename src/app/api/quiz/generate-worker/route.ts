@@ -40,8 +40,7 @@ export async function POST(request: NextRequest) {
         generateQuizForCourse(
           courseId,
           parseInt(userId),
-          difficulty,
-          false // not regenerating
+          difficulty
         ).then((result) => ({
           difficulty,
           success: true,

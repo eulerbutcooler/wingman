@@ -100,8 +100,7 @@ async function generateQuizzesForCourse(courseId: string, userId: string) {
       const result = await generateQuizForCourse(
         courseId,
         parseInt(userId),
-        difficulty,
-        false
+        difficulty
       );
 
       console.log(

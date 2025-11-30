@@ -51,69 +51,79 @@ export default function Navbar() {
       <div
         ref={navRef}
         className={[
-          "flex w-full max-w-5xl z-50 items-center justify-between px-6 py-3 fixed top-6 left-1/2 -translate-x-1/2 rounded-full border",
-          "transition-all duration-300",
-          // Scrolled state will be applied via CSS class
+          "flex w-11/12 z-50 items-center justify-between pl-5 pr-3 py-3 fixed top-2 left-1/2 -translate-x-1/2 rounded-4xl",
+          // Smooth color fade
+          "transition-colors duration-150 ease-in-out",
+          // Transparent by default, background only when scrolled via CSS
         ].join(" ")}
-        style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          backdropFilter: 'blur(12px)',
-          borderColor: 'rgb(219 234 254)',
-          boxShadow: '0 10px 15px -3px rgb(59 130 246 / 0.05), 0 4px 6px -4px rgb(59 130 246 / 0.05)'
-        }}
       >
-        <div className="flex items-center gap-2 text-xl font-bold text-slate-900 tracking-tighter">
-          <span>AeroMentor</span>
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold">AeroMentor</h1>
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8 text-slate-600 font-medium text-sm">
+        <div className="hidden md:flex text-black space-x-6 relative">
           <Link
             href="/"
-            className={`hover:text-blue-600 transition-colors ${
+            className={`relative pb-1 transition-colors ${
               isActive("/") && pathname === "/"
-                ? "text-blue-600 font-semibold"
-                : ""
+                ? "text-black font-semibold"
+                : "hover:text-navy"
             }`}
           >
             Home
+            {isActive("/") && pathname === "/" && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black rounded-full animate-slide-in" />
+            )}
           </Link>
           <Link
             href="/chat"
-            className={`hover:text-blue-600 transition-colors ${
-              isActive("/chat") ? "text-blue-600 font-semibold" : ""
+            className={`relative pb-1 transition-colors ${
+              isActive("/chat") ? "text-black font-semibold" : "hover:text-navy"
             }`}
           >
             Chat
+            {isActive("/chat") && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black rounded-full animate-slide-in" />
+            )}
           </Link>
           <Link
             href="/library"
-            className={`hover:text-blue-600 transition-colors ${
+            className={`relative pb-1 transition-colors ${
               isActive("/library")
-                ? "text-blue-600 font-semibold"
-                : ""
+                ? "text-black font-semibold"
+                : "hover:text-navy"
             }`}
           >
             Library
+            {isActive("/library") && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black rounded-full animate-slide-in" />
+            )}
           </Link>
           <Link
             href="/quiz"
-            className={`hover:text-blue-600 transition-colors ${
-              isActive("/quiz") ? "text-blue-600 font-semibold" : ""
+            className={`relative pb-1 transition-colors ${
+              isActive("/quiz") ? "text-black font-semibold" : "hover:text-navy"
             }`}
           >
             Quiz
+            {isActive("/quiz") && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black rounded-full animate-slide-in" />
+            )}
           </Link>
           {showAnalytics && (
             <Link
               href="/analytics"
-              className={`hover:text-blue-600 transition-colors ${
+              className={`relative pb-1 transition-colors ${
                 isActive("/analytics")
-                  ? "text-blue-600 font-semibold"
-                  : ""
+                  ? "text-black font-semibold"
+                  : "hover:text-navy"
               }`}
             >
               Analytics
+              {isActive("/analytics") && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black rounded-full animate-slide-in" />
+              )}
             </Link>
           )}
         </div>
@@ -122,25 +132,25 @@ export default function Navbar() {
         <div className="md:hidden">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-700"
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
-            {isMobileMenuOpen ? <FiX size={20} /> : <FiMenu size={20} />}
+            {isMobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
         </div>
 
         {/* Desktop Auth Button */}
-        <div className="hidden md:block">
+        <div className="hidden md:block font-bold">
           {loading ? (
-            <div className="py-2 px-5 bg-gray-200 rounded-full animate-pulse w-24 h-10" />
+            <div className="py-2 px-4 bg-gray-200 rounded-full animate-pulse w-20 h-10" />
           ) : !user ? (
             <Link href="/signin">
-              <button className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-full font-semibold transition-all hover:shadow-lg hover:shadow-slate-900/20 text-sm">
-                Get Started
+              <button className="py-2 px-4 bg-black cursor-pointer rounded-full text-white hover:bg-gray-800 transition-colors">
+                Get started
               </button>
             </Link>
           ) : (
             <Link href="/dashboard">
-              <button className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-full font-semibold transition-all hover:shadow-lg hover:shadow-slate-900/20 text-sm">
+              <button className="py-2 px-4 bg-black cursor-pointer rounded-full text-white hover:bg-gray-800 transition-colors">
                 {user.user_metadata?.name?.charAt(0).toUpperCase() ||
                   user.email?.charAt(0).toUpperCase() ||
                   "U"}
@@ -153,84 +163,99 @@ export default function Navbar() {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-[60] md:hidden animate-fade-in"
+          className="fixed inset-0 bg-black bg-opacity-50 z-[60] md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         >
           <div
-            className="fixed top-24 w-[90%] max-w-md left-1/2 -translate-x-1/2 bg-white border border-slate-100 rounded-2xl shadow-2xl p-4 z-[70] animate-fade-in-up"
+            className="fixed top-16 right-4 left-4 bg-white rounded-2xl shadow-2xl p-6 z-[70]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col space-y-6">
               {/* Mobile Navigation Links */}
               <Link
                 href="/"
-                className={`text-slate-600 hover:bg-slate-50 px-4 py-3 rounded-xl block font-medium ${
+                className={`relative text-lg font-medium transition-colors inline-block ${
                   isActive("/") && pathname === "/"
-                    ? "bg-slate-50 text-blue-600"
-                    : ""
+                    ? "text-black font-bold"
+                    : "text-black hover:text-navy"
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Home
+                HOME
+                {isActive("/") && pathname === "/" && (
+                  <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-black rounded-full" />
+                )}
               </Link>
               <Link
                 href="/chat"
-                className={`text-slate-600 hover:bg-slate-50 px-4 py-3 rounded-xl block font-medium ${
+                className={`relative text-lg font-medium transition-colors inline-block ${
                   isActive("/chat")
-                    ? "bg-slate-50 text-blue-600"
-                    : ""
+                    ? "text-black font-bold"
+                    : "text-black hover:text-navy"
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Chat
+                CHAT
+                {isActive("/chat") && (
+                  <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-black rounded-full" />
+                )}
               </Link>
               <Link
                 href="/library"
-                className={`text-slate-600 hover:bg-slate-50 px-4 py-3 rounded-xl block font-medium ${
+                className={`relative text-lg font-medium transition-colors inline-block ${
                   isActive("/library")
-                    ? "bg-slate-50 text-blue-600"
-                    : ""
+                    ? "text-black font-bold"
+                    : "text-black hover:text-navy"
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Library
+                LIBRARY
+                {isActive("/library") && (
+                  <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-black rounded-full" />
+                )}
               </Link>
               <Link
                 href="/quiz"
-                className={`text-slate-600 hover:bg-slate-50 px-4 py-3 rounded-xl block font-medium ${
+                className={`relative text-lg font-medium transition-colors inline-block ${
                   isActive("/quiz")
-                    ? "bg-slate-50 text-blue-600"
-                    : ""
+                    ? "text-black font-bold"
+                    : "text-black hover:text-navy"
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Quiz
+                QUIZ
+                {isActive("/quiz") && (
+                  <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-black rounded-full" />
+                )}
               </Link>
               {showAnalytics && (
                 <Link
                   href="/analytics"
-                  className={`text-slate-600 hover:bg-slate-50 px-4 py-3 rounded-xl block font-medium ${
+                  className={`relative text-lg font-medium transition-colors inline-block ${
                     isActive("/analytics")
-                      ? "bg-slate-50 text-blue-600"
-                      : ""
+                      ? "text-black font-bold"
+                      : "text-black hover:text-navy"
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Analytics
+                  ANALYTICS
+                  {isActive("/analytics") && (
+                    <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-black rounded-full" />
+                  )}
                 </Link>
               )}
 
               {/* Mobile Auth Button */}
-              <div className="pt-2">
+              <div className="pt-4 border-t border-gray-200">
                 {loading ? (
-                  <div className="py-3 bg-slate-200 rounded-xl animate-pulse h-12" />
+                  <div className="py-3 px-6 bg-gray-200 rounded-full animate-pulse h-12" />
                 ) : !user ? (
                   <Link
                     href="/signin"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <button className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors">
-                      Get Started
+                    <button className="w-full py-3 px-6 bg-black text-white rounded-full hover:bg-gray-800 transition-colors">
+                      Get started
                     </button>
                   </Link>
                 ) : (
@@ -238,8 +263,8 @@ export default function Navbar() {
                     href="/dashboard"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <button className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors">
-                      Dashboard
+                    <button className="w-full py-3 px-6 bg-black text-white rounded-full hover:bg-gray-800 transition-colors">
+                      Go to Dashboard
                     </button>
                   </Link>
                 )}
