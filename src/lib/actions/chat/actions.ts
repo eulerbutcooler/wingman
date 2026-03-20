@@ -28,12 +28,15 @@ export interface Message {
   createdAt?: Date;
 }
 
+export type ChatLanguage = "english" | "hindi" | "bangla" | "vietnamese";
+
 export async function continueConversation(
   history: Message[],
   chatId?: string,
   shouldSave: boolean = true,
   mode: "normal" | "deep" = "normal",
-  videoMode: boolean = false
+  videoMode: boolean = false,
+  selectedLanguage: ChatLanguage = "english"
 ) {
   "use server";
 
@@ -62,6 +65,16 @@ export async function continueConversation(
     const userQuery =
       lastUserMessage?.role === "user" ? lastUserMessage.content : "";
 
+    const languageInstructionMap: Record<ChatLanguage, string> = {
+      english: "Always answer in English unless the user explicitly asks for another language.",
+      hindi: "Always answer in Hindi unless the user explicitly asks for another language.",
+      bangla: "Always answer in Bangla unless the user explicitly asks for another language.",
+      vietnamese: "Always answer in Vietnamese unless the user explicitly asks for another language.",
+    };
+
+    const selectedLanguageInstruction =
+      languageInstructionMap[selectedLanguage] || languageInstructionMap.english;
+
     let systemPrompt = `
 You are "AeroMentor", a virtual teaching assistant and study buddy for students at the Naval Institute of Aeronautical Technology (NIAT). Your purpose is to provide clear, in-depth explanations, guide students through complex concepts, and foster a better understanding of their curriculum.
 
@@ -69,7 +82,7 @@ Persona and Tone
 
     Mannerisms: You are a friendly, patient, and knowledgeable tutor. Your tone is supportive and encouraging, always aiming to build the student's confidence.
 
-    Language: Use clear, straightforward English but if youre asked to teach something in hindi or vietnamese or korean, give a short explaination in hinglish, vietnamese, and korean respectively, dont give very long answers in those languages. Break down complex jargon and use analogies when appropriate to make concepts easier to grasp.
+    Language: Respond in whatever language the user asks for. If no language is specified, use clear, straightforward English. Break down complex jargon and use analogies when appropriate to make concepts easier to grasp.
 
     Teaching Style: Give a comprehensive answer or solution to users questions. After providing an explanation, always check for understanding by asking if they would like further clarification or examples. Encourage curiosity and deeper exploration of topics.
 
@@ -102,6 +115,11 @@ User: What is Bernoulli's principle?
 Your Response: That's a great question, it's a fundamental concept in aerodynamics. Simply put, Bernoulli's principle states that as the speed of a fluid increases, its pressure decreases. This principle is key to understanding how an aircraft's wings generate lift. Does that make sense?
 
 Remember to follow these instructions to maintain a consistent, helpful, and ethical persona.`;
+
+  systemPrompt += `
+
+LANGUAGE PREFERENCE:
+${selectedLanguageInstruction}`;
 
     // Add RAG context for Deep Mode with IMPROVED hybrid search and query classification
     let classification;

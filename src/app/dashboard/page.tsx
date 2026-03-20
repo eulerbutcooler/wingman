@@ -10,6 +10,7 @@ import { FaArrowRight } from "react-icons/fa";
 import { PiTimer } from "react-icons/pi";
 import { IoBookOutline } from "react-icons/io5";
 import { AiOutlineThunderbolt } from "react-icons/ai";
+import AviationLoading from "@/components/AviationLoading";
 
 function DeleteButton() {
   const { pending } = useFormStatus();
@@ -58,11 +59,7 @@ export default function DashboardPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
+    return <AviationLoading />;
   }
 
   if (!user) {

@@ -16,6 +16,7 @@ import { db } from "@/services/db/drizzle";
 import { courses, topics, lessons, files } from "@/services/db/schema/courses";
 import { eq, desc, inArray } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
+import AviationLoading from "@/components/AviationLoading";
 
 // Force dynamic rendering (required for auth with cookies)
 export const dynamic = "force-dynamic";
@@ -130,36 +131,6 @@ async function getCourses() {
 }
 
 // ============================================================================
-// LOADING SKELETON
-// ============================================================================
-
-function LibraryLoading() {
-  return (
-    <div className="flex flex-col items-center min-h-screen w-full">
-      <div className="fixed inset-0 bg-white/40 backdrop-blur-sm"></div>
-      <div className="relative z-10 w-full md:w-11/12 mb-10 md:mb-14 px-4 md:px-6 pt-24 md:pt-34">
-        <div className="animate-pulse">
-          {/* Header skeleton */}
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
-
-          {/* Course grid skeleton */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="space-y-3">
-                <div className="h-32 md:h-40 bg-gray-300 rounded-2xl"></div>
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
 // SERVER COMPONENT - Data fetching
 // ============================================================================
 
@@ -189,7 +160,7 @@ async function LibraryData() {
 
 export default async function LibraryPage() {
   return (
-    <Suspense fallback={<LibraryLoading />}>
+    <Suspense fallback={<AviationLoading />}>
       <LibraryData />
     </Suspense>
   );
