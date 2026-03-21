@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, Suspense } from "react";
+import { useEffect, useRef, Suspense, useState } from "react";
 import {
+  ChatLanguage,
   Message,
   continueConversation,
   loadChatHistory,
@@ -17,6 +18,7 @@ import { useChatStore } from "@/stores";
 import { useElevenLabsTTS } from "@/hooks/use-elevenlabs-tts";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import MicButton from "@/components/chat/MicButton";
+import AviationLoading from "@/components/AviationLoading";
 export const maxDuration = 30;
 
 function ChatContent() {
@@ -58,6 +60,7 @@ function ChatContent() {
   const searchParams = useSearchParams();
   const { loading: authLoading } = useRequireAuth(); // Get auth status
   const isVoiceSubmitRef = useRef<boolean>(false); // Track if next submit is from voice
+  const [selectedLanguage, setSelectedLanguage] = useState<ChatLanguage>("english");
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -118,14 +121,7 @@ function ChatContent() {
 
   // Show loading while auth is initializing
   if (authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <AviationLoading />;
   }
 
   const loadChat = async (id: string) => {
@@ -165,7 +161,8 @@ function ChatContent() {
         chatId,
         true,
         mode,
-        videoMode
+        videoMode,
+        selectedLanguage
       );
 
       if (returnedChatId && !chatId) {
@@ -279,19 +276,31 @@ function ChatContent() {
           )}
 
           <div className="flex-1 flex flex-col bg-white rounded-2xl md:rounded-4xl border border-gray-200 shadow-sm h-full">
-            {/* Mobile: Add history button */}
-            <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-200">
-              <button
-                onClick={() => setIsMobileSidebarOpen(true)}
-                className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
-              >
-                <History size={18} className="text-gray-600" />
-                <span className="text-sm font-medium text-gray-900">History</span>
-              </button>
-
-              <div className="text-sm font-medium text-gray-600">
-                Aeromentor Chat
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setIsMobileSidebarOpen(true)}
+                  className="md:hidden flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                >
+                  <History size={18} className="text-gray-600" />
+                  <span className="text-sm font-medium text-gray-900">History</span>
+                </button>
+                <div className="text-sm font-medium text-gray-600">Aeromentor Chat</div>
               </div>
+
+              <select
+                value={selectedLanguage}
+                onChange={(e) => setSelectedLanguage(e.target.value as ChatLanguage)}
+                disabled={isLoading}
+                className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-navy disabled:opacity-60"
+                aria-label="Response language"
+                title="Select response language"
+              >
+                <option value="english">English</option>
+                <option value="hindi">Hindi</option>
+                <option value="bangla">Bangla</option>
+                <option value="vietnamese">Vietnamese</option>
+              </select>
             </div>
 
             <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-4 md:space-y-6 min-h-0 scrollbar-hide">

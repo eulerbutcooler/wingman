@@ -230,6 +230,9 @@ export async function uploadFile(
   topicId?: string,
   _onProgress?: (progress: number) => void
 ): Promise<UploadedFile> {
+  void _userId;
+  void _onProgress;
+
   // Create FormData for API request
   const formData = new FormData();
   formData.append("file", file);
@@ -279,6 +282,9 @@ export async function uploadImage(
   _userId?: string,
   _onProgress?: (progress: number) => void
 ): Promise<{ url: string; publicId: string }> {
+  void _userId;
+  void _onProgress;
+
   const supabase = createClient();
 
   // Generate unique filename
