@@ -93,7 +93,7 @@ Please provide a detailed answer based on the course materials provided in the c
     // Generate response using Gemini
     console.log("🤖 Generating AI response...");
     const { text: aiResponse } = await generateText({
-      model: google("gemini-2.5-flash-lite"),
+      model: google("gemini-3.1-flash-lite"),
       system: systemPrompt,
       prompt: userPrompt,
       temperature: classification.suggestedTemperature,

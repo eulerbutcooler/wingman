@@ -9,7 +9,7 @@ export async function generateCourseSummary(
 ): Promise<string> {
   try {
     const result = await generateText({
-      model: google("gemini-2.5-flash-lite"),
+      model: google("gemini-3.1-flash-lite"),
       system: `You are "AeroMentor", a virtual teaching assistant for students at the Indian Naval Institute of Aeronautical Technology (NIAT). You help students understand aeronautical engineering and naval technology concepts. 
 
 Your task is to generate a brief, encouraging summary for a course that helps NIAT students understand what they'll learn and how it relates to their field of study. Write in a supportive, friendly tone as if speaking directly to the student.

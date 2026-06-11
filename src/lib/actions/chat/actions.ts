@@ -216,7 +216,7 @@ When relevant to the student's question, reference the course materials above us
     }
 
     const { textStream } = streamText({
-      model: google("gemini-2.5-flash-lite"),
+      model: google("gemini-3.1-flash-lite"),
       system: systemPrompt,
       messages: history,
       temperature: classification?.suggestedTemperature ?? 0.7,
@@ -239,7 +239,7 @@ When relevant to the student's question, reference the course materials above us
         );
 
         const keywordResponse = streamText({
-          model: google("gemini-2.5-flash-lite"),
+          model: google("gemini-3.1-flash-lite"),
           system:
             "You are Aeromentors's video search assistant for NIAT students. Generate 2-3 educational YouTube search keywords focused on aeronautical engineering, naval technology, aviation, or related STEM topics that would help NIAT students understand the concept better. Prioritize content from educational channels, universities, or professional engineering sources. Ignore entertainment or non-academic content. Return only the keywords separated by spaces.",
           messages: [{ role: "user", content: userQuery }],
